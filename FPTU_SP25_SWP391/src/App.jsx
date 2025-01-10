@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './page/HomePage';
 import BookingPage from './page/BookingPage';
-import ProductDetailPage from './page/ProductDetailPage';
 import CartPage from './page/CartPage';
 import ProductListPage from './page/ProductListPage';
 import Contact from './page/Contact';
