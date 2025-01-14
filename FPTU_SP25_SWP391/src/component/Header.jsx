@@ -1,42 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome, faInfoCircle, faCalendarCheck, faEnvelope, faShoppingBag, faShoppingCart, faSignInAlt, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
+import './Header.css'; // Import the CSS file
 
 const Header = () => {
+    const [darkMode, setDarkMode] = useState(false);
+
+    const toggleDarkMode = () => {
+        setDarkMode(!darkMode);
+        document.body.classList.toggle('dark-mode');
+    };
+
     return (
-        <header style={styles.header}>
-            <nav style={styles.nav}>
-                <Link to="/" style={styles.link}>Home</Link>
-                <Link to="/about" style={styles.link}>About</Link>
-                <Link to="/booking_page" style={styles.link}>Booking</Link>
-                <Link to="/contact" style={styles.link}>Contact</Link>
-                <Link to="/products" style={styles.link}>Products</Link>
-                <Link to="/cart_page" style={styles.link}>Cart</Link>
+        <header className={`header ${darkMode ? 'dark' : ''}`}>
+            <nav className="nav">
+                <Link to="/" className="link">
+                    <FontAwesomeIcon icon={faHome} /> Home
+                </Link>
+                <Link to="/about" className="link">
+                    <FontAwesomeIcon icon={faInfoCircle} /> About
+                </Link>
+                <Link to="/booking_page" className="link">
+                    <FontAwesomeIcon icon={faCalendarCheck} /> Booking
+                </Link>
+                <Link to="/contact" className="link">
+                    <FontAwesomeIcon icon={faEnvelope} /> Contact
+                </Link>
+                <Link to="/products" className="link">
+                    <FontAwesomeIcon icon={faShoppingBag} /> Products
+                </Link>
+                <Link to="/cart_page" className="link">
+                    <FontAwesomeIcon icon={faShoppingCart} /> Cart
+                </Link>
+                <Link to="/sign_in" className="link">
+                    <FontAwesomeIcon icon={faSignInAlt} /> Sign In
+                </Link>
+                <button className="theme-toggle" onClick={toggleDarkMode}>
+                    <FontAwesomeIcon icon={darkMode ? faSun : faMoon} />
+                </button>
             </nav>
         </header>
     );
-};
-
-const styles = {
-    header: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        backgroundColor: 'blue',
-        padding: '10px 20px'
-
-
-    },
-    nav: {
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '15px',
-    },
-    link: {
-        color: 'white',
-        textDecoration: 'none',
-        fontSize: '18px',
-    },
 };
 
 export default Header;

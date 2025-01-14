@@ -7,7 +7,7 @@ import ProductListPage from './page/ProductListPage';
 import Contact from './page/Contact';
 import Blog from './page/Blog';
 import Header from './component/Header';
-import Login from './page/Login';
+import SignIn from './page/SignIn';
 import ForgotPassword from './page/ForgotPassword';
 import './App.css'
 
@@ -25,7 +25,7 @@ function App() {
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/about" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/sign_in" element={<SignIn />} />
         <Route path="/forgot_password" element={<ForgotPassword />} />
       </Routes>
     </Router>
