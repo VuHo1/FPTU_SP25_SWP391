@@ -18,7 +18,7 @@ const Header = () => {
                 <Link to="/" className="link">
                     <FontAwesomeIcon icon={faHome} /> Home
                 </Link>
-                <Link to="/about" className="link">
+                <Link to="/blog" className="link">
                     <FontAwesomeIcon icon={faInfoCircle} /> About
                 </Link>
                 <Link to="/booking_page" className="link">
