@@ -18,6 +18,20 @@ function App() {
 
   return (
     <Router>
+
+      <Header />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/booking_page" element={<BookingPage />} />
+        <Route path='/blog/:id' element={<BlogDetail />} />
+        <Route path="/cart_page" element={<CartPage />} />
+        <Route path="/products" element={<ProductListPage />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/sign_in" element={<SignIn />} />
+        <Route path="/forgot_password" element={<ForgotPassword />} />
+      </Routes>
+
       <div className="App">
         <Header />
         <main className="content">
@@ -35,7 +49,7 @@ function App() {
         <Footer />
       </div>
     </Router>
-  )
+  );
 }
 
 export default App
