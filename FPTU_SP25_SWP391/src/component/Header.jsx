@@ -1,16 +1,11 @@
-import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faInfoCircle, faCalendarCheck, faEnvelope, faShoppingBag, faShoppingCart, faSignInAlt, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
 import './Header.css'; // Import the CSS file
 
-const Header = () => {
-    const [darkMode, setDarkMode] = useState(false);
-
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-        document.body.classList.toggle('dark-mode');
-    };
+const Header = ({darkMode,toggleDarkMode}) => 
+    {
+    
 
     return (
         <header className={`header ${darkMode ? 'dark' : ''}`}>
