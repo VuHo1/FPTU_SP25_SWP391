@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './page/HomePage';
 import BookingPage from './page/BookingPage';
@@ -15,10 +15,15 @@ import Footer from './component/Footer';
 
 function App() {
 
+  const [darkMode, setDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+      setDarkMode(!darkMode);
+  };
 
   return (
     <Router>
-      <Header />
+      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/booking_page" element={<BookingPage />} />
@@ -27,7 +32,7 @@ function App() {
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/sign_in" element={<SignIn />} />
+        <Route path="/sign_in" element={<SignIn  darkMode={darkMode}/>} />
         <Route path="/forgot_password" element={<ForgotPassword />} />
       </Routes>
 
