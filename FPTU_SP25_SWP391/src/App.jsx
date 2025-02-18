@@ -18,7 +18,6 @@ function App() {
 
   return (
     <Router>
-
       <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -32,22 +31,9 @@ function App() {
         <Route path="/forgot_password" element={<ForgotPassword />} />
       </Routes>
 
-      <div className="App">
-        <Header />
-        <main className="content">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/booking_page" element={<BookingPage />} />
-            <Route path="/cart_page" element={<CartPage />} />
-            <Route path="/products" element={<ProductListPage />} />
-            <Route path="/about" element={<Blog />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/sign_in" element={<SignIn />} />
-            <Route path="/forgot_password" element={<ForgotPassword />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+
+      <Footer />
+
     </Router>
   );
 }
