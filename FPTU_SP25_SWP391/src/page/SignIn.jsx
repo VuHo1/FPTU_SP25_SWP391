@@ -108,161 +108,153 @@ export default function SignIn({darkMode}) {
   //   }
   // };
  
-
-      return (
-          <div
-              style={{
-                  height: "100vh",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: darkMode ? "#2c3e50" : "#f8b195", // Dark mode background
-                  transition: "background-color 0.3s ease",
-              }}
-          >
-              <div
-                  style={{
-                      backgroundColor: darkMode ? "#34495e" : "rgba(255, 255, 255, 0.9)", // Dark mode box
-                      padding: "40px 50px",
-                      borderRadius: "15px",
-                      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-                      textAlign: "center",
-                      width: "450px",
-                      transition: "background-color 0.3s ease",
-                  }}
-              >
-                  <div style={{ marginBottom: "20px" }}>
-                      <Link to={`/`}>
-                          <img
-                              src="/assets/logo2-Photoroom.png"
-                              alt="Logo"
-                              style={{
-                                  width: "150px",
-                                  filter: darkMode ? "grayscale(100%) brightness(1)" : "grayscale(100%) brightness(1.5)", // Adjust logo brightness in dark mode
-                              }}
-                          />
-                      </Link>
-                  </div>
-  
-                  <h2
-                      style={{
-                          fontSize: "28px",
-                          color: darkMode ? "#ecf0f1" : "#6c4f37", // Text color changes in dark mode
-                          fontFamily: "'Playfair Display', serif",
-                          fontWeight: "600",
-                          marginBottom: "30px",
-                          textTransform: "uppercase",
-                          letterSpacing: "1px",
-                      }}
-                  >
-                      Welcome Back
-                  </h2>
-  
-                  <input
-                      type="text"
-                      placeholder="Email Address"
-                      style={{
-                          width: "100%",
-                          padding: "15px",
-                          border: `2px solid ${darkMode ? "#ecf0f1" : "#6c4f37"}`, // Border color change in dark mode
-                          backgroundColor: darkMode ? "#34495e" : "#f8f4e1",
-                          color: darkMode ? "#ecf0f1" : "#6c4f37",
-                          fontSize: "18px",
-                          marginBottom: "20px",
-                          borderRadius: "10px",
-                          outline: "none",
-                          fontFamily: "'Georgia', serif",
-                          transition: "0.3s ease-in-out",
-                      }}
-                  />
-  
-                  <input
-                      type="password"
-                      placeholder="Password"
-                      style={{
-                          width: "100%",
-                          padding: "15px",
-                          border: `2px solid ${darkMode ? "#ecf0f1" : "#6c4f37"}`,
-                          backgroundColor: darkMode ? "#34495e" : "#f8f4e1",
-                          color: darkMode ? "#ecf0f1" : "#6c4f37",
-                          fontSize: "18px",
-                          marginBottom: "25px",
-                          borderRadius: "10px",
-                          outline: "none",
-                          fontFamily: "'Georgia', serif",
-                          transition: "0.3s ease-in-out",
-                      }}
-                  />
-  
-                  <button
-                      type="submit"
-                      style={{
-                          width: "100%",
-                          padding: "15px",
-                          backgroundColor: darkMode ? "#1abc9c" : "#6c4f37", // Button color change
-                          color: "#fff",
-                          fontSize: "18px",
-                          fontWeight: "bold",
-                          border: "none",
-                          borderRadius: "10px",
-                          cursor: "pointer",
-                          transition: "0.3s ease-in-out",
-                          fontFamily: "'Georgia', serif",
-                      }}
-                  >
-                      Log In
-                  </button>
-  
-                  <div style={{ marginTop: "20px" }}>
-                      <h6
-                          style={{
-                              color: darkMode ? "#ecf0f1" : "#6c4f37", // Text color change in dark mode
-                              marginBottom: "8px",
-                              fontFamily: "'Georgia', serif",
-                          }}
-                      >
-                          New to our Hotel?
-                      </h6>
-                      <Link
-                          to={`/signUpUser`}
-                          style={{
-                              color: darkMode ? "#1abc9c" : "#6c4f37", // Link color change in dark mode
-                              fontWeight: "bold",
-                              textDecoration: "none",
-                              fontFamily: "'Georgia', serif",
-                              transition: "0.3s ease-in-out",
-                          }}
-                      >
-                          Register Now
-                      </Link>
-                  </div>
-  
-                  <div style={{ marginTop: "10px" }}>
-                      <h6
-                          style={{
-                              color: darkMode ? "#ecf0f1" : "#6c4f37", // Text color change in dark mode
-                              marginBottom: "8px",
-                              fontFamily: "'Georgia', serif",
-                          }}
-                      >
-                          Forgot your password?
-                      </h6>
-                      <Link
-                          to={`/forgotPassword`}
-                          style={{
-                              color: darkMode ? "#1abc9c" : "#6c4f37", // Link color change in dark mode
-                              fontWeight: "bold",
-                              textDecoration: "none",
-                              fontFamily: "'Georgia', serif",
-                              transition: "0.3s ease-in-out",
-                          }}
-                      >
-                          Reset Password
-                      </Link>
-                  </div>
-              </div>
+ 
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+          background: `url('https://cdn.chiaki.vn/unsafe/0x480/left/top/smart/filters:quality(75)/https://chiaki.vn/upload/news/content/2024/06/cach-chon-san-pham-skincare-phu-hop-jpg-1718864826-20062024132706.jpg') no-repeat center center fixed`, // Set the background image
+          backgroundSize: "cover", // Ensure the image covers the entire screen
+          backgroundPosition: "center", // Center the image
+          animation: "backgroundAnimation 20s infinite alternate", // Apply animation
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: darkMode ? "#34495e" : "rgba(255, 255, 255, 0.9)", // Dark mode styling
+            padding: "40px 50px",
+            borderRadius: "15px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+            textAlign: "center",
+            width: "450px",
+            position: "relative", // Ensure it's on top of the background
+          }}
+        >
+          <div style={{ marginBottom: "20px" }}>
+            <Link to={`/`}>
+              <img
+                src="/assets/logo2-Photoroom.png"
+                alt="Logo"
+                style={{
+                  width: "150px",
+                  filter: darkMode ? "grayscale(100%) brightness(1)" : "grayscale(100%) brightness(1.5)",
+                }}
+              />
+            </Link>
           </div>
-      );
-  };
   
+          <h2
+            style={{
+              fontSize: "28px",
+              color: darkMode ? "#ecf0f1" : "#6c4f37",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: "600",
+              marginBottom: "30px",
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+            }}
+          >
+            Welcome Back
+          </h2>
+  
+          <input
+            type="text"
+            placeholder="Email Address"
+            style={{
+              width: "100%",
+              padding: "15px",
+              border: `2px solid ${darkMode ? "#ecf0f1" : "#6c4f37"}`,
+              backgroundColor: darkMode ? "#34495e" : "#f8f4e1",
+              color: darkMode ? "#ecf0f1" : "#6c4f37",
+              fontSize: "18px",
+              marginBottom: "20px",
+              borderRadius: "10px",
+              outline: "none",
+              fontFamily: "'Georgia', serif",
+            }}
+          />
+  
+          <input
+            type="password"
+            placeholder="Password"
+            style={{
+              width: "100%",
+              padding: "15px",
+              border: `2px solid ${darkMode ? "#ecf0f1" : "#6c4f37"}`,
+              backgroundColor: darkMode ? "#34495e" : "#f8f4e1",
+              color: darkMode ? "#ecf0f1" : "#6c4f37",
+              fontSize: "18px",
+              marginBottom: "25px",
+              borderRadius: "10px",
+              outline: "none",
+              fontFamily: "'Georgia', serif",
+            }}
+          />
+  
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "15px",
+              backgroundColor: darkMode ? "#1abc9c" : "#6c4f37",
+              color: "#fff",
+              fontSize: "18px",
+              fontWeight: "bold",
+              border: "none",
+              borderRadius: "10px",
+              cursor: "pointer",
+            }}
+          >
+            Log In
+          </button>
+  
+          <div style={{ marginTop: "20px" }}>
+            <h6
+              style={{
+                color: darkMode ? "#ecf0f1" : "#6c4f37",
+                marginBottom: "8px",
+              }}
+            >
+              New to our Service?
+            </h6>
+            <Link
+              to={`/signUpUser`}
+              style={{
+                color: darkMode ? "#1abc9c" : "#6c4f37",
+                fontWeight: "bold",
+                textDecoration: "none",
+              }}
+            >
+              Register Now
+            </Link>
+          </div>
+  
+          <div style={{ marginTop: "10px" }}>
+            <h6
+              style={{
+                color: darkMode ? "#ecf0f1" : "#6c4f37",
+                marginBottom: "8px",
+              }}
+            >
+              Forgot your password?
+            </h6>
+            <Link
+              to={`/forgotPassword`}
+              style={{
+                color: darkMode ? "#1abc9c" : "#6c4f37",
+                fontWeight: "bold",
+                textDecoration: "none",
+              }}
+            >
+              Reset Password
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
