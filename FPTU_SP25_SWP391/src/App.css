@@ -40,3 +40,15 @@
 .read-the-docs {
   color: #888;
 }
+.App {
+  display: flex;
+  text-align: center;
+  min-height: 100vh;
+  flex-direction: column;
+}
+.Routes {
+  flex-grow: 1; /* Đẩy Footer xuống dưới cùng */
+}
+.content {
+  flex-grow: 1;
+}
