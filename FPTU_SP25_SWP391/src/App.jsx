@@ -11,13 +11,10 @@ import SignIn from './page/SignIn';
 import ForgotPassword from './page/ForgotPassword';
 import './App.css'
 import Footer from './component/Footer';
-// import Content from './component/Content';
 function App() {
-
-
   return (
-    <Router>
-      <div className="App">
+    <div className="App">
+      <Router>
         <Header />
         <main className="content">
           <Routes>
@@ -31,14 +28,22 @@ function App() {
             <Route path="/forgot_password" element={<ForgotPassword />} />
           </Routes>
         </main>
-        {/* <Content />
-        <Content />
-        <Content />
-        <Content />
-        <Content /> */}
+          <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore fuga officiis odio corporis quibusdam, sapiente mollitia 
+            repudiandae similique nobis possimus iste quas officia adipisci corrupti consequatur architecto ipsa nesciunt. Deleniti!</p>
+            <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore fuga officiis odio corporis quibusdam, sapiente mollitia 
+            repudiandae similique nobis possimus iste quas officia adipisci corrupti consequatur architecto ipsa nesciunt. Deleniti!</p>
+            <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore fuga officiis odio corporis quibusdam, sapiente mollitia 
+            repudiandae similique nobis possimus iste quas officia adipisci corrupti consequatur architecto ipsa nesciunt. Deleniti!</p>
+            <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore fuga officiis odio corporis quibusdam, sapiente mollitia 
+            repudiandae similique nobis possimus iste quas officia adipisci corrupti consequatur architecto ipsa nesciunt. Deleniti!</p>
+            <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore fuga officiis odio corporis quibusdam, sapiente mollitia 
+            repudiandae similique nobis possimus iste quas officia adipisci corrupti consequatur architecto ipsa nesciunt. Deleniti!</p>
+            <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore fuga officiis odio corporis quibusdam, sapiente mollitia 
+            repudiandae similique nobis possimus iste quas officia adipisci corrupti consequatur architecto ipsa nesciunt. Deleniti!</p>
         <Footer />
-      </div>
-    </Router>
+      </Router>
+    </div>
+
   );
 }
 
