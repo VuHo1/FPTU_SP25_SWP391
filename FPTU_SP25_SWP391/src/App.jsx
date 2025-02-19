@@ -39,7 +39,7 @@ function App() {
           <Route path="/forgot_password" element={<ForgotPassword />} />
         </Routes>
         </main>
-      <Footer />
+      <Footer darkMode={darkMode} />
 
     </Router>
     </div >
