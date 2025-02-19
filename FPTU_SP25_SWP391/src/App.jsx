@@ -18,28 +18,31 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
-      setDarkMode(!darkMode);
+    setDarkMode(!darkMode);
   };
 
   return (
-    <Router>
-      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/booking_page" element={<BookingPage />} />
-        <Route path='/blog/:id' element={<BlogDetail />} />
-        <Route path="/cart_page" element={<CartPage />} />
-        <Route path="/products" element={<ProductListPage />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/sign_in" element={<SignIn  darkMode={darkMode}/>} />
-        <Route path="/forgot_password" element={<ForgotPassword />} />
-      </Routes>
+    <div className="App">
+      <Router>
 
-
+        <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        <main className="content">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/booking_page" element={<BookingPage />} />
+          <Route path='/blog/:id' element={<BlogDetail />} />
+          <Route path="/cart_page" element={<CartPage />} />
+          <Route path="/products" element={<ProductListPage />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/sign_in" element={<SignIn darkMode={darkMode} />} />
+          <Route path="/forgot_password" element={<ForgotPassword />} />
+        </Routes>
+        </main>
       <Footer />
 
     </Router>
+    </div >
   );
 }
 
