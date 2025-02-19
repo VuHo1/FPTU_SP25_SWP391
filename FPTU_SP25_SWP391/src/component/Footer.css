@@ -12,7 +12,7 @@
 }
 
 .section-padding {
-    padding: 4rem 4rem;
+    padding: 0rem 4rem;
     margin: 0 auto;
 }
 
@@ -46,6 +46,12 @@
 a {
     color: rgb(175, 175, 179);
     text-decoration: none;
+}
+
+p {
+    /* color: #55433C; */
+    color: rgba(255, 255, 255, 0.85);
+    font-family: Inter, system-ui, Helvetica, Arial, sans-serif;
 }
 
 .social_media {
@@ -146,3 +152,25 @@ hr {
         line-height: 38px;
     }
 }
+
+/* Footer dark mode */
+.Footer.dark {
+    background-color: #213547;
+    color: #fff;
+  }
+  
+  /* link dark mode */
+  .Footer.dark a {
+    color: #bbb;
+  }
+  
+  .Footer.dark a:hover {
+    color: #fff;
+  }
+  
+  .sb_footer-below {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-top: 1px solid #ccc;
+  }

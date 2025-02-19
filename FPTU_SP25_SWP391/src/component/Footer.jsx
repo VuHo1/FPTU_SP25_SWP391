@@ -5,14 +5,15 @@ import tiktok from '../assets/images/logo/tiktok.png'
 import twitter from '../assets/images/logo/twitter.png'
 
 
-const Footer = () => {
+const Footer = ({ darkMode }) => {
+
     return (
-        <div className="Footer">
+        <div className= {`Footer ${darkMode ? 'dark' : ''}`} >
             <div className="sb_footer section-padding">
 
                 <div className="sb_footer-links">
                     <div className='sb_footer-links_div'>
-                        <h4>About</h4>
+                        <h3>About</h3>
                         <a href="/">
                             <p>Our Service</p>
                         </a>
