@@ -27,21 +27,21 @@ function App() {
 
         <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <main className="content">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/booking_page" element={<BookingPage />} />
-          <Route path='/blog/:id' element={<BlogDetail />} />
-          <Route path="/cart_page" element={<CartPage />} />
-          <Route path="/products" element={<ProductListPage />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/sign_in" element={<SignIn darkMode={darkMode} />} />
-          <Route path="/forgot_password" element={<ForgotPassword />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/booking_page" element={<BookingPage />} />
+            <Route path='/service/:id' element={<BlogDetail />} />
+            <Route path="/cart_page" element={<CartPage />} />
+            <Route path="/about" element={<ProductListPage />} />
+            <Route path="/service" element={<Blog />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/sign_in" element={<SignIn darkMode={darkMode} />} />
+            <Route path="/forgot_password" element={<ForgotPassword />} />
+          </Routes>
         </main>
-      <Footer darkMode={darkMode} />
+        <Footer darkMode={darkMode} />
 
-    </Router>
+      </Router>
     </div >
   );
 }

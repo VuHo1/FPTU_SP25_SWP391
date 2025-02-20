@@ -12,7 +12,7 @@ const Blog = () => {
             </p>
             <div className="service-list">
                 {services.map((service) => (
-                    <Link to={`/blog/${service.id}`} key={service.id} className="service-item">
+                    <Link to={`/service/${service.id}`} key={service.id} className="service-item">
                         <img src={service.image} alt={service.title} className="service-image" />
                         <div className="service-content">
                             <h2>{service.title}</h2>
