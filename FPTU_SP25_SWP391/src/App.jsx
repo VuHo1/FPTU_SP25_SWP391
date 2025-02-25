@@ -12,6 +12,7 @@ import ForgotPassword from './page/ForgotPassword';
 import BlogDetail from './page/BlogDetails';
 import './App.css'
 import Footer from './component/Footer';
+import SignUp from './page/signUpUser';
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/sign_in" element={<SignIn darkMode={darkMode} />} />
             <Route path="/forgot_password" element={<ForgotPassword />} />
+            <Route path="/signUpUser" element={<SignUp darkMode={darkMode} />} />
           </Routes>
         </main>
         <Footer darkMode={darkMode} />
