@@ -4,7 +4,16 @@ import { motion } from "framer-motion";
 
 export default function ProductListPage({ darkMode }) {
   return (
-    <div style={{ scrollSnapType: "y mandatory", overflowY: "scroll", height: "100vh" }}>
+    <div style={{  position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      overflowY: "scroll",
+      scrollSnapType: "y mandatory",
+      scrollBehavior: "smooth",
+      willChange: "transform",
+      WebkitOverflowScrolling: "touch", }}>
 
        <motion.section
         initial={{ opacity: 0, y: -20 }}
