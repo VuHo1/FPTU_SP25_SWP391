@@ -1,25 +1,27 @@
+// SignIn.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { jwtDecode } from "jwt-decode";
-import { login } from "../api/testApi";
+import { login } from "../api/testApi"; // Adjust the path as needed
 import { motion } from "framer-motion";
+import { useAuth } from "../page/AuthContext"; // Import useAuth
 
 export default function SignIn({ darkMode }) {
-  const [userName, setEmail] = useState("");
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("User"); // Default role
+  const [role, setRole] = useState("User");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [inputType, setInputType] = useState("password");
   const navigate = useNavigate();
+  const { login: setLoggedIn } = useAuth(); // Rename to avoid conflict with imported login function
 
   const handleEmailChange = (event) => {
-    setEmail(event.target.value); // Fixed to use target.value
+    setUserName(event.target.value);
   };
 
   const handlePasswordChange = (event) => {
-    setPassword(event.target.value); // Fixed to use target.value
+    setPassword(event.target.value);
   };
 
   const togglePasswordVisibility = () => {
@@ -36,7 +38,7 @@ export default function SignIn({ darkMode }) {
       setIsLoading(false);
       return;
     }
-    const data = { userName, password };
+    const data = { userName: userName, password: password };
     setIsLoading(true);
 
     try {
@@ -47,37 +49,46 @@ export default function SignIn({ darkMode }) {
         text: response?.data?.message || "Successfully",
       });
 
-      const token = response.data.data.accessToken;
-      localStorage.setItem("token", token);
+      setLoggedIn(); // Set the user as logged in
 
-      const decodedToken = jwtDecode(token);
-      const role =
-        decodedToken[
-          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-        ];
-      localStorage.setItem("role", role);
+      
 
-      const full_name =
-        decodedToken[
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-        ];
-      localStorage.setItem("full_name", full_name);
+  //const token = response.data.data.accessToken;
+      // //localStorage.setItem("token", token);
+  
+      // const decodedToken = jwtDecode(token);
+      // const role =
+      //   decodedToken[
+      //     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+      //   ];
+      // localStorage.setItem("role", role);
+  
+      // const full_name =
+      //   decodedToken[
+      //     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+      //   ];
+      // localStorage.setItem("full_name", full_name);
+  
+      // localStorage.setItem("userId", decodedToken.id);
+  
+      // if (role === "User") {
+      //   navigate("/");
+      // } else if (role === "Staff") {
+      //   navigate("/shopProfile/shop");
+      // }
+      navigate("/"); // Navigate to homepage
 
-      localStorage.setItem("userId", decodedToken.id);
-
-      if (role === "User") {
-        navigate("/");
-      } else if (role === "Staff") {
-        navigate("/shopProfile/shop");
-      }
     } catch (error) {
       let errorMessage = "An unknown error occurred.";
-      try {
-        const parsedResponse = JSON.parse(error.request.response);
-        errorMessage = parsedResponse.message || errorMessage;
-      } catch (parseError) {
-        console.error("Error parsing JSON response:", parseError);
+
+      if (error.response) {
+        errorMessage = error.response.data.message || error.response.data || "Login failed.";
+      } else if (error.request) {
+        errorMessage = "No response from the server. Please check your network.";
+      } else {
+        errorMessage = error.message || "An unexpected error occurred.";
       }
+
       Swal.fire({
         icon: "error",
         title: "Please check your input!!!",
@@ -103,7 +114,7 @@ export default function SignIn({ darkMode }) {
         position: "relative",
         background: darkMode
           ? "linear-gradient(135deg, #1c2526 0%, #34495e 100%)"
-          : "linear-gradient(135deg, #f8f4e1 0%, #e5e5e5 100%)", // Professional gradient
+          : "linear-gradient(135deg, #f8f4e1 0%, #e5e5e5 100%)",
         overflow: "hidden",
       }}
     >
@@ -122,7 +133,7 @@ export default function SignIn({ darkMode }) {
             : "0 8px 30px rgba(0, 0, 0, 0.1)",
           textAlign: "center",
           width: "450px",
-          backdropFilter: "blur(10px)", // Frosted glass effect
+          backdropFilter: "blur(10px)",
           border: darkMode
             ? "1px solid rgba(255, 255, 255, 0.1)"
             : "1px solid rgba(0, 0, 0, 0.05)",
@@ -407,3 +418,29 @@ export default function SignIn({ darkMode }) {
     </div>
   );
 }
+
+
+
+  //const token = response.data.data.accessToken;
+      // //localStorage.setItem("token", token);
+  
+      // const decodedToken = jwtDecode(token);
+      // const role =
+      //   decodedToken[
+      //     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+      //   ];
+      // localStorage.setItem("role", role);
+  
+      // const full_name =
+      //   decodedToken[
+      //     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+      //   ];
+      // localStorage.setItem("full_name", full_name);
+  
+      // localStorage.setItem("userId", decodedToken.id);
+  
+      // if (role === "User") {
+      //   navigate("/");
+      // } else if (role === "Staff") {
+      //   navigate("/shopProfile/shop");
+      // }

@@ -1,5 +1,7 @@
+// App.jsx
 import { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./page/AuthContext"; // Import AuthProvider
 import HomePage from "./page/HomePage";
 import BookingPage from "./page/BookingPage";
 import CartPage from "./page/CartPage";
@@ -24,25 +26,27 @@ function App() {
 
   return (
     <div className="App">
-      <Router>
-        <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-        <main className="content">
-          <Routes>
-            <Route path="/" element={<HomePage darkMode={darkMode}/>} />
-            <Route path="/booking_page" element={<BookingPage />} />
-            <Route path="/service/:id" element={<BlogDetail />} />
-            <Route path="/cart_page" element={<CartPage />} />
-            <Route path="/about" element={<ProductListPage darkMode={darkMode} />} />
-            <Route path="/service" element={<Blog />} />
-            <Route path="/contact" element={<Contact darkMode={darkMode} />} />
-            <Route path="/sign_in" element={<SignIn darkMode={darkMode} />} />
-            <Route path="/forgotPassword" element={<ForgotPassword darkMode={darkMode} />} />
-            <Route path="/signUpUser" element={<SignUp darkMode={darkMode} />} />
-            <Route path="/policy" element={<PolicyPage darkMode={darkMode} />} />
-          </Routes>
-        </main>
-        <Footer darkMode={darkMode} />
-      </Router>
+      <AuthProvider> {/* Wrap the app with AuthProvider */}
+        <Router>
+          <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+          <main className="content">
+            <Routes>
+              <Route path="/" element={<HomePage darkMode={darkMode} />} />
+              <Route path="/booking_page" element={<BookingPage />} />
+              <Route path="/service/:id" element={<BlogDetail />} />
+              <Route path="/cart_page" element={<CartPage />} />
+              <Route path="/about" element={<ProductListPage darkMode={darkMode} />} />
+              <Route path="/service" element={<Blog />} />
+              <Route path="/contact" element={<Contact darkMode={darkMode} />} />
+              <Route path="/sign_in" element={<SignIn darkMode={darkMode} />} />
+              <Route path="/forgotPassword" element={<ForgotPassword darkMode={darkMode} />} />
+              <Route path="/signUpUser" element={<SignUp darkMode={darkMode} />} />
+              <Route path="/policy" element={<PolicyPage darkMode={darkMode} />} />
+            </Routes>
+          </main>
+          <Footer darkMode={darkMode} />
+        </Router>
+      </AuthProvider>
     </div>
   );
 }

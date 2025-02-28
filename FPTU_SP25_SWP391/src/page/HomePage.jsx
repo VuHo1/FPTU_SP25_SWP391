@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const HomePage = ({ darkMode }) => {
+  const [isPopupOpen, setIsPopupOpen] = useState(false); // State to control popup visibility
+
   const containerStyles = {
     width: "100vw",
     minHeight: "100vh",
@@ -13,6 +15,7 @@ const HomePage = ({ darkMode }) => {
     padding: 0,
     boxSizing: "border-box",
     fontFamily: "Arial, sans-serif",
+    position: "relative",
   };
 
   const sectionStyles = {
@@ -48,6 +51,52 @@ const HomePage = ({ darkMode }) => {
     borderRadius: "12px",
     textDecoration: "none",
     transition: "background-color 0.3s ease, transform 0.2s ease",
+  };
+
+  const contactIconStyles = {
+    position: "fixed",
+    bottom: "30px",
+    right: "30px",
+    width: "60px",
+    height: "60px",
+    backgroundColor: darkMode ? "#34c759" : "#e67e22",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+    zIndex: 1000,
+    cursor: "pointer",
+    transition: "transform 0.3s ease, background-color 0.3s ease",
+  };
+
+  const popupStyles = {
+    position: "fixed",
+    bottom: "100px",
+    right: "30px",
+    backgroundColor: darkMode ? "#2c2c2e" : "#ffffff",
+    color: darkMode ? "#ffffff" : "#1d1d1f",
+    padding: "20px",
+    borderRadius: "12px",
+    boxShadow: darkMode
+      ? "0 4px 12px rgba(0, 0, 0, 0.3)"
+      : "0 4px 12px rgba(0, 0, 0, 0.2)",
+    zIndex: 1001,
+    textAlign: "center",
+    maxWidth: "300px",
+  };
+
+  const popupButtonStyles = {
+    marginTop: "15px",
+    padding: "10px 20px",
+    backgroundColor: darkMode ? "#34c759" : "#e67e22",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "600",
+    transition: "background-color 0.3s ease",
   };
 
   return (
@@ -370,6 +419,69 @@ const HomePage = ({ darkMode }) => {
           </Link>
         </motion.div>
       </section>
+
+      {/* Contact Icon */}
+      <div
+        style={contactIconStyles}
+        onClick={() => setIsPopupOpen(!isPopupOpen)}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "scale(1.1)";
+          e.currentTarget.style.backgroundColor = darkMode
+            ? "#2ea74d"
+            : "#d2691e";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "scale(1)";
+          e.currentTarget.style.backgroundColor = darkMode
+            ? "#34c759"
+            : "#e67e22";
+        }}
+      >
+        <svg
+          width="30"
+          height="30"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      </div>
+
+      {/* Popup */}
+      {isPopupOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.3 }}
+          style={popupStyles}
+        >
+          <p style={{ fontSize: "18px", margin: "0 0 10px" }}>
+            Hãy liên hệ với chúng tôi!
+          </p>
+          <Link to="/contact">
+            <button
+              style={popupButtonStyles}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = darkMode
+                  ? "#2ea74d"
+                  : "#d2691e")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = darkMode
+                  ? "#34c759"
+                  : "#e67e22")
+              }
+            >
+              Đi đến trang liên hệ
+            </button>
+          </Link>
+        </motion.div>
+      )}
 
       {/* Inline Keyframes */}
       <style>
