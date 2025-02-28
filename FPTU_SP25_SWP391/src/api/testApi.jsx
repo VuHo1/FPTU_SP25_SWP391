@@ -1,24 +1,28 @@
 // configApi.js
 import axios from "axios";
 
+const isLocal = true; // Set to true for Swagger testing at localhost:7063, false for production
+const baseURL = isLocal
+  ? "https://localhost:7063" // Local Swagger URL
+  : "https://petserviceplatform-dpgyc0c3fcg9dtc7.southeastasia-01.azurewebsites.net"; // Production URL
+
 const apiClient = axios.create({
-  baseURL:
-    "https://petserviceplatform-dpgyc0c3fcg9dtc7.southeastasia-01.azurewebsites.net",
-  timeout: 10000, // Thời gian timeout 10 giây
+  baseURL,
+  timeout: 10000, // 10-second timeout
 });
 
 //authencation
 export const login = async (data) => {
   try {
-    const response = await apiClient.post(`/api/Auth/user/login`, data, {
+    const response = await apiClient.post(`/api/auth/login`, data, {
       headers: {
-        "Content-Type": `application/json`,
+        "Content-Type": "application/json",
         Accept: "*/*",
       },
     });
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error during login:", error);
     throw error;
   }
 };
