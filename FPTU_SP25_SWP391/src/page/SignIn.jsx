@@ -52,11 +52,15 @@ export default function SignIn({ darkMode }) {
 
       const decodedToken = jwtDecode(token);
       const role =
-        decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+        decodedToken[
+          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ];
       localStorage.setItem("role", role);
 
       const full_name =
-        decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+        decodedToken[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+        ];
       localStorage.setItem("full_name", full_name);
 
       localStorage.setItem("userId", decodedToken.id);
@@ -108,7 +112,9 @@ export default function SignIn({ darkMode }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         style={{
-          backgroundColor: darkMode ? "rgba(52, 73, 94, 0.95)" : "rgba(255, 255, 255, 0.95)",
+          backgroundColor: darkMode
+            ? "rgba(52, 73, 94, 0.95)"
+            : "rgba(255, 255, 255, 0.95)",
           padding: "40px 50px",
           borderRadius: "20px",
           boxShadow: darkMode
@@ -117,7 +123,9 @@ export default function SignIn({ darkMode }) {
           textAlign: "center",
           width: "450px",
           backdropFilter: "blur(10px)", // Frosted glass effect
-          border: darkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.05)",
+          border: darkMode
+            ? "1px solid rgba(255, 255, 255, 0.1)"
+            : "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
         <motion.div
@@ -135,8 +143,12 @@ export default function SignIn({ darkMode }) {
                 filter: darkMode ? "brightness(1.2)" : "none",
                 transition: "transform 0.3s ease",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.05)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
             />
           </Link>
         </motion.div>
@@ -307,10 +319,14 @@ export default function SignIn({ darkMode }) {
               : "0 4px 15px rgba(108, 79, 55, 0.2)",
           }}
           onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = darkMode ? "#16a085" : "#503a28")
+            (e.currentTarget.style.backgroundColor = darkMode
+              ? "#16a085"
+              : "#503a28")
           }
           onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = darkMode ? "#1abc9c" : "#6c4f37")
+            (e.currentTarget.style.backgroundColor = darkMode
+              ? "#1abc9c"
+              : "#6c4f37")
           }
         >
           {isLoading ? "Logging In..." : "Log In"}
