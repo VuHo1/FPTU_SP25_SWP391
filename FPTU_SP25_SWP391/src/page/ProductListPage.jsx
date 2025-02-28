@@ -27,7 +27,6 @@ export default function ProductListPage({ darkMode }) {
         return scrollPosition >= elTop && scrollPosition < elBottom;
       });
       const newIndex = currentSectionIndex === -1 ? 0 : currentSectionIndex;
-      console.log("Active Section Index:", newIndex);
       setActiveSection(newIndex);
     };
 
@@ -36,17 +35,16 @@ export default function ProductListPage({ darkMode }) {
   }, [sections]);
 
   const sectionStyles = {
-    height: "100vh", // Exact height to fill viewport
-    width: "100%", // Full width
+    minHeight: "100vh", // Changed to minHeight to allow growth
+    width: "100%",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: darkMode ? "#1c2526" : "#fafafa", // Consistent background
+    backgroundColor: darkMode ? "#1c2526" : "#fafafa",
     textAlign: "center",
     scrollSnapAlign: "start",
-    padding: "0", // Remove padding to eliminate gaps
-    position: "relative",
+    padding: "20px 0", // Adjusted padding
     boxSizing: "border-box",
   };
 
@@ -63,24 +61,23 @@ export default function ProductListPage({ darkMode }) {
     color: darkMode ? "#a1a1a6" : "#6e6e73",
     lineHeight: "1.6",
     maxWidth: "700px",
-    marginBottom: "20px", // Reduced to fit content better
+    marginBottom: "20px",
   };
 
   return (
     <div
       style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "auto", // Allow content to dictate total height
-        overflowY: "scroll",
+        width: "100%", // Removed position: absolute
+        height: "100%",
+        minHeight: "200vh", // Ensure it takes at least full viewport height
+        overflowY: "auto", // Changed to auto for natural scrolling
         overflowX: "hidden",
         scrollSnapType: "y mandatory",
         scrollBehavior: "smooth",
-        willChange: "transform",
-        WebkitOverflowScrolling: "touch",
-        backgroundColor: darkMode ? "#1c2526" : "#fafafa", // Consistent background
+        backgroundColor: darkMode ? "#1c2526" : "#fafafa",
+        boxSizing: "border-box", // Ensure padding/borders are included in size
+        margin: 0, // Remove any default margins
+        padding: 0, // Remove any default padding
       }}
     >
       {/* Welcome Section */}
@@ -98,13 +95,13 @@ export default function ProductListPage({ darkMode }) {
         <div
           style={{
             width: "100%",
-            height: "100%", // Fill section height
+            height: "100%",
             display: "flex",
             alignItems: "center",
-            gap: "20px", // Reduced gap
+            gap: "20px",
             flexWrap: "wrap",
             justifyContent: "space-between",
-            padding: "20px", // Inner padding for content
+            padding: "20px",
             boxSizing: "border-box",
           }}
         >
@@ -119,13 +116,15 @@ export default function ProductListPage({ darkMode }) {
               width: "50%",
               minWidth: "300px",
               height: "auto",
-              maxHeight: "80vh", // Limit image height
+              maxHeight: "80vh",
               borderRadius: "16px",
               boxShadow: "0 8px 20px rgba(0, 0, 0, 0.15)",
               objectFit: "cover",
               transition: "transform 0.3s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "scale(1.03)")
+            }
             onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
           />
           <div
@@ -162,7 +161,12 @@ export default function ProductListPage({ darkMode }) {
               viewport={{ once: false }}
               style={paragraphStyles}
             >
-              Chúng tôi tự hào là đơn vị tiên phong trong lĩnh vực chăm sóc và tư vấn da chuyên sâu, mang đến những giải pháp toàn diện, khoa học và cá nhân hóa cho từng loại da. Với đội ngũ chuyên gia giàu kinh nghiệm và sự kết hợp giữa công nghệ hiện đại cùng các phương pháp chăm sóc tiên tiến, chúng tôi cam kết giúp khách hàng đạt được làn da khỏe mạnh, rạng rỡ từ bên trong.
+              Chúng tôi tự hào là đơn vị tiên phong trong lĩnh vực chăm sóc và
+              tư vấn da chuyên sâu, mang đến những giải pháp toàn diện, khoa học
+              và cá nhân hóa cho từng loại da. Với đội ngũ chuyên gia giàu kinh
+              nghiệm và sự kết hợp giữa công nghệ hiện đại cùng các phương pháp
+              chăm sóc tiên tiến, chúng tôi cam kết giúp khách hàng đạt được làn
+              da khỏe mạnh, rạng rỡ từ bên trong.
             </motion.p>
             <motion.p
               initial={{ opacity: 0, x: -30 }}
@@ -171,7 +175,11 @@ export default function ProductListPage({ darkMode }) {
               viewport={{ once: false }}
               style={paragraphStyles}
             >
-              Tại SkinCare Pro, chúng tôi không chỉ tập trung vào vẻ đẹp bên ngoài mà còn chú trọng nuôi dưỡng làn da từ sâu bên trong, giúp bạn tự tin tỏa sáng trong mọi hoàn cảnh. Khám phá các dịch vụ độc quyền và sản phẩm chăm sóc da đẳng cấp được thiết kế riêng cho bạn.
+              Tại SkinCare Pro, chúng tôi không chỉ tập trung vào vẻ đẹp bên
+              ngoài mà còn chú trọng nuôi dưỡng làn da từ sâu bên trong, giúp
+              bạn tự tin tỏa sáng trong mọi hoàn cảnh. Khám phá các dịch vụ độc
+              quyền và sản phẩm chăm sóc da đẳng cấp được thiết kế riêng cho
+              bạn.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -193,10 +201,14 @@ export default function ProductListPage({ darkMode }) {
                   transition: "background-color 0.3s ease",
                 }}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = darkMode ? "#2ea74d" : "#d2691e")
+                  (e.currentTarget.style.backgroundColor = darkMode
+                    ? "#2ea74d"
+                    : "#d2691e")
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = darkMode ? "#34c759" : "#e67e22")
+                  (e.currentTarget.style.backgroundColor = darkMode
+                    ? "#34c759"
+                    : "#e67e22")
                 }
               >
                 Khám Phá Dịch Vụ
@@ -243,7 +255,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Đội ngũ của chúng tôi không chỉ có hơn 10 năm kinh nghiệm trong ngành làm đẹp và chăm sóc da, mà còn là những người tiên phong trong việc nghiên cứu và ứng dụng các công nghệ chăm sóc da mới nhất.
+            Đội ngũ của chúng tôi không chỉ có hơn 10 năm kinh nghiệm trong
+            ngành làm đẹp và chăm sóc da, mà còn là những người tiên phong trong
+            việc nghiên cứu và ứng dụng các công nghệ chăm sóc da mới nhất.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -252,7 +266,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Mỗi chuyên gia tại SkinCare Pro đều được đào tạo bài bản tại các học viện danh tiếng trong và ngoài nước, đảm bảo mang đến cho bạn những trải nghiệm chuyên nghiệp và hiệu quả nhất.
+            Mỗi chuyên gia tại SkinCare Pro đều được đào tạo bài bản tại các học
+            viện danh tiếng trong và ngoài nước, đảm bảo mang đến cho bạn những
+            trải nghiệm chuyên nghiệp và hiệu quả nhất.
           </motion.p>
           <div
             style={{
@@ -289,7 +305,11 @@ export default function ProductListPage({ darkMode }) {
                 key={index}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 + 0.5, ease: "easeOut" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.2 + 0.5,
+                  ease: "easeOut",
+                }}
                 viewport={{ once: false }}
                 whileHover={{ y: -8 }}
                 style={{
@@ -387,7 +407,10 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Sứ mệnh của chúng tôi là mang lại làn da khỏe đẹp và sự tự tin cho mọi người thông qua các liệu trình cá nhân hóa và tư vấn chuyên sâu. Chúng tôi hướng đến một cộng đồng yêu thương bản thân và hiểu biết về chăm sóc da.
+            Sứ mệnh của chúng tôi là mang lại làn da khỏe đẹp và sự tự tin cho
+            mọi người thông qua các liệu trình cá nhân hóa và tư vấn chuyên sâu.
+            Chúng tôi hướng đến một cộng đồng yêu thương bản thân và hiểu biết
+            về chăm sóc da.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -396,7 +419,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Với tầm nhìn trở thành thương hiệu chăm sóc da hàng đầu khu vực, SkinCare Pro không ngừng đổi mới để đáp ứng nhu cầu ngày càng cao của khách hàng.
+            Với tầm nhìn trở thành thương hiệu chăm sóc da hàng đầu khu vực,
+            SkinCare Pro không ngừng đổi mới để đáp ứng nhu cầu ngày càng cao
+            của khách hàng.
           </motion.p>
           <ul
             style={{
@@ -426,7 +451,11 @@ export default function ProductListPage({ darkMode }) {
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 + 0.5, ease: "easeOut" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.2 + 0.5,
+                  ease: "easeOut",
+                }}
                 viewport={{ once: false }}
                 style={{
                   fontSize: "18px",
@@ -437,10 +466,17 @@ export default function ProductListPage({ darkMode }) {
                   gap: "8px",
                 }}
               >
-                <span style={{ color: darkMode ? "#34c759" : "#2ecc71" }}>✔</span>
+                <span style={{ color: darkMode ? "#34c759" : "#2ecc71" }}>
+                  ✔
+                </span>
                 <div>
                   {goal.text}
-                  <p style={{ fontSize: "14px", color: darkMode ? "#a1a1a6" : "#888" }}>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      color: darkMode ? "#a1a1a6" : "#888",
+                    }}
+                  >
                     {goal.detail}
                   </p>
                 </div>
@@ -487,7 +523,10 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            SkinCare Pro ra đời vào năm 2010 từ niềm đam mê mang lại làn da khỏe đẹp cho mọi người. Từ một trung tâm nhỏ tại TP.HCM, chúng tôi đã mở rộng thành hệ thống hơn 20 chi nhánh trên toàn quốc, phục vụ hàng ngàn khách hàng mỗi năm.
+            SkinCare Pro ra đời vào năm 2010 từ niềm đam mê mang lại làn da khỏe
+            đẹp cho mọi người. Từ một trung tâm nhỏ tại TP.HCM, chúng tôi đã mở
+            rộng thành hệ thống hơn 20 chi nhánh trên toàn quốc, phục vụ hàng
+            ngàn khách hàng mỗi năm.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -496,7 +535,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Hành trình của chúng tôi gắn liền với những bước tiến công nghệ và sự tin tưởng từ khách hàng, từ việc áp dụng các liệu pháp truyền thống đến tích hợp trí tuệ nhân tạo trong chăm sóc da hiện đại.
+            Hành trình của chúng tôi gắn liền với những bước tiến công nghệ và
+            sự tin tưởng từ khách hàng, từ việc áp dụng các liệu pháp truyền
+            thống đến tích hợp trí tuệ nhân tạo trong chăm sóc da hiện đại.
           </motion.p>
           <div
             style={{
@@ -510,16 +551,32 @@ export default function ProductListPage({ darkMode }) {
             }}
           >
             {[
-              { year: "2010", milestone: "Thành lập trung tâm đầu tiên tại TP.HCM." },
-              { year: "2015", milestone: "Mở rộng ra 10 chi nhánh tại các thành phố lớn." },
-              { year: "2020", milestone: "Ra mắt ứng dụng chăm sóc da bằng AI." },
-              { year: "2023", milestone: "Đạt mốc 50,000 khách hàng hài lòng." },
+              {
+                year: "2010",
+                milestone: "Thành lập trung tâm đầu tiên tại TP.HCM.",
+              },
+              {
+                year: "2015",
+                milestone: "Mở rộng ra 10 chi nhánh tại các thành phố lớn.",
+              },
+              {
+                year: "2020",
+                milestone: "Ra mắt ứng dụng chăm sóc da bằng AI.",
+              },
+              {
+                year: "2023",
+                milestone: "Đạt mốc 50,000 khách hàng hài lòng.",
+              },
             ].map((event, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.2 + 0.5, ease: "easeOut" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.2 + 0.5,
+                  ease: "easeOut",
+                }}
                 viewport={{ once: false }}
                 style={{
                   width: "220px",
@@ -540,7 +597,12 @@ export default function ProductListPage({ darkMode }) {
                 >
                   {event.year}
                 </h3>
-                <p style={{ fontSize: "16px", color: darkMode ? "#bdc3c7" : "#555" }}>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    color: darkMode ? "#bdc3c7" : "#555",
+                  }}
+                >
                   {event.milestone}
                 </p>
               </motion.div>
@@ -586,7 +648,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Chúng tôi cam kết mang đến dịch vụ tư vấn da cá nhân hóa với tiêu chuẩn cao nhất, đảm bảo an toàn, hiệu quả và sự hài lòng của khách hàng trong từng trải nghiệm.
+            Chúng tôi cam kết mang đến dịch vụ tư vấn da cá nhân hóa với tiêu
+            chuẩn cao nhất, đảm bảo an toàn, hiệu quả và sự hài lòng của khách
+            hàng trong từng trải nghiệm.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -595,7 +659,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            SkinCare Pro luôn đặt sức khỏe làn da của bạn lên hàng đầu, sử dụng các sản phẩm được kiểm nghiệm nghiêm ngặt và đội ngũ chuyên gia tận tâm phục vụ 24/7.
+            SkinCare Pro luôn đặt sức khỏe làn da của bạn lên hàng đầu, sử dụng
+            các sản phẩm được kiểm nghiệm nghiêm ngặt và đội ngũ chuyên gia tận
+            tâm phục vụ 24/7.
           </motion.p>
           <div
             style={{
@@ -626,7 +692,11 @@ export default function ProductListPage({ darkMode }) {
                 key={index}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 + 0.5, ease: "easeOut" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.2 + 0.5,
+                  ease: "easeOut",
+                }}
                 viewport={{ once: false }}
                 style={{
                   width: "300px",
@@ -647,7 +717,12 @@ export default function ProductListPage({ darkMode }) {
                 >
                   {item.title}
                 </h3>
-                <p style={{ fontSize: "16px", color: darkMode ? "#bdc3c7" : "#555" }}>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    color: darkMode ? "#bdc3c7" : "#555",
+                  }}
+                >
                   {item.desc}
                 </p>
               </motion.div>
@@ -693,7 +768,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Dưới đây là những thắc mắc phổ biến từ khách hàng của chúng tôi, cùng với câu trả lời chi tiết để bạn hiểu rõ hơn về dịch vụ SkinCare Pro.
+            Dưới đây là những thắc mắc phổ biến từ khách hàng của chúng tôi,
+            cùng với câu trả lời chi tiết để bạn hiểu rõ hơn về dịch vụ SkinCare
+            Pro.
           </motion.p>
           <div
             style={{
@@ -721,7 +798,11 @@ export default function ProductListPage({ darkMode }) {
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 + 0.4, ease: "easeOut" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.2 + 0.4,
+                  ease: "easeOut",
+                }}
                 viewport={{ once: false }}
                 style={{ marginBottom: "16px" }}
               >
@@ -741,7 +822,8 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Nếu bạn có thêm câu hỏi, đừng ngần ngại liên hệ với chúng tôi qua email hoặc hotline!
+            Nếu bạn có thêm câu hỏi, đừng ngần ngại liên hệ với chúng tôi qua
+            email hoặc hotline!
           </motion.p>
         </div>
       </motion.section>
@@ -783,7 +865,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Chúng tôi cam kết minh bạch trong mọi hoạt động, từ quy trình dịch vụ đến chính sách bảo hành và hỗ trợ khách hàng. Tìm hiểu thêm về các điều khoản và quyền lợi của bạn tại SkinCare Pro.
+            Chúng tôi cam kết minh bạch trong mọi hoạt động, từ quy trình dịch
+            vụ đến chính sách bảo hành và hỗ trợ khách hàng. Tìm hiểu thêm về
+            các điều khoản và quyền lợi của bạn tại SkinCare Pro.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -792,7 +876,9 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Chính sách của chúng tôi bao gồm đổi trả sản phẩm trong 7 ngày, hỗ trợ kỹ thuật miễn phí trong 30 ngày sau liệu trình, và bảo vệ thông tin cá nhân theo tiêu chuẩn GDPR.
+            Chính sách của chúng tôi bao gồm đổi trả sản phẩm trong 7 ngày, hỗ
+            trợ kỹ thuật miễn phí trong 30 ngày sau liệu trình, và bảo vệ thông
+            tin cá nhân theo tiêu chuẩn GDPR.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -814,10 +900,14 @@ export default function ProductListPage({ darkMode }) {
                 transition: "background-color 0.3s ease, transform 0.2s ease",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode ? "#2ea74d" : "#d2691e")
+                (e.currentTarget.style.backgroundColor = darkMode
+                  ? "#2ea74d"
+                  : "#d2691e")
               }
               onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode ? "#34c759" : "#e67e22")
+                (e.currentTarget.style.backgroundColor = darkMode
+                  ? "#34c759"
+                  : "#e67e22")
               }
             >
               Xem Chính Sách Công Ty
@@ -844,7 +934,11 @@ export default function ProductListPage({ darkMode }) {
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.2 + 0.6, ease: "easeOut" }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.2 + 0.6,
+                  ease: "easeOut",
+                }}
                 viewport={{ once: false }}
                 style={{
                   padding: "12px 20px",
@@ -855,7 +949,12 @@ export default function ProductListPage({ darkMode }) {
                     : "0 4px 12px rgba(0, 0, 0, 0.06)",
                 }}
               >
-                <p style={{ fontSize: "16px", color: darkMode ? "#bdc3c7" : "#555" }}>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    color: darkMode ? "#bdc3c7" : "#555",
+                  }}
+                >
                   {policy}
                 </p>
               </motion.div>

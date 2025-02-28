@@ -75,7 +75,9 @@ export default function SignUp({ darkMode }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         style={{
-          backgroundColor: darkMode ? "rgba(52, 73, 94, 0.95)" : "rgba(255, 255, 255, 0.95)",
+          backgroundColor: darkMode
+            ? "rgba(52, 73, 94, 0.95)"
+            : "rgba(255, 255, 255, 0.95)",
           padding: "40px 50px",
           borderRadius: "20px",
           boxShadow: darkMode
@@ -84,7 +86,9 @@ export default function SignUp({ darkMode }) {
           textAlign: "center",
           width: "450px",
           backdropFilter: "blur(10px)", // Frosted glass effect
-          border: darkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.05)",
+          border: darkMode
+            ? "1px solid rgba(255, 255, 255, 0.1)"
+            : "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
         <motion.h2
@@ -268,10 +272,14 @@ export default function SignUp({ darkMode }) {
               : "0 4px 15px rgba(108, 79, 55, 0.2)",
           }}
           onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = darkMode ? "#16a085" : "#503a28")
+            (e.currentTarget.style.backgroundColor = darkMode
+              ? "#16a085"
+              : "#503a28")
           }
           onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = darkMode ? "#1abc9c" : "#6c4f37")
+            (e.currentTarget.style.backgroundColor = darkMode
+              ? "#1abc9c"
+              : "#6c4f37")
           }
         >
           {isLoading ? "Signing Up..." : "Sign Up"}

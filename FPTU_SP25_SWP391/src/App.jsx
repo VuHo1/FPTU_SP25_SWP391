@@ -13,6 +13,7 @@ import BlogDetail from "./page/BlogDetails";
 import "./App.css";
 import Footer from "./component/Footer";
 import SignUp from "./page/signUpUser";
+import PolicyPage from "./page/PolicyPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -27,23 +28,17 @@ function App() {
         <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <main className="content">
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomePage darkMode={darkMode}/>} />
             <Route path="/booking_page" element={<BookingPage />} />
             <Route path="/service/:id" element={<BlogDetail />} />
             <Route path="/cart_page" element={<CartPage />} />
-            <Route path="/about" element={<ProductListPage />} />
+            <Route path="/about" element={<ProductListPage darkMode={darkMode} />} />
             <Route path="/service" element={<Blog />} />
-            <Route path="/contact" element={<Contact />} />
+            <Route path="/contact" element={<Contact darkMode={darkMode} />} />
             <Route path="/sign_in" element={<SignIn darkMode={darkMode} />} />
-            <Route
-              path="/forgotPassword"
-              element={<ForgotPassword darkMode={darkMode} />}
-            />{" "}
-            {/* Fixed path */}
-            <Route
-              path="/signUpUser"
-              element={<SignUp darkMode={darkMode} />}
-            />
+            <Route path="/forgotPassword" element={<ForgotPassword darkMode={darkMode} />} />
+            <Route path="/signUpUser" element={<SignUp darkMode={darkMode} />} />
+            <Route path="/policy" element={<PolicyPage darkMode={darkMode} />} />
           </Routes>
         </main>
         <Footer darkMode={darkMode} />
