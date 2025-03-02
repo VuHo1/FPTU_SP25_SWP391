@@ -1,8 +1,6 @@
-// SignIn.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { jwtDecode } from "jwt-decode";
 import { login } from "../api/testApi"; // Adjust the path as needed
 import { motion } from "framer-motion";
 import { useAuth } from "../page/AuthContext"; // Import useAuth
@@ -10,7 +8,7 @@ import { useAuth } from "../page/AuthContext"; // Import useAuth
 export default function SignIn({ darkMode }) {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("User");
+  const [role, setRole] = useState("User"); // Role selection state
   const [isLoading, setIsLoading] = useState(false);
   const [inputType, setInputType] = useState("password");
   const navigate = useNavigate();
@@ -49,35 +47,22 @@ export default function SignIn({ darkMode }) {
         text: response?.data?.message || "Successfully",
       });
 
-      setLoggedIn(); // Set the user as logged in
+      // Store the username and role in AuthContext and localStorage
+      setLoggedIn(userName);
+      localStorage.setItem("role", role); // Store selected role in localStorage
 
-      
+      // Redirect based on the selected role
+      if (role === "User") {
+        navigate("/");
+      } else if (role === "Staff") {
+        navigate("/staff/dashboard");
+      } else if (role === "Admin") {
+        navigate("/admin/home"); // Redirect to AdminHomePage
+      } else if (role === "SkinTherapist") {
+        navigate("/skintherapist/home"); // Redirect to TherapistHomePage
+      }
 
-  //const token = response.data.data.accessToken;
-      // //localStorage.setItem("token", token);
-  
-      // const decodedToken = jwtDecode(token);
-      // const role =
-      //   decodedToken[
-      //     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-      //   ];
-      // localStorage.setItem("role", role);
-  
-      // const full_name =
-      //   decodedToken[
-      //     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-      //   ];
-      // localStorage.setItem("full_name", full_name);
-  
-      // localStorage.setItem("userId", decodedToken.id);
-  
-      // if (role === "User") {
-      //   navigate("/");
-      // } else if (role === "Staff") {
-      //   navigate("/shopProfile/shop");
-      // }
-      navigate("/"); // Navigate to homepage
-
+      setIsLoading(false); // Reset loading state
     } catch (error) {
       let errorMessage = "An unknown error occurred.";
 
@@ -183,7 +168,7 @@ export default function SignIn({ darkMode }) {
 
         <motion.input
           type="text"
-          placeholder="Email Address"
+          placeholder="Username"
           value={userName}
           onChange={handleEmailChange}
           onKeyDown={handleKeyDown}
@@ -302,6 +287,7 @@ export default function SignIn({ darkMode }) {
           <option value="User">User</option>
           <option value="Staff">Staff</option>
           <option value="Admin">Admin</option>
+          <option value="SkinTherapist">Skin Therapist</option>
         </motion.select>
 
         <motion.button
@@ -418,29 +404,3 @@ export default function SignIn({ darkMode }) {
     </div>
   );
 }
-
-
-
-  //const token = response.data.data.accessToken;
-      // //localStorage.setItem("token", token);
-  
-      // const decodedToken = jwtDecode(token);
-      // const role =
-      //   decodedToken[
-      //     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-      //   ];
-      // localStorage.setItem("role", role);
-  
-      // const full_name =
-      //   decodedToken[
-      //     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-      //   ];
-      // localStorage.setItem("full_name", full_name);
-  
-      // localStorage.setItem("userId", decodedToken.id);
-  
-      // if (role === "User") {
-      //   navigate("/");
-      // } else if (role === "Staff") {
-      //   navigate("/shopProfile/shop");
-      // }

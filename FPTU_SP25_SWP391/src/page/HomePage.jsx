@@ -1,9 +1,26 @@
-import React, { useState } from "react";
+// page/HomePage.jsx
+import React, { useState, useEffect } from "react"; // Added useEffect
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence
+import { useAuth } from "../page/AuthContext"; // Correct import path
 
 const HomePage = ({ darkMode }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false); // State to control popup visibility
+  const { isLoggedIn, username } = useAuth(); // Get auth status and username
+  const [showWelcome, setShowWelcome] = useState(false); // State to control welcome message visibility
+
+  // Effect to show welcome message when user logs in and hide it after 5 seconds
+  useEffect(() => {
+    if (isLoggedIn && username) {
+      setShowWelcome(true); // Show the welcome message
+      const timer = setTimeout(() => {
+        setShowWelcome(false); // Hide after 5 seconds
+      }, 5000); // 5000ms = 5 seconds
+
+      // Cleanup the timer if the component unmounts or dependencies change
+      return () => clearTimeout(timer);
+    }
+  }, [isLoggedIn, username]); // Trigger when isLoggedIn or username changes
 
   const containerStyles = {
     width: "100vw",
@@ -14,8 +31,33 @@ const HomePage = ({ darkMode }) => {
     margin: 0,
     padding: 0,
     boxSizing: "border-box",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "'Poppins', sans-serif",
     position: "relative",
+  };
+
+  const welcomeStyles = {
+    position: "absolute",
+    top: "80px", // Positioned above "Beautishop" title
+    left: "50%",
+    transform: "translateX(-50%)", // Centered horizontally
+    fontSize: "26px",
+    fontWeight: "600",
+    color: darkMode ? "#ffffff" : "#1d1d1f",
+    background: darkMode
+      ? "linear-gradient(135deg, rgba(52, 199, 89, 0.2), rgba(44, 62, 80, 0.9))"
+      : "linear-gradient(135deg, rgba(230, 126, 34, 0.2), rgba(255, 255, 255, 0.9))",
+    padding: "12px 28px",
+    borderRadius: "50px",
+    border: darkMode
+      ? "1px solid rgba(52, 199, 89, 0.5)"
+      : "1px solid rgba(230, 126, 34, 0.5)",
+    boxShadow: darkMode
+      ? "0 8px 24px rgba(0, 0, 0, 0.4)"
+      : "0 8px 24px rgba(0, 0, 0, 0.1)",
+    backdropFilter: "blur(8px)",
+    transition: "all 0.3s ease",
+    zIndex: 10,
+    letterSpacing: "0.5px",
   };
 
   const sectionStyles = {
@@ -31,6 +73,7 @@ const HomePage = ({ darkMode }) => {
     letterSpacing: "-1px",
     marginBottom: "20px",
     color: darkMode ? "#ffffff" : "#1d1d1f",
+    fontFamily: "'Poppins', sans-serif",
   };
 
   const paragraphStyles = {
@@ -39,6 +82,7 @@ const HomePage = ({ darkMode }) => {
     maxWidth: "800px",
     margin: "0 auto 30px",
     color: darkMode ? "#a1a1a6" : "#6e6e73",
+    fontFamily: "'Poppins', sans-serif",
   };
 
   const buttonStyles = {
@@ -51,6 +95,7 @@ const HomePage = ({ darkMode }) => {
     borderRadius: "12px",
     textDecoration: "none",
     transition: "background-color 0.3s ease, transform 0.2s ease",
+    fontFamily: "'Poppins', sans-serif",
   };
 
   const contactIconStyles = {
@@ -84,6 +129,7 @@ const HomePage = ({ darkMode }) => {
     zIndex: 1001,
     textAlign: "center",
     maxWidth: "300px",
+    fontFamily: "'Poppins', sans-serif",
   };
 
   const popupButtonStyles = {
@@ -97,10 +143,38 @@ const HomePage = ({ darkMode }) => {
     fontSize: "16px",
     fontWeight: "600",
     transition: "background-color 0.3s ease",
+    fontFamily: "'Poppins', sans-serif",
+  };
+
+  // Animation variants for the welcome message
+  const welcomeVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20, transition: { duration: 1 } }, // Slow fade-out over 1 second
   };
 
   return (
     <div style={containerStyles}>
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div
+            variants={welcomeVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            style={welcomeStyles}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "translateX(-50%) scale(1.05)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.transform = "translateX(-50%) scale(1)")
+            }
+          >
+            Welcome, {username}!
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Hero Section */}
       <section
         style={{
@@ -113,6 +187,7 @@ const HomePage = ({ darkMode }) => {
           background: darkMode
             ? "linear-gradient(135deg, #1c2526 0%, #2c3e50 100%)"
             : "linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%)",
+          paddingTop: isLoggedIn && username ? "120px" : "60px", // Extra padding for welcome message
         }}
       >
         <h1>
@@ -415,7 +490,7 @@ const HomePage = ({ darkMode }) => {
               (e.currentTarget.style.backgroundColor = "#ffffff")
             }
           >
-            Liên Hệ Ngay
+            Đặt Lịch Ngay
           </Link>
         </motion.div>
       </section>
