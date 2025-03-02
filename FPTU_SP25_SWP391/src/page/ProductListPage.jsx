@@ -188,7 +188,7 @@ export default function ProductListPage({ darkMode }) {
               viewport={{ once: false }}
             >
               <Link
-                to="/contact"
+                to="/service"
                 style={{
                   display: "inline-block",
                   padding: "12px 24px",
