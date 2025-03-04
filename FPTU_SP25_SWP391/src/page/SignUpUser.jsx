@@ -270,7 +270,7 @@ export default function SignUp({ darkMode }) {
             }}
             required
           />
-
+{/* 
           <motion.select
             value={role}
             onChange={(e) => setRole(e.target.value)}
@@ -308,7 +308,7 @@ export default function SignUp({ darkMode }) {
             <option value="2">Therapist (Role ID: 2)</option>
             <option value="3">Staff (Role ID: 3)</option>
             <option value="4">Admin (Role ID: 4)</option>
-          </motion.select>
+          </motion.select> */}
 
           <motion.button
             type="submit"

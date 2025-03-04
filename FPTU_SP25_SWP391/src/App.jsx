@@ -25,6 +25,7 @@ import TherapistHomePage from "./page/TherapistHomePage"; // Import new Therapis
 import Profile from "./page/Profile";
 import StaffHomePage from "./page/StaffHomePage";
 import Error from "./page/Error"; // Import the new Error component
+import EditProfile from "./page/EditProfile";
 
 // ProtectedRoute Component to restrict access based on role
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -104,7 +105,7 @@ function App() {
               <Route
                 path="/skintherapist/home"
                 element={
-                  <ProtectedRoute allowedRole="SkinTherapist">
+                  <ProtectedRoute allowedRole="Therapist">
                     <TherapistHomePage darkMode={darkMode} />
                   </ProtectedRoute>
                 }
@@ -119,6 +120,7 @@ function App() {
               />
 
               <Route path="*" element={<Error darkMode={darkMode} />} />
+              <Route path="/edit-profile" element={<EditProfile darkMode={darkMode} />} />
             </Routes>
           </main>
           <Footer darkMode={darkMode} />
