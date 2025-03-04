@@ -1,26 +1,20 @@
-// page/HomePage.jsx
-import React, { useState, useEffect } from "react"; // Added useEffect
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence
-import { useAuth } from "../page/AuthContext"; // Correct import path
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../page/AuthContext";
 
 const HomePage = ({ darkMode }) => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // State to control popup visibility
-  const { isLoggedIn, username } = useAuth(); // Get auth status and username
-  const [showWelcome, setShowWelcome] = useState(false); // State to control welcome message visibility
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const { isLoggedIn, username } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(false);
 
-  // Effect to show welcome message when user logs in and hide it after 5 seconds
   useEffect(() => {
     if (isLoggedIn && username) {
-      setShowWelcome(true); // Show the welcome message
-      const timer = setTimeout(() => {
-        setShowWelcome(false); // Hide after 5 seconds
-      }, 5000); // 5000ms = 5 seconds
-
-      // Cleanup the timer if the component unmounts or dependencies change
+      setShowWelcome(true);
+      const timer = setTimeout(() => setShowWelcome(false), 5000);
       return () => clearTimeout(timer);
     }
-  }, [isLoggedIn, username]); // Trigger when isLoggedIn or username changes
+  }, [isLoggedIn, username]);
 
   const containerStyles = {
     width: "100vw",
@@ -37,9 +31,9 @@ const HomePage = ({ darkMode }) => {
 
   const welcomeStyles = {
     position: "absolute",
-    top: "80px", // Positioned above "Beautishop" title
+    top: "80px",
     left: "50%",
-    transform: "translateX(-50%)", // Centered horizontally
+    transform: "translateX(-50%)",
     fontSize: "26px",
     fontWeight: "600",
     color: darkMode ? "#ffffff" : "#1d1d1f",
@@ -65,6 +59,25 @@ const HomePage = ({ darkMode }) => {
     padding: "60px 20px",
     textAlign: "center",
     boxSizing: "border-box",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    position: "relative",
+  };
+
+  const overlayStyles = {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.4)", // Dark overlay for readability
+    zIndex: 1,
+  };
+
+  const contentStyles = {
+    position: "relative",
+    zIndex: 2,
   };
 
   const headingStyles = {
@@ -72,7 +85,7 @@ const HomePage = ({ darkMode }) => {
     fontWeight: "700",
     letterSpacing: "-1px",
     marginBottom: "20px",
-    color: darkMode ? "#ffffff" : "#1d1d1f",
+    color: "#ffffff",
     fontFamily: "'Poppins', sans-serif",
   };
 
@@ -81,7 +94,7 @@ const HomePage = ({ darkMode }) => {
     lineHeight: "1.6",
     maxWidth: "800px",
     margin: "0 auto 30px",
-    color: darkMode ? "#a1a1a6" : "#6e6e73",
+    color: "#ffffff",
     fontFamily: "'Poppins', sans-serif",
   };
 
@@ -146,11 +159,10 @@ const HomePage = ({ darkMode }) => {
     fontFamily: "'Poppins', sans-serif",
   };
 
-  // Animation variants for the welcome message
   const welcomeVariants = {
     hidden: { opacity: 0, y: -20 },
     visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20, transition: { duration: 1 } }, // Slow fade-out over 1 second
+    exit: { opacity: 0, y: -20, transition: { duration: 1 } },
   };
 
   return (
@@ -175,7 +187,7 @@ const HomePage = ({ darkMode }) => {
         )}
       </AnimatePresence>
 
-      {/* Hero Section */}
+      {/* Hero Section - Glowing Skin Background */}
       <section
         style={{
           ...sectionStyles,
@@ -184,315 +196,332 @@ const HomePage = ({ darkMode }) => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: darkMode
-            ? "linear-gradient(135deg, #1c2526 0%, #2c3e50 100%)"
-            : "linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%)",
-          paddingTop: isLoggedIn && username ? "120px" : "60px", // Extra padding for welcome message
+          backgroundImage: "url('https://images.unsplash.com/photo-1592333841676-1eecfefde529')", // Close-up of radiant, healthy skin
+          paddingTop: isLoggedIn && username ? "120px" : "60px",
         }}
       >
-        <h1>
-          {Array.from("Beautishop").map((letter, index) => (
-            <span
-              key={index}
-              style={{
-                display: "inline-block",
-                fontSize: "80px",
-                opacity: 0,
-                transform: "translateY(20px)",
-                animation: `fadeUp 0.8s ease-out forwards`,
-                animationDelay: `${index * 0.1}s`,
-                color: darkMode ? "#ffffff" : "#1d1d1f",
-              }}
-            >
-              {letter}
-            </span>
-          ))}
-        </h1>
-        <p style={{ ...paragraphStyles, fontSize: "24px", marginTop: "20px" }}>
-          Nơi mang đến vẻ đẹp tự nhiên và sự tự tin với các giải pháp chăm sóc
-          da chuyên sâu.
-        </p>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1 }}
-        >
-          <Link
-            to="/service"
-            style={buttonStyles}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = darkMode
-                ? "#2ea74d"
-                : "#d2691e")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = darkMode
-                ? "#34c759"
-                : "#e67e22")
-            }
+        <div style={overlayStyles}></div>
+        <div style={contentStyles}>
+          <h1>
+            {Array.from("Beautishop").map((letter, index) => (
+              <span
+                key={index}
+                style={{
+                  display: "inline-block",
+                  fontSize: "80px",
+                  opacity: 0,
+                  transform: "translateY(20px)",
+                  animation: `fadeUp 0.8s ease-out forwards`,
+                  animationDelay: `${index * 0.1}s`,
+                  color: "#ffffff",
+                }}
+              >
+                {letter}
+              </span>
+            ))}
+          </h1>
+          <p style={{ ...paragraphStyles, fontSize: "24px", marginTop: "20px" }}>
+            Nơi mang đến vẻ đẹp tự nhiên và sự tự tin với các giải pháp chăm sóc
+            da chuyên sâu.
+          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1 }}
           >
-            Khám Phá Ngay
-          </Link>
-        </motion.div>
-      </section>
-
-      {/* Services Overview */}
-      <section style={sectionStyles}>
-        <h2 style={headingStyles}>Dịch Vụ Của Chúng Tôi</h2>
-        <p style={paragraphStyles}>
-          Beautishop cung cấp các dịch vụ chăm sóc da đa dạng, từ tư vấn cá nhân
-          hóa đến các liệu trình công nghệ cao, giúp bạn sở hữu làn da khỏe đẹp.
-        </p>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "30px",
-            maxWidth: "1200px",
-            margin: "0 auto",
-          }}
-        >
-          {[
-            {
-              title: "Tư Vấn Da Chuyên Sâu",
-              desc: "Phân tích da bằng công nghệ AI để đưa ra giải pháp phù hợp nhất.",
-            },
-            {
-              title: "Liệu Trình Trị Liệu",
-              desc: "Các phương pháp không xâm lấn giúp tái tạo và phục hồi làn da.",
-            },
-            {
-              title: "Sản Phẩm Cao Cấp",
-              desc: "Dòng sản phẩm chăm sóc da tự nhiên, an toàn và hiệu quả.",
-            },
-          ].map((service, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              viewport={{ once: false }}
-              style={{
-                width: "300px",
-                padding: "20px",
-                backgroundColor: darkMode ? "#2c2c2e" : "#ffffff",
-                borderRadius: "12px",
-                boxShadow: darkMode
-                  ? "0 4px 12px rgba(0, 0, 0, 0.3)"
-                  : "0 4px 12px rgba(0, 0, 0, 0.06)",
-                textAlign: "left",
-              }}
+            <Link
+              to="/service"
+              style={buttonStyles}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = darkMode ? "#2ea74d" : "#d2691e")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = darkMode ? "#34c759" : "#e67e22")
+              }
             >
-              <h3
-                style={{
-                  fontSize: "24px",
-                  fontWeight: "600",
-                  color: darkMode ? "#ffffff" : "#1d1d1f",
-                  marginBottom: "10px",
-                }}
-              >
-                {service.title}
-              </h3>
-              <p style={{ ...paragraphStyles, margin: 0 }}>{service.desc}</p>
-            </motion.div>
-          ))}
+              Khám Phá Ngay
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
+      {/* Services Overview - Skincare Products Background */}
       <section
         style={{
           ...sectionStyles,
-          backgroundColor: darkMode ? "#213547" : "#f5f5f5",
+          backgroundImage: "url('https://images.unsplash.com/photo-1556228578-567ba5e7e57c')", // Skincare products like serums or creams
         }}
       >
-        <h2 style={headingStyles}>Tại Sao Chọn Beautishop?</h2>
-        <p style={paragraphStyles}>
-          Chúng tôi tự hào mang đến sự khác biệt với đội ngũ chuyên gia hàng
-          đầu, công nghệ tiên tiến, và cam kết chất lượng vượt trội.
-        </p>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "40px",
-            maxWidth: "1000px",
-            margin: "0 auto",
-          }}
-        >
-          {[
-            {
-              title: "Chuyên Gia Kinh Nghiệm",
-              desc: "Hơn 10 năm trong ngành chăm sóc da.",
-            },
-            {
-              title: "Công Nghệ Hiện Đại",
-              desc: "Ứng dụng AI và thiết bị tiên tiến.",
-            },
-            {
-              title: "Sản Phẩm An Toàn",
-              desc: "Được chứng nhận quốc tế, không hóa chất độc hại.",
-            },
-            {
-              title: "Hỗ Trợ 24/7",
-              desc: "Đội ngũ luôn sẵn sàng giải đáp mọi thắc mắc.",
-            },
-          ].map((reason, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              viewport={{ once: false }}
-              style={{
-                width: "220px",
-                padding: "20px",
-                backgroundColor: darkMode ? "#2c2c2e" : "#ffffff",
-                borderRadius: "12px",
-                boxShadow: darkMode
-                  ? "0 4px 12px rgba(0, 0, 0, 0.3)"
-                  : "0 4px 12px rgba(0, 0, 0, 0.06)",
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: "20px",
-                  color: darkMode ? "#34c759" : "#e67e22",
-                  marginBottom: "10px",
-                }}
-              >
-                {reason.title}
-              </h3>
-              <p style={{ ...paragraphStyles, margin: 0 }}>{reason.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section style={sectionStyles}>
-        <h2 style={headingStyles}>Khách Hàng Nói Gì?</h2>
-        <p style={paragraphStyles}>
-          Nghe từ chính những khách hàng đã trải nghiệm dịch vụ tại Beautishop.
-        </p>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "30px",
-            maxWidth: "1200px",
-            margin: "0 auto",
-          }}
-        >
-          {[
-            {
-              name: "Nguyễn Thị Lan",
-              quote:
-                "Làn da của tôi đã cải thiện rõ rệt sau liệu trình tại Beautishop. Dịch vụ tuyệt vời!",
-            },
-            {
-              name: "Trần Văn Hùng",
-              quote:
-                "Sản phẩm rất an toàn và hiệu quả. Tôi hoàn toàn tin tưởng Beautishop.",
-            },
-            {
-              name: "Lê Minh Anh",
-              quote:
-                "Đội ngũ chuyên gia rất nhiệt tình, tư vấn chi tiết và tận tâm.",
-            },
-          ].map((testimonial, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              viewport={{ once: false }}
-              style={{
-                width: "350px",
-                padding: "25px",
-                backgroundColor: darkMode ? "#2c2c2e" : "#ffffff",
-                borderRadius: "12px",
-                boxShadow: darkMode
-                  ? "0 4px 12px rgba(0, 0, 0, 0.3)"
-                  : "0 4px 12px rgba(0, 0, 0, 0.06)",
-                textAlign: "left",
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "16px",
-                  fontStyle: "italic",
-                  color: darkMode ? "#bdc3c7" : "#555",
-                  marginBottom: "15px",
-                }}
-              >
-                "{testimonial.quote}"
-              </p>
-              <p
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  color: darkMode ? "#ffffff" : "#1d1d1f",
-                }}
-              >
-                {testimonial.name}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section
-        style={{
-          ...sectionStyles,
-          background: darkMode
-            ? "linear-gradient(135deg, #34c759 0%, #2c3e50 100%)"
-            : "linear-gradient(135deg, #e67e22 0%, #f9fafb 100%)",
-          color: "#ffffff",
-        }}
-      >
-        <h2 style={{ ...headingStyles, color: "#ffffff" }}>
-          Bắt Đầu Hành Trình Làm Đẹp
-        </h2>
-        <p
-          style={{
-            ...paragraphStyles,
-            color: "#ffffff",
-            fontSize: "20px",
-            marginBottom: "40px",
-          }}
-        >
-          Đặt lịch ngay hôm nay để trải nghiệm dịch vụ chăm sóc da đẳng cấp tại
-          Beautishop. Chúng tôi sẵn sàng đồng hành cùng bạn trên con đường chạm
-          đến làn da mơ ước!
-        </p>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: false }}
-        >
-          <Link
-            to="/booking_page"
+        <div style={overlayStyles}></div>
+        <div style={contentStyles}>
+          <h2 style={headingStyles}>Dịch Vụ Của Chúng Tôi</h2>
+          <p style={paragraphStyles}>
+            Beautishop cung cấp các dịch vụ chăm sóc da đa dạng, từ tư vấn cá nhân
+            hóa đến các liệu trình công nghệ cao, giúp bạn sở hữu làn da khỏe đẹp.
+          </p>
+          <div
             style={{
-              ...buttonStyles,
-              backgroundColor: "#ffffff",
-              color: darkMode ? "#1c2526" : "#e67e22",
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: "30px",
+              maxWidth: "1200px",
+              margin: "0 auto",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#e0e0e0")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "#ffffff")
-            }
           >
-            Đặt Lịch Ngay
-          </Link>
-        </motion.div>
+            {[
+              {
+                title: "Tư Vấn Da Chuyên Sâu",
+                desc: "Phân tích da bằng công nghệ AI để đưa ra giải pháp phù hợp nhất.",
+              },
+              {
+                title: "Liệu Trình Trị Liệu",
+                desc: "Các phương pháp không xâm lấn giúp tái tạo và phục hồi làn da.",
+              },
+              {
+                title: "Sản Phẩm Cao Cấp",
+                desc: "Dòng sản phẩm chăm sóc da tự nhiên, an toàn và hiệu quả.",
+              },
+            ].map((service, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: false }}
+                style={{
+                  width: "300px",
+                  padding: "20px",
+                  backgroundColor: darkMode ? "rgba(44, 44, 46, 0.9)" : "rgba(255, 255, 255, 0.9)",
+                  borderRadius: "12px",
+                  boxShadow: darkMode
+                    ? "0 4px 12px rgba(0, 0, 0, 0.3)"
+                    : "0 4px 12px rgba(0, 0, 0, 0.06)",
+                  textAlign: "left",
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: "600",
+                    color: darkMode ? "#ffffff" : "#1d1d1f",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {service.title}
+                </h3>
+                <p style={{ ...paragraphStyles, margin: 0, color: darkMode ? "#bdc3c7" : "#555" }}>
+                  {service.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us - Skin Therapist at Work Background */}
+      <section
+        style={{
+          ...sectionStyles,
+          backgroundImage: "url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c')", // Skin therapist performing a treatment
+        }}
+      >
+        <div style={overlayStyles}></div>
+        <div style={contentStyles}>
+          <h2 style={headingStyles}>Tại Sao Chọn Beautishop?</h2>
+          <p style={paragraphStyles}>
+            Chúng tôi tự hào mang đến sự khác biệt với đội ngũ chuyên gia hàng
+            đầu, công nghệ tiên tiến, và cam kết chất lượng vượt trội.
+          </p>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: "40px",
+              maxWidth: "1000px",
+              margin: "0 auto",
+            }}
+          >
+            {[
+              {
+                title: "Chuyên Gia Kinh Nghiệm",
+                desc: "Hơn 10 năm trong ngành chăm sóc da.",
+              },
+              {
+                title: "Công Nghệ Hiện Đại",
+                desc: "Ứng dụng AI và thiết bị tiên tiến.",
+              },
+              {
+                title: "Sản Phẩm An Toàn",
+                desc: "Được chứng nhận quốc tế, không hóa chất độc hại.",
+              },
+              {
+                title: "Hỗ Trợ 24/7",
+                desc: "Đội ngũ luôn sẵn sàng giải đáp mọi thắc mắc.",
+              },
+            ].map((reason, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: false }}
+                style={{
+                  width: "220px",
+                  padding: "20px",
+                  backgroundColor: darkMode ? "rgba(44, 44, 46, 0.9)" : "rgba(255, 255, 255, 0.9)",
+                  borderRadius: "12px",
+                  boxShadow: darkMode
+                    ? "0 4px 12px rgba(0, 0, 0, 0.3)"
+                    : "0 4px 12px rgba(0, 0, 0, 0.06)",
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: "20px",
+                    color: darkMode ? "#34c759" : "#e67e22",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {reason.title}
+                </h3>
+                <p style={{ ...paragraphStyles, margin: 0, color: darkMode ? "#bdc3c7" : "#555" }}>
+                  {reason.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials - Relaxed Spa Setting Background */}
+      <section
+        style={{
+          ...sectionStyles,
+          backgroundImage: "url('https://images.unsplash.com/photo-1512290923902-8a9f81dc236c')", // Calm spa environment with skincare focus
+        }}
+      >
+        <div style={overlayStyles}></div>
+        <div style={contentStyles}>
+          <h2 style={headingStyles}>Khách Hàng Nói Gì?</h2>
+          <p style={paragraphStyles}>
+            Nghe từ chính những khách hàng đã trải nghiệm dịch vụ tại Beautishop.
+          </p>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: "30px",
+              maxWidth: "1200px",
+              margin: "0 auto",
+            }}
+          >
+            {[
+              {
+                name: "Nguyễn Thị Lan",
+                quote:
+                  "Làn da của tôi đã cải thiện rõ rệt sau liệu trình tại Beautishop. Dịch vụ tuyệt vời!",
+              },
+              {
+                name: "Trần Văn Hùng",
+                quote:
+                  "Sản phẩm rất an toàn và hiệu quả. Tôi hoàn toàn tin tưởng Beautishop.",
+              },
+              {
+                name: "Lê Minh Anh",
+                quote:
+                  "Đội ngũ chuyên gia rất nhiệt tình, tư vấn chi tiết và tận tâm.",
+              },
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: false }}
+                style={{
+                  width: "350px",
+                  padding: "25px",
+                  backgroundColor: darkMode ? "rgba(44, 44, 46, 0.9)" : "rgba(255, 255, 255, 0.9)",
+                  borderRadius: "12px",
+                  boxShadow: darkMode
+                    ? "0 4px 12px rgba(0, 0, 0, 0.3)"
+                    : "0 4px 12px rgba(0, 0, 0, 0.06)",
+                  textAlign: "left",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontStyle: "italic",
+                    color: darkMode ? "#bdc3c7" : "#555",
+                    marginBottom: "15px",
+                  }}
+                >
+                  "{testimonial.quote}"
+                </p>
+                <p
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color: darkMode ? "#ffffff" : "#1d1d1f",
+                  }}
+                >
+                  {testimonial.name}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action - Fresh Skin After Treatment Background */}
+      <section
+        style={{
+          ...sectionStyles,
+          backgroundImage: "url('https://images.unsplash.com/photo-1570172619644-dfd03ed5d881')", // Fresh, hydrated skin post-treatment
+        }}
+      >
+        <div style={overlayStyles}></div>
+        <div style={contentStyles}>
+          <h2 style={headingStyles}>Bắt Đầu Hành Trình Làm Đẹp</h2>
+          <p
+            style={{
+              ...paragraphStyles,
+              fontSize: "20px",
+              marginBottom: "40px",
+            }}
+          >
+            Đặt lịch ngay hôm nay để trải nghiệm dịch vụ chăm sóc da đẳng cấp tại
+            Beautishop. Chúng tôi sẵn sàng đồng hành cùng bạn trên con đường chạm
+            đến làn da mơ ước!
+          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: false }}
+          >
+            <Link
+              to="/booking_page"
+              style={{
+                ...buttonStyles,
+                backgroundColor: "#ffffff",
+                color: darkMode ? "#1c2526" : "#e67e22",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#e0e0e0")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#ffffff")
+              }
+            >
+              Đặt Lịch Ngay
+            </Link>
+          </motion.div>
+        </div>
       </section>
 
       {/* Contact Icon */}
@@ -501,15 +530,11 @@ const HomePage = ({ darkMode }) => {
         onClick={() => setIsPopupOpen(!isPopupOpen)}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = "scale(1.1)";
-          e.currentTarget.style.backgroundColor = darkMode
-            ? "#2ea74d"
-            : "#d2691e";
+          e.currentTarget.style.backgroundColor = darkMode ? "#2ea74d" : "#d2691e";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.backgroundColor = darkMode
-            ? "#34c759"
-            : "#e67e22";
+          e.currentTarget.style.backgroundColor = darkMode ? "#34c759" : "#e67e22";
         }}
       >
         <svg
@@ -542,14 +567,10 @@ const HomePage = ({ darkMode }) => {
             <button
               style={popupButtonStyles}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode
-                  ? "#2ea74d"
-                  : "#d2691e")
+                (e.currentTarget.style.backgroundColor = darkMode ? "#2ea74d" : "#d2691e")
               }
               onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode
-                  ? "#34c759"
-                  : "#e67e22")
+                (e.currentTarget.style.backgroundColor = darkMode ? "#34c759" : "#e67e22")
               }
             >
               Đi đến trang liên hệ
@@ -562,14 +583,8 @@ const HomePage = ({ darkMode }) => {
       <style>
         {`
           @keyframes fadeUp {
-            0% {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            100% {
-              opacity: 1;
-              transform: translateY(0);
-            }
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
           }
         `}
       </style>

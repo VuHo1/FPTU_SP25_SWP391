@@ -1,147 +1,59 @@
-// page/Profile.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
-import { getUserDetails, updateUserDetails } from "../api/testApi";
+import { getUserDetails } from "../api/testApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUser,
   faMapMarkerAlt,
   faVenusMars,
-  faCamera,
-  faSave,
-  faTimes,
+  faEdit,
+  faEnvelope,
+  faPhone,
 } from "@fortawesome/free-solid-svg-icons";
 
 const Profile = ({ darkMode }) => {
-  const { userId, token, isLoggedIn } = useAuth();
+  const { userId, token, isLoggedIn, username } = useAuth(); // Added username from AuthContext
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    address: "",
-    gender: "",
-    avatar: null,
-  });
-  const [avatarPreview, setAvatarPreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Log auth values on mount and when they change
   useEffect(() => {
-    console.log("Auth values:", { userId, token, isLoggedIn });
-    
     if (!isLoggedIn || !userId || !token) {
-      console.log("Missing auth data, redirecting to /*");
-      navigate("/*");
+      navigate("/sign_in");
       return;
     }
 
     const fetchUserDetails = async () => {
       try {
         setLoading(true);
-        console.log("Fetching user details for userId:", userId);
-        
         const response = await getUserDetails(userId, token);
-        console.log("API Response from getUserDetails:", response);
-        console.log("Response data:", response.data);
-
         const data = response.data || {};
         setUserDetails(data);
-        setFormData({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          address: data.address || "",
-          gender: data.gender || "",
-          avatar: null,
-        });
-        setAvatarPreview(data.avatar || null);
-        console.log("Updated userDetails state:", data);
       } catch (err) {
-        console.error("Error fetching user details:", err.response || err);
         setError(`Failed to load profile: ${err.message}`);
       } finally {
         setLoading(false);
-        console.log("Loading complete, current states:", { loading: false, userDetails, error });
       }
     };
 
     fetchUserDetails();
   }, [userId, token, isLoggedIn, navigate]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    console.log("Form data updated:", { ...formData, [name]: value });
-  };
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, avatar: file }));
-      setAvatarPreview(URL.createObjectURL(file));
-      console.log("Avatar file selected:", file.name);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const updatedData = new FormData();
-      updatedData.append("firstName", formData.firstName);
-      updatedData.append("lastName", formData.lastName);
-      updatedData.append("address", formData.address);
-      updatedData.append("gender", formData.gender);
-      if (formData.avatar) {
-        updatedData.append("avatar", formData.avatar);
-      }
-
-      console.log("Submitting update with data:");
-      for (let pair of updatedData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
-
-      const response = await updateUserDetails(userId, updatedData, token);
-      console.log("Update API Response:", response);
-      console.log("Updated data:", response.data);
-
-      alert("Profile updated successfully!");
-      setEditMode(false);
-
-      // Refresh user details
-      const updatedResponse = await getUserDetails(userId, token);
-      console.log("Refresh API Response:", updatedResponse);
-      setUserDetails(updatedResponse.data || {});
-    } catch (err) {
-      console.error("Error updating profile:", err.response || err);
-      setError(`Failed to update profile: ${err.message}`);
-    }
-  };
-
-  const toggleEditMode = () => {
-    setEditMode(!editMode);
-    setError(null);
-    console.log("Edit mode toggled:", !editMode);
-  };
-
   if (loading) {
-    console.log("Rendering loading state");
     return <div className="loading">Loading profile...</div>;
   }
 
   if (error) {
-    console.log("Rendering error state:", error);
     return <div className="error">{error}</div>;
   }
 
   if (!userDetails) {
-    console.log("No user details available");
     return (
-      <div className={`profile-page ${darkMode ? "dark" : ""}`}>
-        <div className="profile-container">
-          <h2>User Profile</h2>
+      <div className={`cv-page ${darkMode ? "dark" : ""}`}>
+        <div className="cv-container">
+          <h2>Profile</h2>
           <p>No user details available.</p>
         </div>
       </div>
@@ -151,128 +63,215 @@ const Profile = ({ darkMode }) => {
   return (
     <>
       <style>{`
-        /* Your existing CSS remains unchanged */
-        .profile-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f5f5f5;
-            padding: 20px;
-            transition: background-color 0.3s ease;
+        .cv-page {
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: linear-gradient(135deg, #f8f4e1 0%, #e5e5e5 100%);
+          padding: 40px 20px;
+          transition: background 0.3s ease;
         }
-        /* ... rest of your CSS ... */
+        .cv-page.dark {
+          background: linear-gradient(135deg, #1c2526 0%, #34495e 100%);
+        }
+        .cv-container {
+          background: rgba(255, 255, 255, 0.95);
+          padding: 40px;
+          border-radius: 12px;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+          width: 100%;
+          max-width: 800px;
+          transition: background 0.3s ease;
+        }
+        .cv-page.dark .cv-container {
+          background: rgba(52, 73, 94, 0.95);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+        .cv-header {
+          display: flex;
+          align-items: center;
+          border-bottom: 2px solid #6c4f37;
+          padding-bottom: 20px;
+          margin-bottom: 30px;
+        }
+        .cv-page.dark .cv-header {
+          border-bottom-color: #1abc9c;
+        }
+        .cv-avatar-wrapper {
+          margin-right: 20px;
+        }
+        .cv-avatar {
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 3px solid #6c4f37;
+        }
+        .cv-page.dark .cv-avatar {
+          border-color: #1abc9c;
+        }
+        .cv-avatar-placeholder {
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          background: #e0e0e0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 50px;
+          color: #6c4f37;
+          border: 3px solid #6c4f37;
+        }
+        .cv-page.dark .cv-avatar-placeholder {
+          background: #34495e;
+          color: #1abc9c;
+          border-color: #1abc9c;
+        }
+        .cv-header-info {
+          flex: 1;
+        }
+        .cv-header h1 {
+          font-size: 28px;
+          font-family: "Poppins", sans-serif;
+          font-weight: 700;
+          color: #2c3e50;
+          margin: 0 0 10px;
+        }
+        .cv-page.dark .cv-header h1 {
+          color: #ecf0f1;
+        }
+        .cv-header p {
+          font-size: 16px;
+          font-family: "Roboto", sans-serif;
+          color: #7f8c8d;
+          margin: 5px 0;
+        }
+        .cv-page.dark .cv-header p {
+          color: #bdc3c7;
+        }
+        .cv-section {
+          margin-bottom: 30px;
+        }
+        .cv-section h2 {
+          font-size: 20px;
+          font-family: "Poppins", sans-serif;
+          font-weight: 600;
+          color: #2c3e50;
+          margin-bottom: 15px;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 5px;
+        }
+        .cv-page.dark .cv-section h2 {
+          color: #ecf0f1;
+          border-bottom-color: #5a758c;
+        }
+        .cv-section p {
+          font-size: 16px;
+          font-family: "Roboto", sans-serif;
+          color: #2c3e50;
+          margin: 10px 0;
+          display: flex;
+          align-items: center;
+        }
+        .cv-page.dark .cv-section p {
+          color: #ecf0f1;
+        }
+        .cv-section p strong {
+          margin-right: 10px;
+          min-width: 100px;
+        }
+        .edit-btn {
+          display: inline-flex;
+          align-items: center;
+          padding: 12px 25px;
+          font-size: 16px;
+          font-family: "Poppins", sans-serif;
+          font-weight: 600;
+          text-decoration: none;
+          color: #fff;
+          background: #6c4f37;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .cv-page.dark .edit-btn {
+          background: #1abc9c;
+        }
+        .edit-btn:hover {
+          background: #503a28;
+          transform: scale(1.05);
+        }
+        .cv-page.dark .edit-btn:hover {
+          background: #16a085;
+        }
+        .loading,
+        .error {
+          font-size: 18px;
+          font-family: "Roboto", sans-serif;
+          color: #2c3e50;
+          text-align: center;
+          padding: 20px;
+        }
+        .cv-page.dark .loading,
+        .cv-page.dark .error {
+          color: #ecf0f1;
+        }
       `}</style>
 
-      <div className={`profile-page ${darkMode ? "dark" : ""}`}>
-        <div className="profile-container">
-          <h2>User Profile</h2>
-          <div className="avatar-section">
-            <div className="avatar-wrapper">
-              {avatarPreview ? (
-                <img src={avatarPreview} alt="Avatar" className="avatar-image" />
+      <div className={`cv-page ${darkMode ? "dark" : ""}`}>
+        <div className="cv-container">
+          <div className="cv-header">
+            <div className="cv-avatar-wrapper">
+              {userDetails.avatar ? (
+                <img src={userDetails.avatar} alt="Avatar" className="cv-avatar" />
               ) : (
-                <FontAwesomeIcon icon={faUser} className="avatar-placeholder" />
+                <div className="cv-avatar-placeholder">
+                  <FontAwesomeIcon icon={faUser} />
+                </div>
               )}
-              {editMode && (
-                <label className="avatar-upload">
-                  <FontAwesomeIcon icon={faCamera} />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    hidden
-                  />
-                </label>
-              )}
+            </div>
+            <div className="cv-header-info">
+              <h1>
+                {userDetails.firstName || "N/A"} {userDetails.lastName || "N/A"}
+              </h1>
+              <p>
+                <FontAwesomeIcon icon={faEnvelope} /> {username || "Not provided"}
+              </p>
+              <p>
+                <FontAwesomeIcon icon={faPhone} /> {userDetails.phone || "Not provided"}
+              </p>
             </div>
           </div>
 
-          {editMode ? (
-            <form onSubmit={handleSubmit} className="profile-form">
-              <div className="form-group">
-                <label>
-                  <FontAwesomeIcon icon={faUser} /> First Name
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>
-                  <FontAwesomeIcon icon={faUser} /> Last Name
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>
-                  <FontAwesomeIcon icon={faMapMarkerAlt} /> Address
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>
-                  <FontAwesomeIcon icon={faVenusMars} /> Gender
-                </label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="btn btn-save">
-                  <FontAwesomeIcon icon={faSave} /> Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-cancel"
-                  onClick={toggleEditMode}
-                >
-                  <FontAwesomeIcon icon={faTimes} /> Cancel
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="profile-details">
-              <p>
-                <FontAwesomeIcon icon={faUser} />{" "}
-                <strong>Name:</strong> {userDetails.firstName || "N/A"}{" "}
-                {userDetails.lastName || "N/A"}
-              </p>
-              <p>
-                <FontAwesomeIcon icon={faMapMarkerAlt} />{" "}
-                <strong>Address:</strong> {userDetails.address || "Not provided"}
-              </p>
-              <p>
-                <FontAwesomeIcon icon={faVenusMars} />{" "}
-                <strong>Gender:</strong> {userDetails.gender || "Not provided"}
-              </p>
-              <button className="btn btn-edit" onClick={toggleEditMode}>
-                Edit Profile
-              </button>
-            </div>
-          )}
+          <div className="cv-section">
+            <h2>Personal Information</h2>
+            <p>
+              <strong>
+                <FontAwesomeIcon icon={faUser} /> Full Name:
+              </strong>
+              {userDetails.firstName || "N/A"} {userDetails.lastName || "N/A"}
+            </p>
+            <p>
+              <strong>
+                <FontAwesomeIcon icon={faMapMarkerAlt} /> Address:
+              </strong>
+              {userDetails.address || "Not provided"}
+            </p>
+            <p>
+              <strong>
+                <FontAwesomeIcon icon={faVenusMars} /> Gender:
+              </strong>
+              {userDetails.gender || "Not provided"}
+            </p>
+          </div>
+
+          <div className="cv-section">
+            <Link to="/edit-profile" className="edit-btn">
+              <FontAwesomeIcon icon={faEdit} /> Edit Profile
+            </Link>
+          </div>
         </div>
       </div>
     </>

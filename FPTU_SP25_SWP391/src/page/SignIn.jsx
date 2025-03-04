@@ -151,17 +151,16 @@ export default function SignIn({ darkMode }) {
         title: "Login success!",
         text: response?.data?.message || "Successfully",
       });
-      console.log("Login response:", response.data);
 
       const token = response.data.token;
+      const userId = response.data.userId; // Get userId from response, not token
       const decodedToken = jwtDecode(token);
       const role = decodedToken.role;
-      const userId = decodedToken.sub || decodedToken.userId; // Adjust based on your token structure
+      // const userId = decodedToken.sub || decodedToken.userId; // Adjust based on your token structure
+      console.log("Login response:", response.data);
 
       console.log("Decoded token:", decodedToken);
       console.log("Extracted values:", { userId, role, token });
-
-      // Set all auth data in context
       setAuthData({
         username: userName,
         userId: userId,
@@ -180,7 +179,7 @@ export default function SignIn({ darkMode }) {
         case "Admin":
           navigate("/admin/home");
           break;
-        case "SkinTherapist":
+        case "Therapist":
           navigate("/skintherapist/home");
           break;
         default:
@@ -254,10 +253,10 @@ export default function SignIn({ darkMode }) {
         >
           <Link to={`/`}>
             <img
-              src="/assets/logo2-Photoroom.png"
+              src="/src/assets/images/logo/logo.png"
               alt="Logo"
               style={{
-                width: "150px",
+                width: "115px",
                 filter: darkMode ? "brightness(1.2)" : "none",
                 transition: "transform 0.3s ease",
               }}
