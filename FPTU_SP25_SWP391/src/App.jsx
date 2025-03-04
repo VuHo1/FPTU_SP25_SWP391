@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "./page/AuthContext"; // Import AuthProvider
 import HomePage from "./page/HomePage";
 import BookingPage from "./page/BookingPage";
@@ -17,18 +22,9 @@ import SignUp from "./page/signUpUser";
 import PolicyPage from "./page/PolicyPage";
 import AdminHomePage from "./page/AdminHomePage"; // Import new AdminHomePage
 import TherapistHomePage from "./page/TherapistHomePage"; // Import new TherapistHomePage
-
-// Placeholder Dashboard Component for Staff (kept as per your original code)
-function StaffDashboard({ darkMode }) {
-  return (
-    <div style={{ minHeight: "100vh", padding: "20px", backgroundColor: darkMode ? "#1c2526" : "#fafafa" }}>
-      <h1 style={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Staff Dashboard</h1>
-      <p style={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>
-        Welcome, Staff! Access inventory, schedules, and customer inquiries here.
-      </p>
-    </div>
-  );
-}
+import Profile from "./page/Profile";
+import StaffHomePage from "./page/StaffHomePage";
+import Error from "./page/Error"; // Import the new Error component
 
 // ProtectedRoute Component to restrict access based on role
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -64,15 +60,37 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<HomePage darkMode={darkMode} />} />
               <Route path="/booking_page" element={<BookingPage />} />
-              <Route path="/service/:id" element={<BlogDetail darkMode={darkMode} />} />
+              <Route
+                path="/service/:id"
+                element={<BlogDetail darkMode={darkMode} />}
+              />
               <Route path="/cart_page" element={<CartPage />} />
-              <Route path="/about" element={<ProductListPage darkMode={darkMode} />} />
+              <Route
+                path="/about"
+                element={<ProductListPage darkMode={darkMode} />}
+              />
               <Route path="/service" element={<Blog />} />
-              <Route path="/contact" element={<Contact darkMode={darkMode} />} />
+              <Route
+                path="/contact"
+                element={<Contact darkMode={darkMode} />}
+              />
               <Route path="/sign_in" element={<SignIn darkMode={darkMode} />} />
-              <Route path="/forgotPassword" element={<ForgotPassword darkMode={darkMode} />} />
-              <Route path="/signUpUser" element={<SignUp darkMode={darkMode} />} />
-              <Route path="/policy" element={<PolicyPage darkMode={darkMode} />} />
+              <Route
+                path="/forgotPassword"
+                element={<ForgotPassword darkMode={darkMode} />}
+              />
+              <Route
+                path="/signUpUser"
+                element={<SignUp darkMode={darkMode} />}
+              />
+              <Route
+                path="/policy"
+                element={<PolicyPage darkMode={darkMode} />}
+              />
+              <Route
+                path="/profile"
+                element={<Profile darkMode={darkMode} />}
+              />
 
               {/* Role-Based Protected Routes */}
               <Route
@@ -92,13 +110,15 @@ function App() {
                 }
               />
               <Route
-                path="/staff/dashboard"
+                path="/staff/home"
                 element={
                   <ProtectedRoute allowedRole="Staff">
-                    <StaffDashboard darkMode={darkMode} />
+                    <StaffHomePage darkMode={darkMode} />
                   </ProtectedRoute>
                 }
               />
+
+              <Route path="*" element={<Error darkMode={darkMode} />} />
             </Routes>
           </main>
           <Footer darkMode={darkMode} />

@@ -1,19 +1,28 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-// import { register } from "../api/testApi";
 import { motion } from "framer-motion";
+import { signUpUser } from "../api/testApi";
 
 export default function SignUp({ darkMode }) {
+  const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState("User"); // Default role
+  const [role, setRole] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignUp = async () => {
-    if (!email || !password || !confirmPassword) {
+  const roleToIdMap = {
+    User: 1,
+    Therapist: 2,
+    Staff: 3,
+    Admin: 4,
+  };
+
+  const handleSignUp = async (e) => {
+    if (e) e.preventDefault();
+    if (!userName || !email || !password || !confirmPassword) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -31,9 +40,30 @@ export default function SignUp({ darkMode }) {
     }
 
     setIsLoading(true);
+    const data = {
+      userName:userName,
+      email:email,
+      password:password,
+      roleId: role
+    };
 
     try {
-      const response = await register({ email, password }); // Uncomment and ensure register API is implemented
+      const response = await signUpUser(data);
+      // Logs for debugging successful signup
+      console.log("Signup Successful! Input Data:", {
+        userName,
+        email,
+        password: "[REDACTED]", // Avoid logging sensitive data directly
+        role,
+        roleId: roleToIdMap[role],
+      });
+      console.log("API Response:", response);
+      console.log("Full Response Object:", {
+        data: response.data,
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      });
       Swal.fire({
         icon: "success",
         title: "Sign Up Successful!",
@@ -41,18 +71,14 @@ export default function SignUp({ darkMode }) {
       });
       navigate("/sign_in");
     } catch (error) {
+      console.error("Sign Up Error:", error.response?.data || error.message);
       Swal.fire({
         icon: "error",
         title: "Sign Up Failed!",
-        text: error.message || "An error occurred.",
+        text: error.response?.data?.message || error.message || "An error occurred.",
       });
-    }
-    setIsLoading(false);
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      handleSignUp();
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,7 +92,7 @@ export default function SignUp({ darkMode }) {
         position: "relative",
         background: darkMode
           ? "linear-gradient(135deg, #1c2526 0%, #34495e 100%)"
-          : "linear-gradient(135deg, #f8f4e1 0%, #e5e5e5 100%)", // Professional gradient
+          : "linear-gradient(135deg, #f8f4e1 0%, #e5e5e5 100%)",
         overflow: "hidden",
       }}
     >
@@ -85,7 +111,7 @@ export default function SignUp({ darkMode }) {
             : "0 8px 30px rgba(0, 0, 0, 0.1)",
           textAlign: "center",
           width: "450px",
-          backdropFilter: "blur(10px)", // Frosted glass effect
+          backdropFilter: "blur(10px)",
           border: darkMode
             ? "1px solid rgba(255, 255, 255, 0.1)"
             : "1px solid rgba(0, 0, 0, 0.05)",
@@ -108,182 +134,216 @@ export default function SignUp({ darkMode }) {
           Create an Account
         </motion.h2>
 
-        <motion.input
-          type="email"
-          placeholder="Email Address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyDown={handleKeyDown}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          style={{
-            width: "100%",
-            padding: "15px 20px",
-            border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
-            backgroundColor: darkMode ? "#2c3e50" : "#fff",
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            fontSize: "16px",
-            marginBottom: "20px",
-            borderRadius: "12px",
-            outline: "none",
-            fontFamily: "'Roboto', sans-serif",
-            transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
-            e.target.style.boxShadow = darkMode
-              ? "0 0 8px rgba(26, 188, 156, 0.5)"
-              : "0 0 8px rgba(108, 79, 55, 0.3)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
-            e.target.style.boxShadow = "none";
-          }}
-        />
+        <form onSubmit={handleSignUp}>
+          <motion.input
+            type="text"
+            placeholder="Username"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={{
+              width: "100%",
+              padding: "15px 20px",
+              border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
+              backgroundColor: darkMode ? "#2c3e50" : "#fff",
+              color: darkMode ? "#ecf0f1" : "#2c3e50",
+              fontSize: "16px",
+              marginBottom: "20px",
+              borderRadius: "12px",
+              outline: "none",
+              fontFamily: "'Roboto', sans-serif",
+              transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
+              e.target.style.boxShadow = darkMode
+                ? "0 0 8px rgba(26, 188, 156, 0.5)"
+                : "0 0 8px rgba(108, 79, 55, 0.3)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
+              e.target.style.boxShadow = "none";
+            }}
+            required
+          />
 
-        <motion.input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={handleKeyDown}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          style={{
-            width: "100%",
-            padding: "15px 20px",
-            border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
-            backgroundColor: darkMode ? "#2c3e50" : "#fff",
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            fontSize: "16px",
-            marginBottom: "20px",
-            borderRadius: "12px",
-            outline: "none",
-            fontFamily: "'Roboto', sans-serif",
-            transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
-            e.target.style.boxShadow = darkMode
-              ? "0 0 8px rgba(26, 188, 156, 0.5)"
-              : "0 0 8px rgba(108, 79, 55, 0.3)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
-            e.target.style.boxShadow = "none";
-          }}
-        />
+          <motion.input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            style={{
+              width: "100%",
+              padding: "15px 20px",
+              border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
+              backgroundColor: darkMode ? "#2c3e50" : "#fff",
+              color: darkMode ? "#ecf0f1" : "#2c3e50",
+              fontSize: "16px",
+              marginBottom: "20px",
+              borderRadius: "12px",
+              outline: "none",
+              fontFamily: "'Roboto', sans-serif",
+              transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
+              e.target.style.boxShadow = darkMode
+                ? "0 0 8px rgba(26, 188, 156, 0.5)"
+                : "0 0 8px rgba(108, 79, 55, 0.3)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
+              e.target.style.boxShadow = "none";
+            }}
+            required
+          />
 
-        <motion.input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          onKeyDown={handleKeyDown}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          style={{
-            width: "100%",
-            padding: "15px 20px",
-            border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
-            backgroundColor: darkMode ? "#2c3e50" : "#fff",
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            fontSize: "16px",
-            marginBottom: "20px",
-            borderRadius: "12px",
-            outline: "none",
-            fontFamily: "'Roboto', sans-serif",
-            transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
-            e.target.style.boxShadow = darkMode
-              ? "0 0 8px rgba(26, 188, 156, 0.5)"
-              : "0 0 8px rgba(108, 79, 55, 0.3)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
-            e.target.style.boxShadow = "none";
-          }}
-        />
+          <motion.input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            style={{
+              width: "100%",
+              padding: "15px 20px",
+              border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
+              backgroundColor: darkMode ? "#2c3e50" : "#fff",
+              color: darkMode ? "#ecf0f1" : "#2c3e50",
+              fontSize: "16px",
+              marginBottom: "20px",
+              borderRadius: "12px",
+              outline: "none",
+              fontFamily: "'Roboto', sans-serif",
+              transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
+              e.target.style.boxShadow = darkMode
+                ? "0 0 8px rgba(26, 188, 156, 0.5)"
+                : "0 0 8px rgba(108, 79, 55, 0.3)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
+              e.target.style.boxShadow = "none";
+            }}
+            required
+          />
 
-        <motion.select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-          style={{
-            width: "100%",
-            padding: "15px 20px",
-            border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
-            backgroundColor: darkMode ? "#2c3e50" : "#fff",
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            fontSize: "16px",
-            marginBottom: "25px",
-            borderRadius: "12px",
-            outline: "none",
-            fontFamily: "'Roboto', sans-serif",
-            cursor: "pointer",
-            appearance: "none",
-            transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
-            e.target.style.boxShadow = darkMode
-              ? "0 0 8px rgba(26, 188, 156, 0.5)"
-              : "0 0 8px rgba(108, 79, 55, 0.3)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
-            e.target.style.boxShadow = "none";
-          }}
-        >
-          <option value="User">User</option>
-          <option value="Staff">Staff</option>
-          <option value="Admin">Admin</option>
-        </motion.select>
+          <motion.input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            style={{
+              width: "100%",
+              padding: "15px 20px",
+              border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
+              backgroundColor: darkMode ? "#2c3e50" : "#fff",
+              color: darkMode ? "#ecf0f1" : "#2c3e50",
+              fontSize: "16px",
+              marginBottom: "20px",
+              borderRadius: "12px",
+              outline: "none",
+              fontFamily: "'Roboto', sans-serif",
+              transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
+              e.target.style.boxShadow = darkMode
+                ? "0 0 8px rgba(26, 188, 156, 0.5)"
+                : "0 0 8px rgba(108, 79, 55, 0.3)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
+              e.target.style.boxShadow = "none";
+            }}
+            required
+          />
 
-        <motion.button
-          onClick={handleSignUp}
-          disabled={isLoading}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          style={{
-            width: "100%",
-            padding: "15px",
-            backgroundColor: darkMode ? "#1abc9c" : "#6c4f37",
-            color: "#fff",
-            fontSize: "18px",
-            fontWeight: "600",
-            border: "none",
-            borderRadius: "12px",
-            cursor: isLoading ? "not-allowed" : "pointer",
-            fontFamily: "'Poppins', sans-serif",
-            transition: "background-color 0.3s ease, box-shadow 0.3s ease",
-            boxShadow: darkMode
-              ? "0 4px 15px rgba(26, 188, 156, 0.3)"
-              : "0 4px 15px rgba(108, 79, 55, 0.2)",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = darkMode
-              ? "#16a085"
-              : "#503a28")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = darkMode
-              ? "#1abc9c"
-              : "#6c4f37")
-          }
-        >
-          {isLoading ? "Signing Up..." : "Sign Up"}
-        </motion.button>
+          <motion.select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+            style={{
+              width: "100%",
+              padding: "15px 20px",
+              border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
+              backgroundColor: darkMode ? "#2c3e50" : "#fff",
+              color: darkMode ? "#ecf0f1" : "#2c3e50",
+              fontSize: "16px",
+              marginBottom: "25px",
+              borderRadius: "12px",
+              outline: "none",
+              fontFamily: "'Roboto', sans-serif",
+              cursor: "pointer",
+              appearance: "none",
+              transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
+              e.target.style.boxShadow = darkMode
+                ? "0 0 8px rgba(26, 188, 156, 0.5)"
+                : "0 0 8px rgba(108, 79, 55, 0.3)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
+              e.target.style.boxShadow = "none";
+            }}
+            required
+          >
+            <option value="1">User (Role ID: 1)</option>
+            <option value="2">Therapist (Role ID: 2)</option>
+            <option value="3">Staff (Role ID: 3)</option>
+            <option value="4">Admin (Role ID: 4)</option>
+          </motion.select>
+
+          <motion.button
+            type="submit"
+            disabled={isLoading}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              width: "100%",
+              padding: "15px",
+              backgroundColor: darkMode ? "#1abc9c" : "#6c4f37",
+              color: "#fff",
+              fontSize: "18px",
+              fontWeight: "600",
+              border: "none",
+              borderRadius: "12px",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              fontFamily: "'Poppins', sans-serif",
+              transition: "background-color 0.3s ease, box-shadow 0.3s ease",
+              boxShadow: darkMode
+                ? "0 4px 15px rgba(26, 188, 156, 0.3)"
+                : "0 4px 15px rgba(108, 79, 55, 0.2)",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = darkMode ? "#16a085" : "#503a28")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = darkMode ? "#1abc9c" : "#6c4f37")
+            }
+          >
+            {isLoading ? "Signing Up..." : "Sign Up"}
+          </motion.button>
+        </form>
 
         <motion.div
           initial={{ opacity: 0 }}

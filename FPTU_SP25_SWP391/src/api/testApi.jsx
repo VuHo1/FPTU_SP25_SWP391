@@ -1,4 +1,4 @@
-// configApi.js
+// testApi.js
 import axios from "axios";
 
 const isLocal = true; // Set to true for Swagger testing at localhost:7063, false for production
@@ -75,11 +75,11 @@ export const resetPassword = async (token, newPassword) => {
 export const signUpUser = async (data) => {
   try {
     const response = await apiClient.post(
-      `/api/Auth/user/register/user`,
+      `/api/users`,
       data,
       {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
           Accept: "*/*",
         },
       }
@@ -257,6 +257,44 @@ export const postCheckout = async (bookingId, token) => {
     return reponse;
   } catch (error) {
     console.error("Error fetching services:", error);
+    throw error;
+  }
+};
+
+
+// api/testApi.js
+export const getUserDetails = async (userId, token) => {
+  try {
+    console.log("Making GET request to /api/UserDetails/", userId);
+    const response = await apiClient.get(`/api/UserDetails/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    console.log("GET UserDetails response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error fetching user details:", error.response?.data || error);
+    throw error;
+  }
+};
+
+export const updateUserDetails = async (userId, data, token) => {
+  try {
+    console.log("Making PUT request to /api/UserDetails/", userId);
+    console.log("Update data being sent:", Object.fromEntries(data));
+    const response = await apiClient.put(`/api/UserDetails/${userId}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data", // Changed to match FormData
+        Accept: "*/*",
+      },
+    });
+    console.log("PUT UserDetails response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error updating user details:", error.response?.data || error);
     throw error;
   }
 };

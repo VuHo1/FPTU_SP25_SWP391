@@ -1,18 +1,123 @@
+// import React, { useState } from "react";
+// import { Link, useNavigate } from "react-router-dom";
+// import Swal from "sweetalert2";
+// import { login } from "../api/testApi"; // Adjust the path as needed
+// import { motion } from "framer-motion";
+// import { useAuth } from "../page/AuthContext"; // Import useAuth
+// import { jwtDecode } from "jwt-decode";
+
+
+// export default function SignIn({ darkMode }) {
+//   const [userName, setUserName] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [role, setRole] = useState("User"); // Role selection state
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [inputType, setInputType] = useState("password");
+//   const navigate = useNavigate();
+//   const { login: setLoggedIn } = useAuth(); // Rename to avoid conflict with imported login function
+
+//   const handleEmailChange = (event) => {
+//     setUserName(event.target.value);
+//   };
+
+//   const handlePasswordChange = (event) => {
+//     setPassword(event.target.value);
+//   };
+
+//   const togglePasswordVisibility = () => {
+//     setInputType(inputType === "password" ? "text" : "password");
+//   };
+
+//   const handleSave = async () => {
+//     if (!userName || !password) {
+//       Swal.fire({
+//         icon: "error",
+//         title: "Oops...",
+//         text: "Please fill in all required fields!",
+//       });
+//       setIsLoading(false);
+//       return;
+//     }
+//     const data = { userName: userName, password: password };
+//     setIsLoading(true);
+
+//     try {
+//       const response = await login(data);
+//       Swal.fire({
+//         icon: "success",
+//         title: "Login success!",
+//         text: response?.data?.message || "Successfully",
+//       });
+//       console.log("Data: ", response);
+
+//       const token = response.data.token;
+//       localStorage.setItem("token", token);
+//       console.log("Token: ", token);
+
+//       const decodedToken = jwtDecode(token);
+//       const role =
+//         decodedToken.role
+//         console.log("role",role);
+        
+//       localStorage.setItem("role", role);
+//       console.log("decode: ", decodedToken);
+
+//       // Store the username and role in AuthContext and localStorage
+//       setLoggedIn(userName);
+//       localStorage.setItem("role", role); // Store selected role in localStorage
+
+//       // Redirect based on the selected role
+//       if (role === "Customer") {
+//         navigate("/");
+//       } else if (role === "Staff") {
+//         navigate("/staff/home");
+//       } else if (role === "Admin") {
+//         navigate("/admin/home"); // Redirect to AdminHomePage
+//       } else if (role === "SkinTherapist") {
+//         navigate("/skintherapist/home"); // Redirect to TherapistHomePage
+//       }
+
+//       setIsLoading(false); // Reset loading state
+//     } catch (error) {
+//       let errorMessage = "An unknown error occurred.";
+
+//       if (error.response) {
+//         errorMessage = error.response.data.message || error.response.data || "Login failed.";
+//       } else if (error.request) {
+//         errorMessage = "No response from the server. Please check your network.";
+//       } else {
+//         errorMessage = error.message || "An unexpected error occurred.";
+//       }
+
+//       Swal.fire({
+//         icon: "error",
+//         title: "Please check your input!!!",
+//         text: errorMessage,
+//       });
+//       setIsLoading(false);
+//     }
+//   };
+
+//   const handleKeyDown = (event) => {
+//     if (event.key === "Enter") {
+//       handleSave();
+//     }
+//   };
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { login } from "../api/testApi"; // Adjust the path as needed
+import { login } from "../api/testApi";
 import { motion } from "framer-motion";
-import { useAuth } from "../page/AuthContext"; // Import useAuth
+import { useAuth } from "../page/AuthContext";
+import { jwtDecode } from "jwt-decode";
 
 export default function SignIn({ darkMode }) {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("User"); // Role selection state
   const [isLoading, setIsLoading] = useState(false);
   const [inputType, setInputType] = useState("password");
   const navigate = useNavigate();
-  const { login: setLoggedIn } = useAuth(); // Rename to avoid conflict with imported login function
+  const { login: setAuthData } = useAuth(); // Renamed to avoid conflict
 
   const handleEmailChange = (event) => {
     setUserName(event.target.value);
@@ -36,7 +141,7 @@ export default function SignIn({ darkMode }) {
       setIsLoading(false);
       return;
     }
-    const data = { userName: userName, password: password };
+    const data = { userName, password };
     setIsLoading(true);
 
     try {
@@ -46,26 +151,45 @@ export default function SignIn({ darkMode }) {
         title: "Login success!",
         text: response?.data?.message || "Successfully",
       });
+      console.log("Login response:", response.data);
 
-      // Store the username and role in AuthContext and localStorage
-      setLoggedIn(userName);
-      localStorage.setItem("role", role); // Store selected role in localStorage
+      const token = response.data.token;
+      const decodedToken = jwtDecode(token);
+      const role = decodedToken.role;
+      const userId = decodedToken.sub || decodedToken.userId; // Adjust based on your token structure
 
-      // Redirect based on the selected role
-      if (role === "User") {
-        navigate("/");
-      } else if (role === "Staff") {
-        navigate("/staff/dashboard");
-      } else if (role === "Admin") {
-        navigate("/admin/home"); // Redirect to AdminHomePage
-      } else if (role === "SkinTherapist") {
-        navigate("/skintherapist/home"); // Redirect to TherapistHomePage
+      console.log("Decoded token:", decodedToken);
+      console.log("Extracted values:", { userId, role, token });
+
+      // Set all auth data in context
+      setAuthData({
+        username: userName,
+        userId: userId,
+        token: token,
+        role: role,
+      });
+
+      // Redirect based on role
+      switch (role) {
+        case "Customer":
+          navigate("/");
+          break;
+        case "Staff":
+          navigate("/staff/home");
+          break;
+        case "Admin":
+          navigate("/admin/home");
+          break;
+        case "SkinTherapist":
+          navigate("/skintherapist/home");
+          break;
+        default:
+          navigate("/");
       }
 
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     } catch (error) {
       let errorMessage = "An unknown error occurred.";
-
       if (error.response) {
         errorMessage = error.response.data.message || error.response.data || "Login failed.";
       } else if (error.request) {
@@ -73,7 +197,6 @@ export default function SignIn({ darkMode }) {
       } else {
         errorMessage = error.message || "An unexpected error occurred.";
       }
-
       Swal.fire({
         icon: "error",
         title: "Please check your input!!!",
@@ -88,7 +211,6 @@ export default function SignIn({ darkMode }) {
       handleSave();
     }
   };
-
   return (
     <div
       style={{
@@ -252,43 +374,7 @@ export default function SignIn({ darkMode }) {
           </span>
         </motion.div>
 
-        <motion.select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-          style={{
-            width: "100%",
-            padding: "15px 20px",
-            border: darkMode ? "1px solid #ecf0f1" : "1px solid #ccc",
-            backgroundColor: darkMode ? "#2c3e50" : "#fff",
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            fontSize: "16px",
-            marginBottom: "25px",
-            borderRadius: "12px",
-            outline: "none",
-            fontFamily: "'Roboto', sans-serif",
-            cursor: "pointer",
-            appearance: "none",
-            transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = darkMode ? "#1abc9c" : "#6c4f37";
-            e.target.style.boxShadow = darkMode
-              ? "0 0 8px rgba(26, 188, 156, 0.5)"
-              : "0 0 8px rgba(108, 79, 55, 0.3)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = darkMode ? "#ecf0f1" : "#ccc";
-            e.target.style.boxShadow = "none";
-          }}
-        >
-          <option value="User">User</option>
-          <option value="Staff">Staff</option>
-          <option value="Admin">Admin</option>
-          <option value="SkinTherapist">Skin Therapist</option>
-        </motion.select>
+      
 
         <motion.button
           type="submit"
