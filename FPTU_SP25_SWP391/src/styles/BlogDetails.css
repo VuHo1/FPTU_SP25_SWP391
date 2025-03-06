@@ -1,28 +1,17 @@
+/* BlogDetails.css */
 .blog-detail {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #fff;
-    padding: 15px 40px;
-    text-align: left;
-    width: 100%;
-
-}
-
-.booking-button {
-    display: inline-block;
-    padding: 20px 50px;
-    background: red;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 5px;
+    padding: 80px 40px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     transition: background 0.3s ease;
 }
 
-.booking-button:hover {
-    background-color: rgba(255, 51, 0, 0.554);
-    color: yellow;
+.blog-detail.dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
 .blog-content {
@@ -30,30 +19,56 @@
     max-width: 1200px;
     width: 100%;
     align-items: center;
-    gap: 30px;
-    white-space: pre-line;
+    gap: 50px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    animation: fadeInUp 0.8s ease-out;
+    margin-bottom: 40px;
+}
+
+.blog-detail.dark .blog-content {
+    background: #34495e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .blog-text {
     flex: 1;
+    opacity: 0;
+    animation: slideInLeft 0.8s ease-out 0.2s forwards;
 }
 
 .blog-text h1 {
-    font-size: 2rem;
-    color: #222;
-    margin-bottom: 10px;
+    font-size: 2.5rem;
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.blog-detail.dark .blog-text h1 {
+    color: #ecf0f1;
 }
 
 .blog-text p {
     font-size: 1.2rem;
-    color: #444;
+    color: #666;
+    line-height: 1.8;
     text-align: justify;
+    margin-bottom: 30px;
+}
+
+.blog-detail.dark .blog-text p {
+    color: #bdc3c7;
 }
 
 .blog-image {
     flex: 1;
     display: flex;
     justify-content: center;
+    opacity: 0;
+    animation: slideInRight 0.8s ease-out 0.4s forwards;
 }
 
 .blog-image img {
@@ -61,19 +76,103 @@
     max-width: 500px;
     height: auto;
     border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.blog-detail.dark .blog-image img {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.blog-image img:hover {
+    transform: scale(1.05);
 }
 
 .back-button {
-    margin-top: 20px;
     display: inline-block;
-    padding: 10px 15px;
-    background: #007bff;
+    padding: 12px 25px;
+    background: #3498db;
     color: #fff;
     text-decoration: none;
-    border-radius: 5px;
-    transition: background 0.3s ease;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .back-button:hover {
-    background: #0056b3;
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.booking-button {
+    display: inline-block;
+    padding: 15px 40px;
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+}
+
+.booking-button:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: #fff; /* Changed from yellow to maintain professionalism */
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
 }

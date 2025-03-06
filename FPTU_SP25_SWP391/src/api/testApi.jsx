@@ -1,17 +1,16 @@
-// testApi.js
 import axios from "axios";
 
 const isLocal = true; // Set to true for Swagger testing at localhost:7063, false for production
 const baseURL = isLocal
   ? "https://localhost:7063" // Local Swagger URL
-  : "https://petserviceplatform-dpgyc0c3fcg9dtc7.southeastasia-01.azurewebsites.net"; // Production URL
+  : "https://skincarebooking-eccebca6feeeakh9.southeastasia-01.azurewebsites.net"; // Production URL
 
 const apiClient = axios.create({
   baseURL,
   timeout: 10000, // 10-second timeout
 });
 
-//authencation
+// Authentication
 export const login = async (data) => {
   try {
     const response = await apiClient.post(`/api/auth/login`, data, {
@@ -84,7 +83,6 @@ export const signUpUser = async (data) => {
         },
       }
     );
-
     return response;
   } catch (error) {
     console.error("Error fetching services:", error);
@@ -104,7 +102,6 @@ export const signUpShop = async (data) => {
         },
       }
     );
-
     return response;
   } catch (error) {
     console.error("Error fetching services:", error);
@@ -124,7 +121,6 @@ export const verifyEmail = async (dataOTP) => {
         },
       }
     );
-
     return response;
   } catch (error) {
     console.error("Error fetching services:", error);
@@ -132,16 +128,16 @@ export const verifyEmail = async (dataOTP) => {
   }
 };
 
-//services
+// Services
 export const getListServices = async (pageIndex = 0, pageSize = 100) => {
   try {
     const response = await apiClient.get(
       `/api/service/GetListServices?pageIndex=${pageIndex}&pageSize=${pageSize}`
     );
-    return response; // Trả về dữ liệu
+    return response;
   } catch (error) {
     console.error("Error fetching services:", error);
-    throw error; // Ném lại lỗi để xử lý bên ngoài
+    throw error;
   }
 };
 
@@ -164,7 +160,7 @@ export const getListServicesByUserId = async (userId, token) => {
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          accept: "*/*",
+          Accept: "*/*",
         },
       }
     );
@@ -177,7 +173,7 @@ export const getListServicesByUserId = async (userId, token) => {
 
 export const postCreateService = async (formData, token) => {
   try {
-    const reponse = await apiClient.post(
+    const response = await apiClient.post(
       `/api/service/CreateService`,
       formData,
       {
@@ -188,14 +184,14 @@ export const postCreateService = async (formData, token) => {
         },
       }
     );
-    return reponse;
+    return response;
   } catch (error) {
     console.error("Error fetching services:", error);
     throw error;
   }
 };
 
-export const getSubCatergoy = async () => {
+export const getSubCategory = async () => {
   try {
     const response = await apiClient.get(`/Api/GetAllSubCategories`);
     return response;
@@ -205,11 +201,10 @@ export const getSubCatergoy = async () => {
   }
 };
 
-//booking
-
+// Booking
 export const postBooking = async (formData, token) => {
   try {
-    const reponse = await apiClient.post(
+    const response = await apiClient.post(
       `/api/Booking/user/booking`,
       formData,
       {
@@ -220,7 +215,7 @@ export const postBooking = async (formData, token) => {
         },
       }
     );
-    return reponse;
+    return response;
   } catch (error) {
     console.error("Error fetching services:", error);
     throw error;
@@ -243,7 +238,7 @@ export const getBookingById = async (id, token) => {
 
 export const postCheckout = async (bookingId, token) => {
   try {
-    const reponse = await apiClient.post(
+    const response = await apiClient.post(
       `/api/Booking/payment/check-out/${bookingId}`,
       {},
       {
@@ -254,15 +249,14 @@ export const postCheckout = async (bookingId, token) => {
         },
       }
     );
-    return reponse;
+    return response;
   } catch (error) {
     console.error("Error fetching services:", error);
     throw error;
   }
 };
 
-
-// api/testApi.js
+// User Details
 export const getUserDetails = async (userId, token) => {
   try {
     console.log("Making GET request to /api/UserDetails/", userId);
@@ -287,7 +281,7 @@ export const updateUserDetails = async (userId, data, token) => {
     const response = await apiClient.put(`/api/UserDetails/${userId}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data", // Changed to match FormData
+        "Content-Type": "multipart/form-data",
         Accept: "*/*",
       },
     });
@@ -295,6 +289,89 @@ export const updateUserDetails = async (userId, data, token) => {
     return response;
   } catch (error) {
     console.error("Error updating user details:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Admin-specific endpoints
+export const createTherapist = async (data, token) => {
+  try {
+    const response = await apiClient.post(`/api/users/create-therapist`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error creating therapist:", error);
+    throw error;
+  }
+};
+
+export const createStaff = async (data, token) => {
+  try {
+    const response = await apiClient.post(`/api/users/create-staff`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error creating staff:", error);
+    throw error;
+  }
+};
+
+// Fetch all users
+export const getAllUsers = async (token) => {
+  try {
+    const response = await apiClient.get(`/api/users`, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("All users response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    throw error;
+  }
+};
+
+// In testApi.jsx
+export const deleteUser = async (userId, token) => {
+  try {
+    const response = await apiClient.delete(`/api/users/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error deleting user:", error.response?.data || error);
+    throw error; // Let the caller handle the error
+  }
+};
+// In testApi.jsx, add this function
+export const createUserDetails = async (data, token) => {
+  try {
+    const response = await apiClient.post(`/api/UserDetails`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "*/*",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error creating user details:", error.response?.data || error);
     throw error;
   }
 };
