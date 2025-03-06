@@ -1,69 +1,205 @@
+/* Blog.css */
 .blog-container {
     min-height: 100vh;
-
+    padding: 80px 40px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 50px;
+}
+
+.blog-header {
+    text-align: center;
+    margin-bottom: 40px;
 }
 
 .blog-title {
-    font-size: 2.5rem;
-    color: #333;
-    text-align: center;
-    margin-bottom: 10px;
+    font-size: 3rem;
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 15px;
+    animation: fadeInDown 1s ease-out;
 }
 
 .blog-description {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     color: #666;
-    text-align: center;
-    max-width: 800px;
+    max-width: 900px;
+    line-height: 1.6;
+    animation: fadeInUp 1s ease-out;
+}
+
+.blog-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 1200px;
+    flex-wrap: wrap;
+}
+
+.search-container {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 20px 12px 40px;
+    border: none;
+    border-radius: 25px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    color: #333; /* Added: Dark text color for visibility */
+    transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+    color: #999; /* Lighter color for placeholder text */
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transform: scale(1.02);
+    background: #fafafa; /* Slightly off-white background on focus */
+}
+
+.filter-select {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    cursor: pointer;
+    min-width: 200px;
+    transition: all 0.3s ease;
+    color: #333; /* Added: Ensure filter text is visible */
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    outline: none;
 }
 
 .service-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
     width: 100%;
     max-width: 1200px;
-    margin-top: 20px;
 }
 
 .service-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    position: relative;
     text-decoration: none;
     background: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .service-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
-.service-item img {
+.service-image-wrapper {
+    position: relative;
     width: 100%;
-    height: 200px;
+    height: 220px;
+    overflow: hidden;
+}
+
+.service-image {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.service-item:hover .service-image {
+    transform: scale(1.05);
+}
+
+.service-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.service-item:hover .service-overlay {
+    opacity: 1;
+}
+
+.service-overlay span {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.service-content {
+    padding: 20px;
 }
 
 .service-item h2 {
-    font-size: 1.5rem;
-    color: #222;
-    margin-top: 10px;
+    font-size: 1.6rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-weight: 600;
 }
 
 .service-item p {
     font-size: 1rem;
-    color: #555;
-    text-align: center;
-    padding: 0 10px;
+    color: #777;
+    line-height: 1.5;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

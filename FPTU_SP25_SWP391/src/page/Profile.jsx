@@ -10,10 +10,11 @@ import {
   faEdit,
   faEnvelope,
   faPhone,
+  faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
 
 const Profile = ({ darkMode }) => {
-  const { userId, token, isLoggedIn, username } = useAuth(); // Added username from AuthContext
+  const { userId, token, isLoggedIn, username } = useAuth();
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,16 +50,14 @@ const Profile = ({ darkMode }) => {
     return <div className="error">{error}</div>;
   }
 
-  if (!userDetails) {
-    return (
-      <div className={`cv-page ${darkMode ? "dark" : ""}`}>
-        <div className="cv-container">
-          <h2>Profile</h2>
-          <p>No user details available.</p>
-        </div>
-      </div>
-    );
-  }
+  // Check if profile has meaningful data
+  const hasProfileData =
+    userDetails &&
+    (userDetails.firstName ||
+      userDetails.lastName ||
+      userDetails.address ||
+      userDetails.gender ||
+      userDetails.avatar);
 
   return (
     <>
@@ -181,7 +180,7 @@ const Profile = ({ darkMode }) => {
           margin-right: 10px;
           min-width: 100px;
         }
-        .edit-btn {
+        .edit-btn, .add-btn {
           display: inline-flex;
           align-items: center;
           padding: 12px 25px;
@@ -195,83 +194,115 @@ const Profile = ({ darkMode }) => {
           border-radius: 5px;
           cursor: pointer;
           transition: background 0.3s ease, transform 0.2s ease;
+          margin-right: 10px;
         }
-        .cv-page.dark .edit-btn {
+        .cv-page.dark .edit-btn, .cv-page.dark .add-btn {
           background: #1abc9c;
         }
-        .edit-btn:hover {
+        .edit-btn:hover, .add-btn:hover {
           background: #503a28;
           transform: scale(1.05);
         }
-        .cv-page.dark .edit-btn:hover {
+        .cv-page.dark .edit-btn:hover, .cv-page.dark .add-btn:hover {
           background: #16a085;
         }
-        .loading,
-        .error {
+        .notification {
+          background: #f8d7da;
+          color: #721c24;
+          padding: 15px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: center;
+          font-family: "Roboto", sans-serif;
+        }
+        .cv-page.dark .notification {
+          background: #f44336;
+          color: #fff;
+        }
+        .notification-icon {
+          margin-right: 10px;
+        }
+        .loading, .error {
           font-size: 18px;
           font-family: "Roboto", sans-serif;
           color: #2c3e50;
           text-align: center;
           padding: 20px;
         }
-        .cv-page.dark .loading,
-        .cv-page.dark .error {
+        .cv-page.dark .loading, .cv-page.dark .error {
           color: #ecf0f1;
         }
       `}</style>
 
       <div className={`cv-page ${darkMode ? "dark" : ""}`}>
         <div className="cv-container">
-          <div className="cv-header">
-            <div className="cv-avatar-wrapper">
-              {userDetails.avatar ? (
-                <img src={userDetails.avatar} alt="Avatar" className="cv-avatar" />
-              ) : (
-                <div className="cv-avatar-placeholder">
-                  <FontAwesomeIcon icon={faUser} />
+          {!hasProfileData ? (
+            <>
+              <div className="notification">
+                <FontAwesomeIcon icon={faExclamationTriangle} className="notification-icon" />
+                Your profile doesn't have any data yet.
+              </div>
+              <div className="cv-section">
+                <Link to="/add-profile" className="add-btn">
+                  <FontAwesomeIcon icon={faEdit} /> Add Profile
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="cv-header">
+                <div className="cv-avatar-wrapper">
+                  {userDetails.avatar ? (
+                    <img src={userDetails.avatar} alt="Avatar" className="cv-avatar" />
+                  ) : (
+                    <div className="cv-avatar-placeholder">
+                      <FontAwesomeIcon icon={faUser} />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="cv-header-info">
-              <h1>
-                {userDetails.firstName || "N/A"} {userDetails.lastName || "N/A"}
-              </h1>
-              <p>
-                <FontAwesomeIcon icon={faEnvelope} /> {username || "Not provided"}
-              </p>
-              <p>
-                <FontAwesomeIcon icon={faPhone} /> {userDetails.phone || "Not provided"}
-              </p>
-            </div>
-          </div>
+                <div className="cv-header-info">
+                  <h1>
+                    {userDetails.firstName || "N/A"} {userDetails.lastName || "N/A"}
+                  </h1>
+                  <p>
+                    <FontAwesomeIcon icon={faEnvelope} /> {username || "Not provided"}
+                  </p>
+                  <p>
+                    <FontAwesomeIcon icon={faPhone} /> {userDetails.phone || "Not provided"}
+                  </p>
+                </div>
+              </div>
 
-          <div className="cv-section">
-            <h2>Personal Information</h2>
-            <p>
-              <strong>
-                <FontAwesomeIcon icon={faUser} /> Full Name:
-              </strong>
-              {userDetails.firstName || "N/A"} {userDetails.lastName || "N/A"}
-            </p>
-            <p>
-              <strong>
-                <FontAwesomeIcon icon={faMapMarkerAlt} /> Address:
-              </strong>
-              {userDetails.address || "Not provided"}
-            </p>
-            <p>
-              <strong>
-                <FontAwesomeIcon icon={faVenusMars} /> Gender:
-              </strong>
-              {userDetails.gender || "Not provided"}
-            </p>
-          </div>
+              <div className="cv-section">
+                <h2>Personal Information</h2>
+                <p>
+                  <strong>
+                    <FontAwesomeIcon icon={faUser} /> Full Name:
+                  </strong>
+                  {userDetails.firstName || "N/A"} {userDetails.lastName || "N/A"}
+                </p>
+                <p>
+                  <strong>
+                    <FontAwesomeIcon icon={faMapMarkerAlt} /> Address:
+                  </strong>
+                  {userDetails.address || "Not provided"}
+                </p>
+                <p>
+                  <strong>
+                    <FontAwesomeIcon icon={faVenusMars} /> Gender:
+                  </strong>
+                  {userDetails.gender || "Not provided"}
+                </p>
+              </div>
 
-          <div className="cv-section">
-            <Link to="/edit-profile" className="edit-btn">
-              <FontAwesomeIcon icon={faEdit} /> Edit Profile
-            </Link>
-          </div>
+              <div className="cv-section">
+                <Link to="/edit-profile" className="edit-btn">
+                  <FontAwesomeIcon icon={faEdit} /> Edit Profile
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>

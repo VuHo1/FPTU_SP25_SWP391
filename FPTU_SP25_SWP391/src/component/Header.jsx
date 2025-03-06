@@ -1,5 +1,5 @@
 // Header.jsx
-import { useState } from "react"; // Add useState for dropdown toggle
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -19,17 +19,13 @@ import { useAuth } from "../page/AuthContext";
 
 const Header = ({ darkMode, toggleDarkMode }) => {
   const { isLoggedIn, logout } = useAuth();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
   const handleLogout = () => {
-    logout(); // Call logout from AuthContext
-    navigate("/sign_in"); // Redirect to sign-in page
-    setIsDropdownOpen(false); // Close dropdown
+    logout();
+    navigate("/sign_in");
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -56,23 +52,36 @@ const Header = ({ darkMode, toggleDarkMode }) => {
           </Link>
         )}
         {isLoggedIn ? (
-          <div className="user-profile">
-            <button className="user-icon" onClick={toggleDropdown}>
+          <div 
+            className="user-profile"
+            onMouseEnter={() => setIsDropdownOpen(true)}
+            onMouseLeave={() => setIsDropdownOpen(false)}
+          >
+            <button className="user-icon">
               <FontAwesomeIcon icon={faUser} />
             </button>
-            {isDropdownOpen && (
-              <div className="dropdown-menu">
-                <Link to="/profile" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
-                  User Profile
-                </Link>
-                <Link to="/edit-profile" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
-                  Edit Profile
-                </Link>
-                <button className="dropdown-item logout-btn" onClick={handleLogout}>
-                  Logout
-                </button>
-              </div>
-            )}
+            <div className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`}>
+              <Link 
+                to="/profile" 
+                className="dropdown-item" 
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                User Profile
+              </Link>
+              <Link 
+                to="/edit-profile" 
+                className="dropdown-item" 
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                Edit Profile
+              </Link>
+              <button 
+                className="dropdown-item logout-btn" 
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </div>
           </div>
         ) : (
           <Link to="/sign_in" className="link">
