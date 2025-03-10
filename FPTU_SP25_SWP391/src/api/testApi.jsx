@@ -1,13 +1,13 @@
 import axios from "axios";
 
-const isLocal = true; // Set to true for Swagger testing at localhost:7063, false for production
+const isLocal = true;
 const baseURL = isLocal
-  ? "https://localhost:7063" // Local Swagger URL
-  : "https://skincarebooking-eccebca6feeeakh9.southeastasia-01.azurewebsites.net"; // Production URL
+  ? "https://localhost:7063"
+  : "https://skincarebooking-eccebca6feeeakh9.southeastasia-01.azurewebsites.net";
 
 const apiClient = axios.create({
   baseURL,
-  timeout: 10000, // 10-second timeout
+  timeout: 10000,
 });
 
 // Authentication
@@ -26,167 +26,157 @@ export const login = async (data) => {
   }
 };
 
-export const forgotPassword = async (email) => {
-  try {
-    const formData = new FormData();
-    formData.append("EmailOrPhoneNumber", email);
+// export const forgotPassword = async (email) => {
+//   try {
+//     const formData = new FormData();
+//     formData.append("EmailOrPhoneNumber", email);
+//     const response = await apiClient.post(`/api/Auth/user/password/forgot`, formData, {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//         Accept: "*/*",
+//       },
+//     });
+//     return response;
+//   } catch (error) {
+//     console.error("Error during forgot password:", error);
+//     throw error;
+//   }
+// };
 
-    const response = await apiClient.post(
-      `/api/Auth/user/password/forgot`,
-      formData,
-      {
-        headers: {
-          "Content-Type": `multipart/form-data`,
-          Accept: "*/*",
-        },
-      }
-    );
-    return response;
-  } catch (error) {
-    console.error("Error fetching services:", error);
-    throw error;
-  }
-};
-
-export const resetPassword = async (token, newPassword) => {
-  try {
-    const data = {
-      token: token,
-      newPassword: newPassword,
-    };
-    const response = await apiClient.post(
-      `/api/Auth/user/password/reset`,
-      data,
-      {
-        headers: {
-          "Content-Type": `application/json`,
-          Accept: "*/*",
-        },
-      }
-    );
-    return response;
-  } catch (error) {
-    console.error("Error fetching services:", error);
-    throw error;
-  }
-};
+// export const resetPassword = async (token, newPassword) => {
+//   try {
+//     const data = { token, newPassword };
+//     const response = await apiClient.post(`/api/Auth/user/password/reset`, data, {
+//       headers: {
+//         "Content-Type": "application/json",
+//         Accept: "*/*",
+//       },
+//     });
+//     return response;
+//   } catch (error) {
+//     console.error("Error during reset password:", error);
+//     throw error;
+//   }
+// };
 
 export const signUpUser = async (data) => {
   try {
-    const response = await apiClient.post(
-      `/api/users`,
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "*/*",
-        },
-      }
-    );
+    const response = await apiClient.post(`/api/users`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+      },
+    });
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error during user signup:", error);
     throw error;
   }
 };
 
-export const signUpShop = async (data) => {
-  try {
-    const response = await apiClient.post(
-      `/api/Auth/user/register/shop`,
-      data,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "*/*",
-        },
-      }
-    );
-    return response;
-  } catch (error) {
-    console.error("Error fetching services:", error);
-    throw error;
-  }
-};
+// export const signUpShop = async (data) => {
+//   try {
+//     const response = await apiClient.post(`/api/Auth/user/register/shop`, data, {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//         Accept: "*/*",
+//       },
+//     });
+//     return response;
+//   } catch (error) {
+//     console.error("Error during shop signup:", error);
+//     throw error;
+//   }
+// };
 
-export const verifyEmail = async (dataOTP) => {
-  try {
-    const response = await apiClient.post(
-      `/api/Auth/user/otp/verify`,
-      dataOTP,
-      {
-        headers: {
-          "Content-Type": `application/json`,
-          Accept: "*/*",
-        },
-      }
-    );
-    return response;
-  } catch (error) {
-    console.error("Error fetching services:", error);
-    throw error;
-  }
-};
+// export const verifyEmail = async (dataOTP) => {
+//   try {
+//     const response = await apiClient.post(`/api/Auth/user/otp/verify`, dataOTP, {
+//       headers: {
+//         "Content-Type": "application/json",
+//         Accept: "*/*",
+//       },
+//     });
+//     return response;
+//   } catch (error) {
+//     console.error("Error during email verification:", error);
+//     throw error;
+//   }
+// };
 
 // Services
-export const getListServices = async (pageIndex = 0, pageSize = 100) => {
+export const getServiceCategories = async (token) => {
   try {
-    const response = await apiClient.get(
-      `/api/service/GetListServices?pageIndex=${pageIndex}&pageSize=${pageSize}`
-    );
+    const response = await apiClient.get(`/api/ServiceCategory`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error fetching service categories:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
     throw error;
   }
 };
 
 export const getServiceById = async (id) => {
   try {
-    const response = await apiClient.get(
-      `/api/service/ViewServiceById?serviceId=${id}`
-    );
+    const response = await apiClient.get(`/api/service/ViewServiceById?serviceId=${id}`);
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error fetching service by ID:", error);
     throw error;
   }
 };
 
 export const getListServicesByUserId = async (userId, token) => {
   try {
-    const response = await apiClient.get(
-      `/api/service/ViewListServicesByUserId?userId=${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "*/*",
-        },
-      }
-    );
+    const response = await apiClient.get(`/api/service/ViewListServicesByUserId?userId=${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error fetching services by user ID:", error);
     throw error;
   }
 };
 
 export const postCreateService = async (formData, token) => {
   try {
-    const response = await apiClient.post(
-      `/api/service/CreateService`,
-      formData,
-      {
-        headers: {
-          "Content-Type": `multipart/form-data`,
-          Accept: "text/plain",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await apiClient.post(`/api/service/CreateService`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "text/plain",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error creating service:", error);
+    throw error;
+  }
+};
+
+export const postServiceCategory = async (serviceData, token) => {
+  try {
+    const response = await apiClient.post(`/api/ServiceCategory`, serviceData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error creating service category:", error);
     throw error;
   }
 };
@@ -196,7 +186,7 @@ export const getSubCategory = async () => {
     const response = await apiClient.get(`/Api/GetAllSubCategories`);
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error fetching subcategories:", error);
     throw error;
   }
 };
@@ -204,20 +194,16 @@ export const getSubCategory = async () => {
 // Booking
 export const postBooking = async (formData, token) => {
   try {
-    const response = await apiClient.post(
-      `/api/Booking/user/booking`,
-      formData,
-      {
-        headers: {
-          "Content-Type": `multipart/form-data`,
-          Accept: "*/*",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await apiClient.post(`/api/Booking/user/booking`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error creating booking:", error);
     throw error;
   }
 };
@@ -231,27 +217,23 @@ export const getBookingById = async (id, token) => {
     });
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error fetching booking by ID:", error);
     throw error;
   }
 };
 
 export const postCheckout = async (bookingId, token) => {
   try {
-    const response = await apiClient.post(
-      `/api/Booking/payment/check-out/${bookingId}`,
-      {},
-      {
-        headers: {
-          "Content-Type": `multipart/form-data`,
-          Accept: "*/*",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await apiClient.post(`/api/Booking/payment/check-out/${bookingId}`, {}, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response;
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error during checkout:", error);
     throw error;
   }
 };
@@ -326,7 +308,6 @@ export const createStaff = async (data, token) => {
   }
 };
 
-// Fetch all users
 export const getAllUsers = async (token) => {
   try {
     const response = await apiClient.get(`/api/users`, {
@@ -344,7 +325,6 @@ export const getAllUsers = async (token) => {
   }
 };
 
-// In testApi.jsx
 export const deleteUser = async (userId, token) => {
   try {
     const response = await apiClient.delete(`/api/users/${userId}`, {
@@ -356,10 +336,10 @@ export const deleteUser = async (userId, token) => {
     return response;
   } catch (error) {
     console.error("Error deleting user:", error.response?.data || error);
-    throw error; // Let the caller handle the error
+    throw error;
   }
 };
-// In testApi.jsx, add this function
+
 export const createUserDetails = async (data, token) => {
   try {
     const response = await apiClient.post(`/api/UserDetails`, data, {
@@ -372,6 +352,38 @@ export const createUserDetails = async (data, token) => {
     return response;
   } catch (error) {
     console.error("Error creating user details:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// testApi.js (updated section only - add these to your existing file)
+export const updateServiceCategory = async (serviceCategoryId, serviceData, token) => {
+  try {
+    const response = await apiClient.put(`/api/ServiceCategory/${serviceCategoryId}`, serviceData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error updating service category:", error);
+    throw error;
+  }
+};
+
+export const deleteServiceCategory = async (serviceCategoryId, token) => {
+  try {
+    const response = await apiClient.delete(`/api/ServiceCategory/${serviceCategoryId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error deleting service category:", error);
     throw error;
   }
 };

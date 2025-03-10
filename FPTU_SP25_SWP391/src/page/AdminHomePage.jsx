@@ -3,15 +3,12 @@ import {
   Box,
   Grid,
   Typography,
-  Paper,
   IconButton,
   Drawer,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  TextField,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -37,12 +34,13 @@ import {
 } from "@mui/icons-material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
-import { createTherapist, createStaff, getAllUsers, deleteUser } from "../api/testApi";
+import { getAllUsers, deleteUser, getServiceCategories } from "../api/testApi";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import CreateUserForm from "./CreateUserForm";
+import ServicesDashboard from "./ServicesDashboard";
 
-// Styled Components (unchanged)
-const MainContent = styled(Box)(({ theme, darkMode }) => ({
+const MainContent = styled(Box)(({ darkMode }) => ({
   flexGrow: 1,
   padding: "40px",
   minHeight: "100vh",
@@ -52,7 +50,7 @@ const MainContent = styled(Box)(({ theme, darkMode }) => ({
   transition: "all 0.3s ease",
 }));
 
-const DashboardCard = styled(Paper)(({ theme, darkMode }) => ({
+const DashboardCard = styled("div")(({ darkMode }) => ({
   padding: "30px",
   borderRadius: "16px",
   background: darkMode ? "#252525" : "#ffffff",
@@ -68,7 +66,7 @@ const DashboardCard = styled(Paper)(({ theme, darkMode }) => ({
   },
 }));
 
-const Sidebar = styled(Drawer)(({ theme, darkMode }) => ({
+const Sidebar = styled(Drawer)(({ darkMode }) => ({
   width: 260,
   flexShrink: 0,
   "& .MuiDrawer-paper": {
@@ -99,8 +97,8 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
 export default function AdminHomePage({ darkMode, toggleDarkMode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const [userForm, setUserForm] = useState({ userName: "", email: "", password: "" });
   const [users, setUsers] = useState([]);
+  const [services, setServices] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [idSort, setIdSort] = useState("");
   const [nameSort, setNameSort] = useState("");
@@ -116,44 +114,11 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUserForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCreateUser = async (role) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found. Please log in again.");
-
-      const createFn = role === "Therapist" ? createTherapist : createStaff;
-      const response = await createFn(userForm, token);
-
-      const newUser = { ...userForm, role, password: "****" };
-      setUsers((prev) => [...prev, newUser]);
-      setUserForm({ userName: "", email: "", password: "" });
-
-      console.log("Account created successfully:", {
-        userName: newUser.userName,
-        email: newUser.email,
-        role: newUser.role,
-        responseData: response.data,
-      });
-
-      alert(`${role} created successfully!`);
-    } catch (error) {
-      console.error(`Error creating ${role}:`, error);
-      alert(`Failed to create ${role}: ${error.response?.data?.message || error.message}`);
-    }
-  };
-
   const handleDeleteUser = async (userId) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found. Please log in again.");
-
       await deleteUser(userId, token);
-
       setUsers((prev) => prev.filter((user) => user.userId !== userId));
       setFilteredUsers((prev) => prev.filter((user) => user.userId !== userId));
       alert("User deleted successfully!");
@@ -163,19 +128,28 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     }
   };
 
+  const handleUserCreated = (newUser) => {
+    setUsers((prev) => [...prev, newUser]);
+    setFilteredUsers((prev) => [...prev, newUser]);
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No authentication token found. Please log in again.");
-        const response = await getAllUsers(token);
-        setUsers(response.data);
-        setFilteredUsers(response.data);
+
+        const usersResponse = await getAllUsers(token);
+        setUsers(usersResponse.data || []);
+        setFilteredUsers(usersResponse.data || []);
+
+        const servicesResponse = await getServiceCategories(token);
+        setServices(servicesResponse.data || []);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchUsers();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -193,8 +167,8 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
   const handleLogout = () => {
     logout();
     setUsers([]);
+    setServices([]);
     setFilteredUsers([]);
-    setUserForm({ userName: "", email: "", password: "" });
     setTabValue(0);
     setIdSort("");
     setNameSort("");
@@ -204,7 +178,6 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     navigate("/sign_in", { replace: true });
   };
 
-  // Pagination Logic
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
@@ -213,6 +186,15 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
+
+  const totalUsers = users.length;
+  const totalServices = services.length;
+  const activeServices = services.filter((s) => s.status).length;
+  const inactiveServices = totalServices - activeServices;
+  const roleBreakdown = users.reduce((acc, user) => {
+    acc[user.role] = (acc[user.role] || 0) + 1;
+    return acc;
+  }, {});
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, action: () => setTabValue(0) },
@@ -228,13 +210,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     <Box sx={{ p: 2 }}>
       <Typography
         variant="h6"
-        sx={{
-          color: darkMode ? "#ffffff" : "#1d1d1f",
-          mb: 3,
-          fontWeight: 700,
-          textAlign: "center",
-          letterSpacing: "1px",
-        }}
+        sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", mb: 3, fontWeight: 700, textAlign: "center" }}
       >
         Admin Panel
       </Typography>
@@ -247,13 +223,8 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
             darkMode={darkMode}
             isActive={tabValue === index && index < 3}
           >
-            <ListItemIcon sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mr: 1 }}>
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText
-              primary={item.text}
-              sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 500 }}
-            />
+            <ListItemIcon sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mr: 1 }}>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }} />
           </StyledListItem>
         ))}
       </List>
@@ -265,7 +236,6 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
       <Sidebar variant="permanent" darkMode={darkMode} sx={{ display: { xs: "none", sm: "block" } }}>
         {drawerContent}
       </Sidebar>
-
       <Sidebar
         variant="temporary"
         open={mobileOpen}
@@ -276,7 +246,6 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
       >
         {drawerContent}
       </Sidebar>
-
       <MainContent
         darkMode={darkMode}
         component={motion.div}
@@ -295,11 +264,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
           </IconButton>
           <Typography
             variant="h4"
-            sx={{
-              fontWeight: 700,
-              color: darkMode ? "#ffffff" : "#1d1d1f",
-              letterSpacing: "1px",
-            }}
+            sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f" }}
             component={motion.div}
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -322,122 +287,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
             >
               Overview of users and services.
             </Typography>
-
-            <DashboardCard
-              darkMode={darkMode}
-              sx={{ mb: 4 }}
-              component={motion.div}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
-              >
-                Create New User
-              </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Username"
-                    name="userName"
-                    value={userForm.userName}
-                    onChange={handleInputChange}
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                        "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                        "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                      },
-                      "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-                      "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Email"
-                    name="email"
-                    value={userForm.email}
-                    onChange={handleInputChange}
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                        "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                        "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                      },
-                      "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-                      "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Password"
-                    name="password"
-                    type="password"
-                    value={userForm.password}
-                    onChange={handleInputChange}
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                        "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                        "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                      },
-                      "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-                      "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleCreateUser("Therapist")}
-                    sx={{
-                      mr: 2,
-                      py: 1.5,
-                      px: 4,
-                      borderRadius: "8px",
-                      background: darkMode ? "#1976d2" : "#1d1d1f",
-                      "&:hover": { background: darkMode ? "#1565c0" : "#333" },
-                      transition: "background 0.3s ease",
-                    }}
-                    component={motion.div}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Create Therapist
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => handleCreateUser("Staff")}
-                    sx={{
-                      py: 1.5,
-                      px: 4,
-                      borderRadius: "8px",
-                      background: darkMode ? "#d81b60" : "#6e6e73",
-                      "&:hover": { background: darkMode ? "#c2185b" : "#555" },
-                      transition: "background 0.3s ease",
-                    }}
-                    component={motion.div}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Create Staff
-                  </Button>
-                </Grid>
-              </Grid>
-            </DashboardCard>
-
+            <CreateUserForm darkMode={darkMode} onUserCreated={handleUserCreated} />
             <DashboardCard
               darkMode={darkMode}
               component={motion.div}
@@ -449,53 +299,232 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                 variant="h6"
                 sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
               >
+                Users Overview
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <DashboardCard
+                    darkMode={darkMode}
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1 }}
+                    >
+                      Total Users
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
+                    >
+                      {totalUsers}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#4caf50" }}>
+                      +{Math.round(totalUsers * 0.05)} this month
+                    </Typography>
+                  </DashboardCard>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <DashboardCard
+                    darkMode={darkMode}
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1 }}
+                    >
+                      Customers
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
+                    >
+                      {roleBreakdown["Customer"] || 0}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#4caf50" }}>
+                      +{Math.round((roleBreakdown["Customer"] || 0) * 0.03)} this month
+                    </Typography>
+                  </DashboardCard>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <DashboardCard
+                    darkMode={darkMode}
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1 }}
+                    >
+                      Therapists
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
+                    >
+                      {roleBreakdown["Therapist"] || 0}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#4caf50" }}>
+                      +{Math.round((roleBreakdown["Therapist"] || 0) * 0.02)} this month
+                    </Typography>
+                  </DashboardCard>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <DashboardCard
+                    darkMode={darkMode}
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1 }}
+                    >
+                      Staff
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
+                    >
+                      {roleBreakdown["Staff"] || 0}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#4caf50" }}>
+                      +{Math.round((roleBreakdown["Staff"] || 0) * 0.01)} this month
+                    </Typography>
+                  </DashboardCard>
+                </Grid>
+              </Grid>
+            </DashboardCard>
+            <DashboardCard
+              darkMode={darkMode}
+              component={motion.div}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              sx={{ mt: 4 }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
+              >
                 Services Overview
               </Typography>
               <Grid container spacing={3}>
-                {[
-                  { title: "Total Services", value: "342", change: "+6.7%" },
-                  { title: "Active Bookings", value: "1,234", change: "+3.2%" },
-                  { title: "Service Revenue", value: "$12,345", change: "+9.1%" },
-                  { title: "Pending Approvals", value: "15", change: "-2.5%" },
-                ].map((stat, index) => (
-                  <Grid item xs={12} sm={6} md={3} key={index}>
-                    <DashboardCard
-                      darkMode={darkMode}
-                      component={motion.div}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                <Grid item xs={12} sm={6} md={3}>
+                  <DashboardCard
+                    darkMode={darkMode}
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1 }}
                     >
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1, fontWeight: 500 }}
-                      >
-                        {stat.title}
-                      </Typography>
-                      <Typography
-                        variant="h5"
-                        sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
-                      >
-                        {stat.value}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: stat.change.startsWith("+") ? "#4caf50" : "#f44336",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {stat.change} from last month
-                      </Typography>
-                    </DashboardCard>
-                  </Grid>
-                ))}
+                      Total Services
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
+                    >
+                      {totalServices}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#4caf50" }}>
+                      +{Math.round(totalServices * 0.067)} this month
+                    </Typography>
+                  </DashboardCard>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <DashboardCard
+                    darkMode={darkMode}
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.6 }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1 }}
+                    >
+                      Active Services
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
+                    >
+                      {activeServices}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#4caf50" }}>
+                      +{Math.round(activeServices * 0.032)} this month
+                    </Typography>
+                  </DashboardCard>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <DashboardCard
+                    darkMode={darkMode}
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.7 }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1 }}
+                    >
+                      Inactive Services
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
+                    >
+                      {inactiveServices}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#f44336" }}>
+                      -{Math.round(inactiveServices * 0.025)} this month
+                    </Typography>
+                  </DashboardCard>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <DashboardCard
+                    darkMode={darkMode}
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.8 }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1 }}
+                    >
+                      Service Revenue
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
+                    >
+                      ${(totalServices * 36.05).toFixed(2)}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#4caf50" }}>
+                      +9.1% this month
+                    </Typography>
+                  </DashboardCard>
+                </Grid>
               </Grid>
             </DashboardCard>
           </Box>
         )}
 
-        {/* Users Tab with Delete Button */}
+        {/* Users Tab */}
         {tabValue === 1 && (
           <Box>
             <Typography
@@ -508,122 +537,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
             >
               Manage staff and therapist accounts here.
             </Typography>
-
-            <DashboardCard
-              darkMode={darkMode}
-              sx={{ mb: 4 }}
-              component={motion.div}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
-              >
-                Create New User
-              </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Username"
-                    name="userName"
-                    value={userForm.userName}
-                    onChange={handleInputChange}
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                        "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                        "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                      },
-                      "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-                      "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Email"
-                    name="email"
-                    value={userForm.email}
-                    onChange={handleInputChange}
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                        "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                        "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                      },
-                      "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-                      "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Password"
-                    name="password"
-                    type="password"
-                    value={userForm.password}
-                    onChange={handleInputChange}
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                        "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                        "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                      },
-                      "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-                      "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleCreateUser("Therapist")}
-                    sx={{
-                      mr: 2,
-                      py: 1.5,
-                      px: 4,
-                      borderRadius: "8px",
-                      background: darkMode ? "#1976d2" : "#1d1d1f",
-                      "&:hover": { background: darkMode ? "#1565c0" : "#333" },
-                      transition: "background 0.3s ease",
-                    }}
-                    component={motion.div}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Create Therapist
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => handleCreateUser("Staff")}
-                    sx={{
-                      py: 1.5,
-                      px: 4,
-                      borderRadius: "8px",
-                      background: darkMode ? "#d81b60" : "#6e6e73",
-                      "&:hover": { background: darkMode ? "#c2185b" : "#555" },
-                      transition: "background 0.3s ease",
-                    }}
-                    component={motion.div}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Create Staff
-                  </Button>
-                </Grid>
-              </Grid>
-            </DashboardCard>
-
+            <CreateUserForm darkMode={darkMode} onUserCreated={handleUserCreated} />
             <DashboardCard
               darkMode={darkMode}
               component={motion.div}
@@ -635,26 +549,16 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                 variant="h6"
                 sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
               >
-                All Users
+                All Users (Total: {filteredUsers.length})
               </Typography>
               <Grid container spacing={3} sx={{ mb: 3 }}>
                 <Grid item xs={12} sm={4}>
                   <FormControl fullWidth>
-                    <InputLabel sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>
-                      Sort by User
-                    </InputLabel>
+                    <InputLabel sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>Sort by User</InputLabel>
                     <Select
                       value={idSort}
                       onChange={(e) => setIdSort(e.target.value)}
-                      sx={{
-                        color: darkMode ? "#ffffff" : "#1d1d1f",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: darkMode ? "#a1a1a6" : "#e0e0e0",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: darkMode ? "#ffffff" : "#1d1d1f",
-                        },
-                      }}
+                      sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}
                     >
                       <MenuItem value="">None</MenuItem>
                       <MenuItem value="asc">1 to 10</MenuItem>
@@ -664,21 +568,11 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <FormControl fullWidth>
-                    <InputLabel sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>
-                      Sort by Name
-                    </InputLabel>
+                    <InputLabel sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>Sort by Name</InputLabel>
                     <Select
                       value={nameSort}
                       onChange={(e) => setNameSort(e.target.value)}
-                      sx={{
-                        color: darkMode ? "#ffffff" : "#1d1d1f",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: darkMode ? "#a1a1a6" : "#e0e0e0",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: darkMode ? "#ffffff" : "#1d1d1f",
-                        },
-                      }}
+                      sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}
                     >
                       <MenuItem value="">None</MenuItem>
                       <MenuItem value="asc">A-Z</MenuItem>
@@ -688,21 +582,11 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <FormControl fullWidth>
-                    <InputLabel sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>
-                      Filter by Role
-                    </InputLabel>
+                    <InputLabel sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>Filter by Role</InputLabel>
                     <Select
                       value={roleFilter}
                       onChange={(e) => setRoleFilter(e.target.value)}
-                      sx={{
-                        color: darkMode ? "#ffffff" : "#1d1d1f",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: darkMode ? "#a1a1a6" : "#e0e0e0",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: darkMode ? "#ffffff" : "#1d1d1f",
-                        },
-                      }}
+                      sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}
                     >
                       <MenuItem value="">All</MenuItem>
                       <MenuItem value="Customer">Customer</MenuItem>
@@ -723,46 +607,27 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>
-                        User ID
-                      </TableCell>
-                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>
-                        Username
-                      </TableCell>
-                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>
-                        Email
-                      </TableCell>
-                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>
-                        Role
-                      </TableCell>
-                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>
-                        Actions
-                      </TableCell>
+                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>id</TableCell>
+                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>Username</TableCell>
+                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>Email</TableCell>
+                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>Role</TableCell>
+                      <TableCell sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {currentUsers.map((user) => (
+                    {currentUsers.map((user, index) => (
                       <TableRow
                         key={user.userId || user.userName}
                         sx={{
-                          "&:hover": {
-                            background: darkMode ? "#2d2d2d" : "#f5f5f5",
-                            transition: "background 0.3s ease",
-                          },
+                          "&:hover": { background: darkMode ? "#2d2d2d" : "#f5f5f5" },
                         }}
                       >
                         <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
-                          {user.userId || "N/A"}
+                          {indexOfFirstUser + index + 1}
                         </TableCell>
-                        <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
-                          {user.userName}
-                        </TableCell>
-                        <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
-                          {user.email}
-                        </TableCell>
-                        <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
-                          {user.role}
-                        </TableCell>
+                        <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>{user.userName}</TableCell>
+                        <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>{user.email}</TableCell>
+                        <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>{user.role}</TableCell>
                         <TableCell>
                           <IconButton
                             onClick={() => user.userId && handleDeleteUser(user.userId)}
@@ -783,11 +648,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                   page={currentPage}
                   onChange={handlePageChange}
                   color="primary"
-                  sx={{
-                    "& .MuiPaginationItem-root": {
-                      color: darkMode ? "#ffffff" : "#1d1d1f",
-                    },
-                  }}
+                  sx={{ "& .MuiPaginationItem-root": { color: darkMode ? "#ffffff" : "#1d1d1f" } }}
                 />
               </Box>
             </DashboardCard>
@@ -795,60 +656,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
         )}
 
         {/* Services Tab */}
-        {tabValue === 2 && (
-          <Box>
-            <Typography
-              variant="subtitle1"
-              sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 4, fontStyle: "italic" }}
-              component={motion.div}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              Overview of services on the platform.
-            </Typography>
-            <Grid container spacing={3}>
-              {[
-                { title: "Total Services", value: "342", change: "+6.7%" },
-                { title: "Active Bookings", value: "1,234", change: "+3.2%" },
-                { title: "Service Revenue", value: "$12,345", change: "+9.1%" },
-                { title: "Pending Approvals", value: "15", change: "-2.5%" },
-              ].map((stat, index) => (
-                <Grid item xs={12} sm={6} md={3} key={index}>
-                  <DashboardCard
-                    darkMode={darkMode}
-                    component={motion.div}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <Typography
-                      variant="subtitle2"
-                      sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 1, fontWeight: 500 }}
-                    >
-                      {stat.title}
-                    </Typography>
-                    <Typography
-                      variant="h5"
-                      sx={{ fontWeight: 700, color: darkMode ? "#ffffff" : "#1d1d1f", mb: 1 }}
-                    >
-                      {stat.value}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: stat.change.startsWith("+") ? "#4caf50" : "#f44336",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {stat.change} from last month
-                    </Typography>
-                  </DashboardCard>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
+        {tabValue === 2 && <ServicesDashboard darkMode={darkMode} />}
       </MainContent>
     </Box>
   );

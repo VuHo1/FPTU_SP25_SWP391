@@ -1,0 +1,102 @@
+.sign-in-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .sign-in-container.light {
+    background: linear-gradient(135deg, #f8f4e1 0%, #e5e5e5 100%);
+  }
+  
+  .sign-in-container.dark {
+    background: linear-gradient(135deg, #1c2526 0%, #34495e 100%);
+  }
+  
+  .sign-in-box {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 40px 50px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 450px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .sign-in-container.dark .sign-in-box {
+    background-color: rgba(52, 73, 94, 0.95);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .logo-img {
+    width: 115px;
+    transition: transform 0.3s ease;
+  }
+  
+  .logo-img:hover {
+    transform: scale(1.05);
+  }
+  
+  .sign-in-title {
+    font-size: 28px;
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  
+  .sign-in-input {
+    width: 100%;
+    padding: 15px 20px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #2c3e50;
+    font-size: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .password-container {
+    position: relative;
+  }
+  
+  .password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+  }
+  
+  .sign-in-button {
+    width: 100%;
+    padding: 15px;
+    background-color: #6c4f37;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  
+  .sign-in-link {
+    color: #6c4f37;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .sign-in-link:hover {
+    color: #503a28;
+  }
+  .sign-in-links h6 {
+    color: #b0b0b0; /* Light grey */
+    font-size: 13px;
+    font-weight: 400;
+  }

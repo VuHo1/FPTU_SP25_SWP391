@@ -1,0 +1,138 @@
+.container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    padding: 40px 20px;
+  }
+  
+  .dark {
+    background-color: #1c2526;
+  }
+  
+  .light {
+    background-color: #fafafa;
+  }
+  
+  .section {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 0;
+  }
+  
+  .heading {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--heading-color);
+    letter-spacing: -1px;
+    margin-bottom: 30px;
+    line-height: 1.2;
+  }
+  
+  .dark .heading {
+    color: #ffffff;
+  }
+  
+  .light .heading {
+    color: #1d1d1f;
+  }
+  
+  .subheading {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 20px 0 15px;
+  }
+  
+  .dark .subheading {
+    color: #e5e7eb;
+  }
+  
+  .light .subheading {
+    color: #333;
+  }
+  
+  .paragraph {
+    font-size: 18px;
+    line-height: 1.8;
+    max-width: 800px;
+    margin-bottom: 30px;
+    text-align: left;
+  }
+  
+  .dark .paragraph {
+    color: #a1a1a6;
+  }
+  
+  .light .paragraph {
+    color: #6e6e73;
+  }
+  
+  .policy-container {
+    width: 100%;
+  }
+  
+  .policy-item {
+    background-color: var(--policy-bg);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: var(--policy-shadow);
+    width: 100%;
+    max-width: 800px;
+    text-align: left;
+    margin-bottom: 40px;
+    border: var(--policy-border);
+  }
+  
+  .dark .policy-item {
+    background-color: #2c2c2e;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    border: 1px solid #38383a;
+  }
+  
+  .light .policy-item {
+    background-color: #ffffff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f0f0f0;
+  }
+  
+  .button {
+    display: inline-block;
+    padding: 16px 40px;
+    background-color: var(--button-bg);
+    color: #ffffff !important; /* Ensure text is always white */
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease, color 0.2s ease;
+    margin-top: 40px;
+    border: none;
+    outline: none;
+  }
+  
+  .dark .button {
+    background-color: #34c759;
+  }
+  
+  .light .button {
+    background-color: #e67e22;
+  }
+  
+  .button:hover {
+    transform: translateY(-2px);
+  }
+
+  
+  .button:active {
+    color: #ffffff !important; /* Ensure the text stays white when touched */
+    background-color: rgba(255, 255, 255, 0.2); /* Optional: Slight background effect */
+  }
