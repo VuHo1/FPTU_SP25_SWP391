@@ -77,6 +77,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+                <Route
+                      path="/staff/home"
+                      element={
+                        <ProtectedRoute allowedRole="Staff">
+                          <StaffHomePage darkMode={darkMode} />
+                        </ProtectedRoute>
+                      }
+                    />
             <Route
               path="*"
               element={
@@ -123,14 +131,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path="/staff/home"
-                      element={
-                        <ProtectedRoute allowedRole="Staff">
-                          <StaffHomePage darkMode={darkMode} />
-                        </ProtectedRoute>
-                      }
-                    />
+                
                     <Route path="/edit-profile" element={<EditProfile darkMode={darkMode} />} />
                     <Route path="/add-profile" element={<AddProfile darkMode={darkMode} />} />
                     <Route path="*" element={<Error darkMode={darkMode} />} />

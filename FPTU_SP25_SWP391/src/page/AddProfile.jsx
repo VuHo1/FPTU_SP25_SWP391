@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
-import { createUserDetails } from "../api/testApi"; // We'll add this to testApi.jsx
+import { createUserDetails } from "../api/testApi"; 
 
 const AddProfile = ({ darkMode }) => {
   const { userId, token } = useAuth();
