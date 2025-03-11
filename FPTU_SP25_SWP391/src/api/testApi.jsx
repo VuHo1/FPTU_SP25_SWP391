@@ -26,39 +26,6 @@ export const login = async (data) => {
   }
 };
 
-// export const forgotPassword = async (email) => {
-//   try {
-//     const formData = new FormData();
-//     formData.append("EmailOrPhoneNumber", email);
-//     const response = await apiClient.post(`/api/Auth/user/password/forgot`, formData, {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//         Accept: "*/*",
-//       },
-//     });
-//     return response;
-//   } catch (error) {
-//     console.error("Error during forgot password:", error);
-//     throw error;
-//   }
-// };
-
-// export const resetPassword = async (token, newPassword) => {
-//   try {
-//     const data = { token, newPassword };
-//     const response = await apiClient.post(`/api/Auth/user/password/reset`, data, {
-//       headers: {
-//         "Content-Type": "application/json",
-//         Accept: "*/*",
-//       },
-//     });
-//     return response;
-//   } catch (error) {
-//     console.error("Error during reset password:", error);
-//     throw error;
-//   }
-// };
-
 export const signUpUser = async (data) => {
   try {
     const response = await apiClient.post(`/api/users`, data, {
@@ -74,36 +41,6 @@ export const signUpUser = async (data) => {
   }
 };
 
-// export const signUpShop = async (data) => {
-//   try {
-//     const response = await apiClient.post(`/api/Auth/user/register/shop`, data, {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//         Accept: "*/*",
-//       },
-//     });
-//     return response;
-//   } catch (error) {
-//     console.error("Error during shop signup:", error);
-//     throw error;
-//   }
-// };
-
-// export const verifyEmail = async (dataOTP) => {
-//   try {
-//     const response = await apiClient.post(`/api/Auth/user/otp/verify`, dataOTP, {
-//       headers: {
-//         "Content-Type": "application/json",
-//         Accept: "*/*",
-//       },
-//     });
-//     return response;
-//   } catch (error) {
-//     console.error("Error during email verification:", error);
-//     throw error;
-//   }
-// };
-
 // Services
 export const getServiceCategories = async (token) => {
   try {
@@ -113,54 +50,94 @@ export const getServiceCategories = async (token) => {
         Accept: "*/*",
       },
     });
+    console.log("Service Categories Response:", response.data);
     return response;
   } catch (error) {
-    console.error("Error fetching service categories:", {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-    });
-    throw error;
-  }
-};
-
-export const getServiceById = async (id) => {
-  try {
-    const response = await apiClient.get(`/api/service/ViewServiceById?serviceId=${id}`);
-    return response;
-  } catch (error) {
-    console.error("Error fetching service by ID:", error);
+    console.error("Error fetching service categories:", JSON.stringify(error.response?.data, null, 2));
     throw error;
   }
 };
 
 export const getListServicesByUserId = async (userId, token) => {
   try {
-    const response = await apiClient.get(`/api/service/ViewListServicesByUserId?userId=${userId}`, {
+    console.log("Calling GET /api/services/user with userId:", userId);
+    const response = await apiClient.get(`/api/services/user/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "*/*",
       },
     });
+    console.log("Services Response:", response.data);
     return response;
   } catch (error) {
-    console.error("Error fetching services by user ID:", error);
+    console.error("Error fetching services by user ID:", JSON.stringify(error.response?.data, null, 2));
     throw error;
   }
 };
 
-export const postCreateService = async (formData, token) => {
+export const getAllServices = async (token) => {
   try {
-    const response = await apiClient.post(`/api/service/CreateService`, formData, {
+    const response = await apiClient.get(`/api/Service`, {
       headers: {
-        "Content-Type": "multipart/form-data",
-        Accept: "text/plain",
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    console.log("All Services Response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error fetching all services:", JSON.stringify(error.response?.data, null, 2));
+    throw error;
+  }
+};
+
+export const postCreateService = async (serviceData, token) => {
+  try {
+    const response = await apiClient.post(`/api/Service`, serviceData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log("Created service:", response.data);
     return response;
   } catch (error) {
-    console.error("Error creating service:", error);
+    console.error("Error creating service:", JSON.stringify(error.response?.data, null, 2));
+    throw error;
+  }
+};
+
+export const updateService = async (serviceId, serviceData, token) => {
+  try {
+    console.log("Calling PUT /api/Service with serviceId:", serviceId, "and data:", serviceData);
+    const response = await apiClient.put(`/api/Service/${serviceId}`, serviceData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Updated Service Response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error updating service:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const deleteService = async (serviceId, token) => {
+  try {
+    const response = await apiClient.delete(`/api/Service/${serviceId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    console.log("Deleted service:", serviceId);
+    return response;
+  } catch (error) {
+    console.error("Error deleting service:", JSON.stringify(error.response?.data, null, 2));
     throw error;
   }
 };
@@ -177,16 +154,6 @@ export const postServiceCategory = async (serviceData, token) => {
     return response;
   } catch (error) {
     console.error("Error creating service category:", error);
-    throw error;
-  }
-};
-
-export const getSubCategory = async () => {
-  try {
-    const response = await apiClient.get(`/Api/GetAllSubCategories`);
-    return response;
-  } catch (error) {
-    console.error("Error fetching subcategories:", error);
     throw error;
   }
 };
@@ -356,7 +323,6 @@ export const createUserDetails = async (data, token) => {
   }
 };
 
-// testApi.js (updated section only - add these to your existing file)
 export const updateServiceCategory = async (serviceCategoryId, serviceData, token) => {
   try {
     const response = await apiClient.put(`/api/ServiceCategory/${serviceCategoryId}`, serviceData, {
