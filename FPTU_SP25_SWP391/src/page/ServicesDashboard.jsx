@@ -1,4 +1,3 @@
-// ServicesDashboard.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -45,7 +44,7 @@ export default function ServicesDashboard({ darkMode }) {
   const [loading, setLoading] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState(""); // For filtering/sorting
+  const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
 
   const handleServiceInputChange = (e) => {
@@ -74,9 +73,22 @@ export default function ServicesDashboard({ darkMode }) {
     }
   };
 
+  // Check if the name already exists, excluding the current service being edited
+  const isDuplicateName = (name, excludeServiceId = null) => {
+    return services.some(
+      (service) =>
+        service.name.toLowerCase() === name.toLowerCase() &&
+        (excludeServiceId ? service.serviceCategoryId !== excludeServiceId : true)
+    );
+  };
+
   const handleCreateService = async () => {
     if (!serviceForm.name.trim()) {
       setError("Service category name cannot be empty.");
+      return;
+    }
+    if (isDuplicateName(serviceForm.name)) {
+      setError("A service category with this name already exists. Please choose a different name.");
       return;
     }
     setLoading(true);
@@ -113,6 +125,10 @@ export default function ServicesDashboard({ darkMode }) {
   const handleUpdateService = async () => {
     if (!serviceForm.name.trim()) {
       setError("Service category name cannot be empty.");
+      return;
+    }
+    if (isDuplicateName(serviceForm.name, editingService.serviceCategoryId)) {
+      setError("A service category with this name already exists. Please choose a different name.");
       return;
     }
     setLoading(true);
