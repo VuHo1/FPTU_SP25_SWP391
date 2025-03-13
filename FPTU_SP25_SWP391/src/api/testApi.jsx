@@ -40,6 +40,21 @@ export const signUpUser = async (data) => {
     throw error;
   }
 };
+export const updatePassword = async (data) => {
+  try {
+    const response = await apiClient.put(`/api/users/update-password`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+      },
+    });
+    console.log("Password updated successfully:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error updating password:", error.response?.data || error);
+    throw error;
+  }
+};
 
 // Services
 export const getServiceCategories = async (token) => {
@@ -206,6 +221,23 @@ export const postCheckout = async (bookingId, token) => {
 };
 
 // User Details
+// export const getUserDetails = async (userId, token) => {
+//   try {
+//     console.log("Making GET request to /api/UserDetails/", userId);
+//     const response = await apiClient.get(`/api/UserDetails/${userId}`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         Accept: "*/*",
+//       },
+//     });
+//     console.log("GET UserDetails response:", response.data);
+//     return response;
+//   } catch (error) {
+//     console.error("Error fetching user details:", error.response?.data || error);
+//     throw error;
+//   }
+// };
+// User Details
 export const getUserDetails = async (userId, token) => {
   try {
     console.log("Making GET request to /api/UserDetails/", userId);
@@ -218,8 +250,12 @@ export const getUserDetails = async (userId, token) => {
     console.log("GET UserDetails response:", response.data);
     return response;
   } catch (error) {
+    if (error.response?.status === 404) {
+      console.log("No user details found for userId:", userId);
+      return { data: {} }; // Return empty object for 404
+    }
     console.error("Error fetching user details:", error.response?.data || error);
-    throw error;
+    throw error; // Throw for other errors (e.g., 500, 401)
   }
 };
 
@@ -230,7 +266,7 @@ export const updateUserDetails = async (userId, data, token) => {
     const response = await apiClient.put(`/api/UserDetails/${userId}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "application/json",
         Accept: "*/*",
       },
     });
