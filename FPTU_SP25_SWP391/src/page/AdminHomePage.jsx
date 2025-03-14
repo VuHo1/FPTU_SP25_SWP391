@@ -200,8 +200,8 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     { text: "Dashboard", icon: <DashboardIcon />, action: () => setTabValue(0) },
     { text: "Users", icon: <PeopleIcon />, action: () => setTabValue(1) },
     { text: "Services", icon: <BusinessIcon />, action: () => setTabValue(2) },
-    { text: "User Profile", icon: <PersonIcon />, action: () => navigate("/profile") },
-    { text: "Edit Profile", icon: <EditIcon />, action: () => navigate("/edit-profile") },
+    { text: "User Profile", icon: <PersonIcon />, action: () => navigate("/profile-role") },
+    { text: "Edit Profile", icon: <EditIcon />, action: () => navigate("/edit-profilerole") },
     { text: "Toggle Dark Mode", icon: <DarkModeIcon />, action: toggleDarkMode },
     { text: "Logout", icon: <LogoutIcon />, action: handleLogout },
   ];
