@@ -86,8 +86,8 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
       action();
     } else {
       setActiveSection(section);
-      if (section === "view-profile") navigate("/profile");
-      if (section === "edit-profile") navigate("/edit-profile");
+      if (section === "view-profile") navigate("/profile-role");
+      if (section === "edit-profile") navigate("/edit-profilerole");
     }
   };
 

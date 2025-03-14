@@ -28,6 +28,9 @@ import StaffHomePage from "./page/StaffHomePage";
 import Error from "./page/Error";
 import EditProfile from "./page/EditProfile";
 import AddProfile from "./page/AddProfile"; // Add this import
+import ProfileRole from "./page/ProfileRole";
+import EditProfileRole from "./page/EditProfileRole";
+import AddProfileRole from "./page/AddProfileRole";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const role = localStorage.getItem("role");
@@ -85,6 +88,9 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                       <Route path="/profile-role" element={<ProfileRole darkMode={darkMode} />} />
+                    <Route path="/edit-profilerole" element={<EditProfileRole darkMode={darkMode} />} />
+                    <Route path="/add-profilerole" element={<AddProfileRole darkMode={darkMode} />} />
             <Route
               path="*"
               element={
@@ -135,6 +141,7 @@ function App() {
                     <Route path="/edit-profile" element={<EditProfile darkMode={darkMode} />} />
                     <Route path="/add-profile" element={<AddProfile darkMode={darkMode} />} />
                     <Route path="*" element={<Error darkMode={darkMode} />} />
+                 
                   </Routes>
                 </Layout>
               }
