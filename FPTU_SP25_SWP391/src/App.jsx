@@ -31,6 +31,7 @@ import AddProfile from "./page/AddProfile"; // Add this import
 import ProfileRole from "./page/ProfileRole";
 import EditProfileRole from "./page/EditProfileRole";
 import AddProfileRole from "./page/AddProfileRole";
+import ChooseScheduleTherapist from "./page/ChooseScheduleTherapist";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const role = localStorage.getItem("role");
@@ -84,13 +85,25 @@ function App() {
                       path="/staff/home"
                       element={
                         <ProtectedRoute allowedRole="Staff">
-                          <StaffHomePage darkMode={darkMode} />
+                          <StaffHomePage darkMode={darkMode}
+                          toggleDarkMode={toggleDarkMode} />
+                        </ProtectedRoute>
+                      }
+                    />
+                       <Route
+                      path="/skintherapist/home"
+                      element={
+                        <ProtectedRoute allowedRole="Therapist">
+                          <TherapistHomePage darkMode={darkMode}
+                          toggleDarkMode={toggleDarkMode} />
                         </ProtectedRoute>
                       }
                     />
                        <Route path="/profile-role" element={<ProfileRole darkMode={darkMode} />} />
                     <Route path="/edit-profilerole" element={<EditProfileRole darkMode={darkMode} />} />
                     <Route path="/add-profilerole" element={<AddProfileRole darkMode={darkMode} />} />
+                    <Route path="/therapist/choose-schedule" element={<ChooseScheduleTherapist darkMode={true} />} />
+
             <Route
               path="*"
               element={
@@ -129,14 +142,7 @@ function App() {
                       path="/profile"
                       element={<Profile darkMode={darkMode} />}
                     />
-                    <Route
-                      path="/skintherapist/home"
-                      element={
-                        <ProtectedRoute allowedRole="Therapist">
-                          <TherapistHomePage darkMode={darkMode} />
-                        </ProtectedRoute>
-                      }
-                    />
+                 
                 
                     <Route path="/edit-profile" element={<EditProfile darkMode={darkMode} />} />
                     <Route path="/add-profile" element={<AddProfile darkMode={darkMode} />} />

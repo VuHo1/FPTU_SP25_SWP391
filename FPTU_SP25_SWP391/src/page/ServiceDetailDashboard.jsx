@@ -30,16 +30,24 @@ import {
 const DashboardCard = styled("div")(({ darkMode }) => ({
   padding: "30px",
   borderRadius: "16px",
-  background: darkMode ? "#34495e" : "#ffffff",
+  background: darkMode ? "#000000" : "#ffffff", // Black in dark mode to match StaffHomePage
   boxShadow: darkMode
-    ? "0 8px 24px rgba(0, 0, 0, 0.6)"
+    ? "0 8px 24px rgba(255, 255, 255, 0.1)" // Subtle white shadow like StaffHomePage
     : "0 8px 24px rgba(0, 0, 0, 0.1)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-8px)",
     boxShadow: darkMode
-      ? "0 12px 32px rgba(0, 0, 0, 0.8)"
+      ? "0 12px 32px rgba(255, 255, 255, 0.15)" // Slightly stronger white shadow
       : "0 12px 32px rgba(0, 0, 0, 0.15)",
+  },
+}));
+
+const StyledTableContainer = styled(TableContainer)(({ darkMode }) => ({
+  background: darkMode ? "#000000" : "#ffffff", // Black in dark mode
+  "& .MuiPaper-root": {
+    background: darkMode ? "#000000" : "#ffffff", // Ensure Paper matches
+    boxShadow: "none", // Remove default Paper shadow to avoid overlap
   },
 }));
 
@@ -267,7 +275,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
     <Box>
       <Typography
         variant="subtitle1"
-        sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 4, fontStyle: "italic" }}
+        sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 4, fontStyle: "italic" }} // White in dark mode
         component={motion.div}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -279,7 +287,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       {error && (
         <Typography
           variant="body2"
-          sx={{ color: "#f44336", mb: 2 }}
+          sx={{ color: "#f44336", mb: 2 }} // Keep error red for visibility
           component={motion.div}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -292,7 +300,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       {loading && (
         <Typography
           variant="body2"
-          sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 2 }}
+          sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 2 }} // White in dark mode
         >
           Loading...
         </Typography>
@@ -309,14 +317,14 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       >
         <Typography
           variant="h6"
-          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
+          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }} // White in dark mode
         >
           {editingService ? "Edit Service" : "Add New Service"}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>
+              <InputLabel sx={{ color: darkMode ? "#ffffff" : "#6e6e73" }}>
                 Service Category
               </InputLabel>
               <Select
@@ -327,9 +335,12 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                 sx={{
                   color: darkMode ? "#ffffff" : "#1d1d1f",
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: darkMode ? "#a1a1a6" : "#e0e0e0",
+                    borderColor: darkMode ? "#333333" : "#e0e0e0", // Match StaffHomePage border
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: darkMode ? "#444444" : "#1d1d1f",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: darkMode ? "#ffffff" : "#1d1d1f",
                   },
                 }}
@@ -354,11 +365,11 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                  "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                  "& fieldset": { borderColor: darkMode ? "#333333" : "#e0e0e0" },
+                  "&:hover fieldset": { borderColor: darkMode ? "#444444" : "#1d1d1f" },
                   "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
                 },
-                "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
+                "& .MuiInputLabel-root": { color: darkMode ? "#ffffff" : "#6e6e73" },
                 "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
               }}
             />
@@ -376,11 +387,11 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                  "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                  "& fieldset": { borderColor: darkMode ? "#333333" : "#e0e0e0" },
+                  "&:hover fieldset": { borderColor: darkMode ? "#444444" : "#1d1d1f" },
                   "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
                 },
-                "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
+                "& .MuiInputLabel-root": { color: darkMode ? "#ffffff" : "#6e6e73" },
                 "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
               }}
             />
@@ -397,18 +408,18 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                  "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                  "& fieldset": { borderColor: darkMode ? "#333333" : "#e0e0e0" },
+                  "&:hover fieldset": { borderColor: darkMode ? "#444444" : "#1d1d1f" },
                   "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
                 },
-                "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
+                "& .MuiInputLabel-root": { color: darkMode ? "#ffffff" : "#6e6e73" },
                 "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
               }}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>Status</InputLabel>
+              <InputLabel sx={{ color: darkMode ? "#ffffff" : "#6e6e73" }}>Status</InputLabel>
               <Select
                 name="status"
                 value={serviceForm.status}
@@ -417,9 +428,12 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                 sx={{
                   color: darkMode ? "#ffffff" : "#1d1d1f",
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: darkMode ? "#a1a1a6" : "#e0e0e0",
+                    borderColor: darkMode ? "#333333" : "#e0e0e0",
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: darkMode ? "#444444" : "#1d1d1f",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: darkMode ? "#ffffff" : "#1d1d1f",
                   },
                 }}
@@ -500,11 +514,11 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       >
         <Typography
           variant="h6"
-          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
+          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }} // White in dark mode
         >
           All Services
         </Typography>
-        <TableContainer component={Paper}>
+        <StyledTableContainer darkMode={darkMode} component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
@@ -543,7 +557,12 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                         color="primary"
                         onClick={() => handleEditService(service)}
                         disabled={loading}
-                        sx={{ mr: 1 }}
+                        sx={{
+                          mr: 1,
+                          color: darkMode ? "#ffffff" : "#1976d2",
+                          borderColor: darkMode ? "#ffffff" : "#1976d2",
+                          "&:hover": { borderColor: darkMode ? "#cccccc" : "#1565c0" },
+                        }}
                       >
                         Edit
                       </Button>
@@ -552,6 +571,11 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                         color="error"
                         onClick={() => handleDeleteService(service.serviceId)}
                         disabled={loading}
+                        sx={{
+                          color: darkMode ? "#ffffff" : "#d32f2f",
+                          borderColor: darkMode ? "#ffffff" : "#d32f2f",
+                          "&:hover": { borderColor: darkMode ? "#cccccc" : "#c62828" },
+                        }}
                       >
                         Delete
                       </Button>
@@ -561,7 +585,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               )}
             </TableBody>
           </Table>
-        </TableContainer>
+        </StyledTableContainer>
       </DashboardCard>
     </Box>
   );
