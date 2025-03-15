@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Added useEffect
 import {
   Box,
   Drawer,
@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import {
   Schedule as ScheduleIcon,
-  Business as BusinessIcon,
+  QuestionAnswer as QaIcon,
   Person as PersonIcon,
   Edit as EditIcon,
   Brightness4 as DarkModeIcon,
@@ -19,7 +19,9 @@ import {
 } from "@mui/icons-material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import ServiceDetailDashboard from "../page/ServiceDetailDashboard";
+import { useAuth } from "./AuthContext";
 
 const Sidebar = styled(Drawer)(({ darkMode }) => ({
   width: 240,
@@ -31,6 +33,9 @@ const Sidebar = styled(Drawer)(({ darkMode }) => ({
       : "linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%)",
     borderRight: darkMode ? "1px solid #3d4a4b" : "1px solid #e0e0e0",
     paddingTop: "20px",
+    boxShadow: darkMode
+      ? "2px 0 8px rgba(0, 0, 0, 0.5)"
+      : "2px 0 8px rgba(0, 0, 0, 0.05)",
   },
 }));
 
@@ -49,6 +54,7 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
   margin: "8px 16px",
   padding: "12px 20px",
   background: isActive ? (darkMode ? "#3d4a4b" : "#e0e0e0") : "transparent",
+  transition: "background 0.3s ease, transform 0.2s ease",
   "&:hover": {
     background: darkMode ? "#3d4a4b" : "#f0f0f0",
     transform: "translateX(5px)",
@@ -58,17 +64,30 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
 const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("home");
   const navigate = useNavigate();
+  const location = useLocation(); // Added to access navigation state
+  const { logout } = useAuth();
+
+  // Reset activeSection to "home" when returning with resetToHome flag
+  useEffect(() => {
+    if (location.state?.resetToHome) {
+      setActiveSection("home");
+      // Clear the state to prevent repeated resets on refresh
+      navigate("/skintherapist/home", { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const handleLogout = () => {
+    logout();
     localStorage.removeItem("token");
+    setActiveSection("home");
     navigate("/sign_in", { replace: true });
   };
 
   const menuItems = [
     { text: "Choose Schedule", icon: <ScheduleIcon />, section: "schedule" },
-    { text: "View Services", icon: <BusinessIcon />, section: "services" },
-    { text: "View Profile", icon: <PersonIcon />, section: "skintherapist/profile-role" },
-    { text: "Edit Profile", icon: <EditIcon />, section: "skintherapist/edit-profile" },
+    { text: "View QA Customer", icon: <QaIcon />, section: "qa-customer" },
+    { text: "View Profile", icon: <PersonIcon />, section: "view-profile" },
+    { text: "Edit Profile", icon: <EditIcon />, section: "edit-profile" },
     { text: "Toggle Dark Mode", icon: <DarkModeIcon />, action: toggleDarkMode },
     { text: "Logout", icon: <LogoutIcon />, action: handleLogout },
   ];
@@ -78,8 +97,10 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
       action();
     } else {
       setActiveSection(section);
-      if (section === "skintherapist/profile") navigate("/skintherapist/profile");
-      if (section === "skintherapist/edit-profile") navigate("/skintherapist/edit-profile");
+      if (section === "schedule") navigate("/therapist/choose-schedule");
+      if (section === "qa-customer") navigate("/therapist/qa-customer");
+      if (section === "view-profile") navigate("/profile-role");
+      if (section === "edit-profile") navigate("/edit-profilerole");
     }
   };
 
@@ -89,7 +110,16 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
         <Box sx={{ p: 2 }}>
           <Typography
             variant="h6"
-            sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 700, textAlign: "center", mb: 3 }}
+            sx={{
+              color: darkMode ? "#ffffff" : "#1d1d1f",
+              fontWeight: 700,
+              textAlign: "center",
+              mb: 3,
+            }}
+            component={motion.div}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
           >
             Therapist Control Panel
           </Typography>
@@ -102,14 +132,23 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
                 onClick={() => handleMenuClick(item.section, item.action)}
                 darkMode={darkMode}
                 isActive={activeSection === item.section}
+                component={motion.div}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <ListItemIcon sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }} />
+                <ListItemIcon sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mr: 1 }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}
+                />
               </StyledListItem>
             ))}
           </List>
         </Box>
       </Sidebar>
+
       <MainContent
         darkMode={darkMode}
         component={motion.div}
@@ -117,12 +156,27 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <Typography variant="h4" sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 700, mb: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: darkMode ? "#ffffff" : "#1d1d1f",
+            fontWeight: 700,
+            mb: 4,
+          }}
+          component={motion.div}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
           Therapist Dashboard
         </Typography>
+
         {activeSection === "home" && (
           <Box>
-            <Typography variant="h5" sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", mb: 2 }}>
+            <Typography
+              variant="h5"
+              sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", mb: 2 }}
+            >
               Welcome, Therapist!
             </Typography>
             <Typography sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>
@@ -130,8 +184,8 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
             </Typography>
           </Box>
         )}
-        {activeSection === "schedule" && <Typography>Schedule Content (Placeholder)</Typography>}
-        {activeSection === "services" && <Typography>Services Content (Placeholder)</Typography>}
+
+        {activeSection === "services" && <ServiceDetailDashboard darkMode={darkMode} />}
       </MainContent>
     </Box>
   );

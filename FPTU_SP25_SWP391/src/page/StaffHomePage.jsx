@@ -22,20 +22,18 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import ScheduleSelectionStaff from "../page/ScheduleSelectionStaff";
 import ServiceDetailDashboard from "../page/ServiceDetailDashboard";
-import { useAuth } from "./AuthContext"; // Import your auth context
+import { useAuth } from "./AuthContext";
 
 const Sidebar = styled(Drawer)(({ darkMode }) => ({
   width: 240,
   flexShrink: 0,
   "& .MuiDrawer-paper": {
     width: 240,
-    background: darkMode
-      ? "linear-gradient(180deg, #1c2526 0%, #2d3839 100%)"
-      : "linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%)",
-    borderRight: darkMode ? "1px solid #3d4a4b" : "1px solid #e0e0e0",
+    background: darkMode ? "#000000" : "linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%)",
+    borderRight: darkMode ? "1px solid #333333" : "1px solid #e0e0e0",
     paddingTop: "20px",
     boxShadow: darkMode
-      ? "2px 0 8px rgba(0, 0, 0, 0.5)"
+      ? "2px 0 8px rgba(255, 255, 255, 0.1)"
       : "2px 0 8px rgba(0, 0, 0, 0.05)",
   },
 }));
@@ -44,9 +42,7 @@ const MainContent = styled(Box)(({ darkMode }) => ({
   flexGrow: 1,
   padding: "40px",
   minHeight: "100vh",
-  background: darkMode
-    ? "linear-gradient(135deg, #1c2526 0%, #2d3839 100%)"
-    : "linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%)",
+  background: darkMode ? "#000000" : "linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%)",
   transition: "all 0.3s ease",
 }));
 
@@ -54,24 +50,32 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
   borderRadius: "8px",
   margin: "8px 16px",
   padding: "12px 20px",
-  background: isActive ? (darkMode ? "#3d4a4b" : "#e0e0e0") : "transparent",
+  background: isActive ? (darkMode ? "#333333" : "#e0e0e0") : "transparent",
   transition: "background 0.3s ease, transform 0.2s ease",
   "&:hover": {
-    background: darkMode ? "#3d4a4b" : "#f0f0f0",
+    background: darkMode ? "#444444" : "#f0f0f0",
     transform: "translateX(5px)",
   },
+}));
+
+// New styled component for wrapping ServiceDetailDashboard
+const ServiceContainer = styled(Box)(({ darkMode }) => ({
+  background: darkMode ? "#000000" : "transparent", // Black background in dark mode
+  padding: "20px",
+  borderRadius: "8px",
+  color: darkMode ? "#ffffff" : "inherit", // Ensure text stays white in dark mode
 }));
 
 const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("home");
   const navigate = useNavigate();
-  const { logout } = useAuth(); // Use the auth context for logout
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    logout(); // Call the logout function from the auth context
-    localStorage.removeItem("token"); // Clear the token
-    setActiveSection("home"); // Reset the active section
-    navigate("/sign_in", { replace: true }); // Navigate immediately
+    logout();
+    localStorage.removeItem("token");
+    setActiveSection("home");
+    navigate("/sign_in", { replace: true });
   };
 
   const menuItems = [
@@ -112,7 +116,7 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
           >
             Staff Control Panel
           </Typography>
-          <Divider sx={{ backgroundColor: darkMode ? "#3d4a4b" : "#e0e0e0", mb: 2 }} />
+          <Divider sx={{ backgroundColor: darkMode ? "#333333" : "#e0e0e0", mb: 2 }} />
           <List>
             {menuItems.map((item) => (
               <StyledListItem
@@ -125,7 +129,7 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <ListItemIcon sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mr: 1 }}>
+                <ListItemIcon sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mr: 1 }}>
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText
@@ -168,14 +172,18 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
             >
               Welcome, Staff Member!
             </Typography>
-            <Typography sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73" }}>
+            <Typography sx={{ color: darkMode ? "#ffffff" : "#6e6e73" }}>
               Use the control panel on the left to manage your tasks and profile.
             </Typography>
           </Box>
         )}
 
         {activeSection === "schedule" && <ScheduleSelectionStaff darkMode={darkMode} />}
-        {activeSection === "services" && <ServiceDetailDashboard darkMode={darkMode} />}
+        {activeSection === "services" && (
+          <ServiceContainer darkMode={darkMode}>
+            <ServiceDetailDashboard darkMode={darkMode} />
+          </ServiceContainer>
+        )}
       </MainContent>
     </Box>
   );
