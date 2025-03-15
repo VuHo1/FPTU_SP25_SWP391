@@ -7,7 +7,6 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
-  IconButton,
   Divider,
 } from "@mui/material";
 import {
@@ -19,10 +18,11 @@ import {
   ExitToApp as LogoutIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/system";
-import { motion } from "framer-motion"; // Optional: for animations
-import { useNavigate } from "react-router-dom"; // For navigation
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import ScheduleSelectionStaff from "../page/ScheduleSelectionStaff";
 import ServiceDetailDashboard from "../page/ServiceDetailDashboard";
+import { useAuth } from "./AuthContext"; // Import your auth context
 
 const Sidebar = styled(Drawer)(({ darkMode }) => ({
   width: 240,
@@ -65,11 +65,13 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
 const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("home");
   const navigate = useNavigate();
+  const { logout } = useAuth(); // Use the auth context for logout
 
   const handleLogout = () => {
-    // Add logout logic here (e.g., clear token, redirect to login)
-    localStorage.removeItem("token");
-    navigate("/sign_in", { replace: true });
+    logout(); // Call the logout function from the auth context
+    localStorage.removeItem("token"); // Clear the token
+    setActiveSection("home"); // Reset the active section
+    navigate("/sign_in", { replace: true }); // Navigate immediately
   };
 
   const menuItems = [
@@ -93,7 +95,6 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
 
   return (
     <Box sx={{ display: "flex" }}>
-      {/* Sidebar */}
       <Sidebar variant="permanent" darkMode={darkMode}>
         <Box sx={{ p: 2 }}>
           <Typography
@@ -137,7 +138,6 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
         </Box>
       </Sidebar>
 
-      {/* Main Content */}
       <MainContent
         darkMode={darkMode}
         component={motion.div}
@@ -176,7 +176,6 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
 
         {activeSection === "schedule" && <ScheduleSelectionStaff darkMode={darkMode} />}
         {activeSection === "services" && <ServiceDetailDashboard darkMode={darkMode} />}
-        {/* Note: View Profile and Edit Profile redirect to separate routes */}
       </MainContent>
     </Box>
   );

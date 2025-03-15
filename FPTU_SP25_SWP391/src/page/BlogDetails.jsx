@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../page/AuthContext";
-import { getAllServices, getServiceCategories } from "../api/testApi"; // Import both APIs
+import { getAllServices, getServiceCategories } from "../api/testApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 
@@ -10,11 +10,10 @@ const BlogDetail = ({ darkMode }) => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [service, setService] = useState(null);
-  const [categories, setCategories] = useState([]); // Add categories state
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch service and categories dynamically
   useEffect(() => {
     const fetchServiceAndCategories = async () => {
       setLoading(true);
@@ -52,6 +51,8 @@ const BlogDetail = ({ darkMode }) => {
       navigate("/sign_in", { state: { from: `/service/${id}` } });
     }
   };
+
+  const isServiceActive = service.status;
 
   return (
     <>
@@ -109,7 +110,7 @@ const BlogDetail = ({ darkMode }) => {
           border-radius: 16px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .back-button, .booking-button {
+        .back-button, .booking-button, .inactive-button {
           display: inline-block;
           padding: 0.75rem 1.5rem;
           font-size: 1rem;
@@ -136,6 +137,13 @@ const BlogDetail = ({ darkMode }) => {
         .booking-button:hover {
           background: ${darkMode ? "#16a085" : "#16a085"};
           transform: translateY(-2px);
+        }
+        .inactive-button {
+          background: ${darkMode ? "#7f8c8d" : "#95a5a6"};
+          color: #fff;
+          border: none;
+          cursor: not-allowed;
+          opacity: 0.7;
         }
         .loading, .error {
           text-align: center;
@@ -185,8 +193,12 @@ const BlogDetail = ({ darkMode }) => {
             <Link to="/service" className="back-button">
               Quay lại
             </Link>
-            <button onClick={handleBookingClick} className="booking-button">
-              Đặt Lịch Ngay
+            <button
+              onClick={isServiceActive ? handleBookingClick : null}
+              className={isServiceActive ? "booking-button" : "inactive-button"}
+              disabled={!isServiceActive}
+            >
+              {isServiceActive ? "Đặt Lịch Ngay" : "Không Khả Dụng"}
             </button>
           </div>
           <div className="blog-image">

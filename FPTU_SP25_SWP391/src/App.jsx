@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./page/AuthContext";
 import HomePage from "./page/HomePage";
-import BookingPage from "./page/BookingPage";
+// import BookingPage from "./page/BookingPage";
 import CartPage from "./page/CartPage";
 import ProductListPage from "./page/ProductListPage";
 import Contact from "./page/Contact";
@@ -97,7 +97,7 @@ function App() {
                 <Layout darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
                   <Routes>
                     <Route path="/" element={<HomePage darkMode={darkMode} />} />
-                    <Route path="/booking_page" element={<BookingPage />} />
+                    {/* <Route path="/booking_page" element={<BookingPage />} /> */}
                     <Route
                       path="/service/:id"
                       element={<BlogDetail darkMode={darkMode} />}
