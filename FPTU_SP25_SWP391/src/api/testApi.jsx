@@ -517,9 +517,24 @@ export const createTherapistSchedule = async (scheduleData, token) => {
     console.log("Schedule created successfully:", response.data);
     return response;
   } catch (error) {
-    console.error("Error creating schedule:", error.response?.data || error);
+    console.error("Error creating schedule:", JSON.stringify(error.response?.data, null, 2));
     throw error;
   }
 };
 
-// ... (rest of your existing API functions remain unchanged)
+export const getTherapistSchedules = async (token) => {
+  try {
+    const response = await apiClient.get("/api/TherapistSchedule", {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Fetched therapist schedules (raw):", JSON.stringify(response.data, null, 2));
+    return response;
+  } catch (error) {
+    console.error("Error fetching therapist schedules:", error.response?.data || error);
+    throw error;
+  }
+};
