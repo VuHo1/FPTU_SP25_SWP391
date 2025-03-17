@@ -49,8 +49,7 @@ const ProfileRole = ({ darkMode, role }) => { // Added role prop if passed expli
   }, [userId, token, isLoggedIn, navigate]);
 
   const handleAddProfile = () => {
-    const userRole = role || localStorage.getItem("role")?.toLowerCase() || "admin"; // Default to admin if role not provided
-    navigate(`/${userRole === "therapist" ? "skintherapist" : userRole}/add-profile`);
+    navigate("/add-profilerole");
   };
 
   const handleReturn = () => {

@@ -10,7 +10,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import { createTherapistSchedule } from "../api/testApi"; // Adjust the import path
 
 const ScheduleContainer = styled(Box)(({ darkMode }) => ({
   padding: "40px",
@@ -21,35 +22,67 @@ const ScheduleContainer = styled(Box)(({ darkMode }) => ({
   transition: "all 0.3s ease",
 }));
 
-const ChooseScheduleTherapist = ({ darkMode }) => {
+const ChooseScheduleTherapist = ({ darkMode, therapistId: propTherapistId, token: propToken }) => {
   const [selectedDay, setSelectedDay] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Use props if provided, otherwise fall back to location state or local storage
+  const therapistId = propTherapistId || location.state?.therapistId;
+  const token = propToken || location.state?.token || localStorage.getItem("token");
 
   const days = [
+    "Sunday",
     "Monday",
     "Tuesday",
     "Wednesday",
     "Thursday",
     "Friday",
     "Saturday",
-    "Sunday",
   ];
+
+  const dayToNumber = {
+    Sunday: 0,
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6,
+  };
 
   const handleDayChange = (event) => {
     setSelectedDay(event.target.value);
   };
 
-  const handleSubmit = () => {
-    if (selectedDay) {
-      alert(`Schedule set for ${selectedDay}`);
-      // Add logic here to save the schedule (e.g., API call)
-    } else {
+  const handleSubmit = async () => {
+    if (!selectedDay) {
       alert("Please select a day.");
+      return;
+    }
+
+    if (!therapistId || !token) {
+      alert("Therapist ID or authentication token is missing.");
+      return;
+    }
+
+    const scheduleData = {
+      therapistId: Number(therapistId),
+      dayOfWeek: dayToNumber[selectedDay],
+      startTime: "00:00:00",
+      endTime: "00:00:00",
+    };
+
+    try {
+      await createTherapistSchedule(scheduleData, token);
+      alert(`Schedule set for ${selectedDay} successfully!`);
+      navigate("/skintherapist/home", { state: { resetToHome: true } });
+    } catch (error) {
+      alert("Failed to set schedule. Please try again.");
     }
   };
 
   const handleBack = () => {
-    // Navigate back to /skintherapist/home with a reset flag
     navigate("/skintherapist/home", { state: { resetToHome: true } });
   };
 

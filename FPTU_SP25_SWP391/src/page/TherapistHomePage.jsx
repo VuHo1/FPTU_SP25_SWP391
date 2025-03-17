@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react"; // Added useEffect
+// TherapistHomePage.jsx
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Drawer,
@@ -19,7 +20,7 @@ import {
 } from "@mui/icons-material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import ServiceDetailDashboard from "../page/ServiceDetailDashboard";
 import { useAuth } from "./AuthContext";
 
@@ -64,17 +65,18 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
 const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("home");
   const navigate = useNavigate();
-  const location = useLocation(); // Added to access navigation state
-  const { logout } = useAuth();
+  const location = useLocation();
+  const { logout, user } = useAuth(); // Assuming useAuth provides user info including therapistId
 
-  // Reset activeSection to "home" when returning with resetToHome flag
   useEffect(() => {
     if (location.state?.resetToHome) {
       setActiveSection("home");
-      // Clear the state to prevent repeated resets on refresh
       navigate("/skintherapist/home", { replace: true, state: {} });
     }
   }, [location, navigate]);
+
+  const token = localStorage.getItem("token"); // Get token from local storage
+  const therapistId = user?.id; // Assuming user object has an id field for therapistId
 
   const handleLogout = () => {
     logout();
@@ -97,7 +99,9 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
       action();
     } else {
       setActiveSection(section);
-      if (section === "schedule") navigate("/therapist/choose-schedule");
+      if (section === "schedule") {
+        navigate("/therapist/choose-schedule", { state: { therapistId, token } });
+      }
       if (section === "qa-customer") navigate("/therapist/qa-customer");
       if (section === "view-profile") navigate("/profile-role");
       if (section === "edit-profile") navigate("/edit-profilerole");

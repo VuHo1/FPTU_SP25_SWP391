@@ -244,6 +244,8 @@ export const getUserDetails = async (userId, token) => {
     const response = await apiClient.get(`/api/UserDetails/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+
         Accept: "*/*",
       },
     });
@@ -259,15 +261,42 @@ export const getUserDetails = async (userId, token) => {
   }
 };
 
+// export const updateUserDetails = async (userId, data, token) => {
+//   try {
+//     console.log("Making PUT request to /api/UserDetails/UpdateUser", userId);
+//     console.log("Update data being sent:", Object.fromEntries(data));
+//     const response = await apiClient.put(`/api/UserDetails/UpdateUser/${userId}`, data, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         Accept: "*/*",
+//       },
+//     });
+//     console.log("PUT UserDetails response:", response.data);
+//     return response;
+//   } catch (error) {
+//     console.error("Error updating user details:", error.response?.data || error);
+//     throw error;
+//   }
+// };
 export const updateUserDetails = async (userId, data, token) => {
   try {
-    console.log("Making PUT request to /api/UserDetails/", userId);
-    console.log("Update data being sent:", Object.fromEntries(data));
-    const response = await apiClient.put(`/api/UserDetails/${userId}`, data, {
+    console.log("Making PUT request to /api/UserDetails/UpdateUser");
+    const formData = new FormData();
+    formData.append("UserId", userId); // Add UserId to the body
+    formData.append("FirstName", data.get("firstName"));
+    formData.append("LastName", data.get("lastName"));
+    formData.append("Address", data.get("address"));
+    formData.append("Gender", data.get("gender"));
+    if (data.get("Avatar")) {
+      formData.append("avatarFile", data.get("Avatar")); // Match server's expected field name
+    }
+
+    console.log("Update data being sent:", Object.fromEntries(formData));
+    const response = await apiClient.put(`/api/UserDetails/UpdateUser`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
         Accept: "*/*",
+        // No need to set Content-Type; Axios sets it to multipart/form-data automatically
       },
     });
     console.log("PUT UserDetails response:", response.data);
@@ -345,10 +374,10 @@ export const deleteUser = async (userId, token) => {
 
 export const createUserDetails = async (data, token) => {
   try {
-    const response = await apiClient.post(`/api/UserDetails`, data, {
+    const response = await apiClient.post(`/api/UserDetails/CreateUserDetail`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
         Accept: "*/*",
       },
     });
@@ -389,3 +418,108 @@ export const deleteServiceCategory = async (serviceCategoryId, token) => {
     throw error;
   }
 };
+export const getAllTherapistSpecialties = async (token) => {
+  try {
+    const response = await apiClient.get(`/api/TherapistSpecialty/all`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "text/plain",
+      },
+    });
+    console.log("All therapist specialties:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching therapist specialties:", error.response?.data || error);
+    throw error;
+  }
+};
+
+export const updateTherapistCategories = async (therapistId, categoryIds, token) => {
+  try {
+    console.log("Updating therapist categories for therapistId:", therapistId, "with categoryIds:", categoryIds);
+    if (!therapistId) throw new Error("therapistId is required");
+    if (!Array.isArray(categoryIds) || categoryIds.length === 0) {
+      console.log("No valid category IDs provided; skipping update.");
+      return [];
+    }
+    if (!token) throw new Error("Authentication token is required");
+
+    const validCategoryIds = categoryIds
+      .filter(id => id !== null && id !== undefined)
+      .map(id => Number(id));
+
+    const requests = validCategoryIds.map(categoryId =>
+      apiClient.post(
+        `/api/TherapistSpecialty/create`,
+        {
+          therapistId: Number(therapistId), // Lowercase to match API
+          serviceCategoryId: Number(categoryId), // Lowercase to match API
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+    );
+
+    const responses = await Promise.all(requests);
+    console.log("Therapist categories updated successfully:", responses.map(res => res.data));
+    return responses;
+  } catch (error) {
+    console.error("Error updating therapist categories:", error.response?.data || error);
+    throw error;
+  }
+};
+
+export const createTherapistSpecialty = async (therapistId, serviceCategoryId, token) => {
+  try {
+    console.log("Creating therapist specialty:", { therapistId, serviceCategoryId });
+    if (!therapistId || !serviceCategoryId) throw new Error("therapistId and serviceCategoryId are required");
+    if (!token) throw new Error("Authentication token is required");
+
+    const response = await apiClient.post(
+      `/api/TherapistSpecialty/create`,
+      {
+        therapistId: Number(therapistId),
+        serviceCategoryId: Number(serviceCategoryId),
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("Therapist specialty created successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating therapist specialty:", error.response?.data || error);
+    throw error;
+  }
+};
+// Add this to your existing API file (e.g., test.api.js)
+
+// ... (existing imports and code remain unchanged)
+
+export const createTherapistSchedule = async (scheduleData, token) => {
+  try {
+    const response = await apiClient.post("/api/TherapistSchedule", scheduleData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Schedule created successfully:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error creating schedule:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// ... (rest of your existing API functions remain unchanged)
