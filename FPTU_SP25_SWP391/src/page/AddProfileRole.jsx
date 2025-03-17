@@ -64,7 +64,7 @@ const AddProfileRole = ({ darkMode }) => {
       newProfileData.append("address", formData.address);
       newProfileData.append("gender", formData.gender);
       if (formData.avatar) {
-        newProfileData.append("Avatar", formData.avatar); // Adjusted to "Avatar" (capitalized)
+        newProfileData.append("avatar", formData.avatar); // Adjusted to "Avatar" (capitalized)
       }
 
       await createUserDetails(newProfileData, token);
@@ -80,7 +80,7 @@ const AddProfileRole = ({ darkMode }) => {
   };
 
   const handleCancel = () => {
-    navigate("/profile");
+    navigate(-2);
   };
 
   return (

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Drawer,
@@ -58,12 +59,11 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
   },
 }));
 
-// New styled component for wrapping ServiceDetailDashboard
 const ServiceContainer = styled(Box)(({ darkMode }) => ({
-  background: darkMode ? "#000000" : "transparent", // Black background in dark mode
+  background: darkMode ? "#000000" : "transparent",
   padding: "20px",
   borderRadius: "8px",
-  color: darkMode ? "#ffffff" : "inherit", // Ensure text stays white in dark mode
+  color: darkMode ? "#ffffff" : "inherit",
 }));
 
 const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
@@ -79,7 +79,7 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
   };
 
   const menuItems = [
-    { text: "Choose Schedule", icon: <ScheduleIcon />, section: "schedule" },
+    { text: "Therapist Edit Service", icon: <ScheduleIcon />, section: "schedule" },
     { text: "View Services", icon: <BusinessIcon />, section: "services" },
     { text: "View Profile", icon: <PersonIcon />, section: "view-profile" },
     { text: "Edit Profile", icon: <EditIcon />, section: "edit-profile" },
@@ -187,6 +187,11 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
       </MainContent>
     </Box>
   );
+};
+
+StaffHomePage.propTypes = {
+  darkMode: PropTypes.bool.isRequired,
+  toggleDarkMode: PropTypes.func.isRequired,
 };
 
 export default StaffHomePage;

@@ -17,7 +17,7 @@ const Footer = ({ darkMode }) => {
                         <a href="/">
                             <p>Our Service</p>
                         </a>
-                        <a href="/">
+                        <a href="/Blog">
                             <p>Our Team</p>
                         </a>
                         <a href="/">
@@ -68,10 +68,9 @@ const Footer = ({ darkMode }) => {
                         </p>
                     </div>
                     <div className='sb_footer-below-links'>
-                        <a href="/terms"> <div> <p>Terms & conditions</p> </div></a>
-                        <a href="/"> <div> <p>Privacy</p> </div></a>
-                        <a href="/"> <div> <p>Security</p> </div></a>
-                        <a href="/"> <div> <p>Cookie Declaration</p> </div></a>
+                        <a href="/policy"> <div> <p>Terms & conditions</p> </div></a>
+                        <a href="/policy"> <div> <p>Privacy</p> </div></a>
+                        <a href="/policy"> <div> <p>Security</p> </div></a>
                     </div>
                 </div>
 
