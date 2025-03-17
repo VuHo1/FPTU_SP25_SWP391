@@ -21,7 +21,6 @@ import {
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import ServiceDetailDashboard from "../page/ServiceDetailDashboard";
 import { useAuth } from "./AuthContext";
 
 const Sidebar = styled(Drawer)(({ darkMode }) => ({
@@ -66,7 +65,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("home");
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, user } = useAuth(); // Assuming useAuth provides user info including therapistId
+  const { logout, userId, token } = useAuth(); // Use userId and token directly
 
   useEffect(() => {
     if (location.state?.resetToHome) {
@@ -75,12 +74,8 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
     }
   }, [location, navigate]);
 
-  const token = localStorage.getItem("token"); // Get token from local storage
-  const therapistId = user?.id; // Assuming user object has an id field for therapistId
-
   const handleLogout = () => {
     logout();
-    localStorage.removeItem("token");
     setActiveSection("home");
     navigate("/sign_in", { replace: true });
   };
@@ -100,7 +95,12 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
     } else {
       setActiveSection(section);
       if (section === "schedule") {
-        navigate("/therapist/choose-schedule", { state: { therapistId, token } });
+        if (!userId || !token) {
+          alert("Please log in to choose a schedule.");
+          navigate("/sign_in");
+          return;
+        }
+        navigate("/therapist/choose-schedule", { state: { therapistId: userId, token } });
       }
       if (section === "qa-customer") navigate("/therapist/qa-customer");
       if (section === "view-profile") navigate("/profile-role");
@@ -188,8 +188,6 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
             </Typography>
           </Box>
         )}
-
-        {activeSection === "services" && <ServiceDetailDashboard darkMode={darkMode} />}
       </MainContent>
     </Box>
   );
