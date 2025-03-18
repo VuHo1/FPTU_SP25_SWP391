@@ -8,10 +8,12 @@ import {
   Select,
   MenuItem,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
@@ -61,7 +63,7 @@ const StyledButton = styled(Button)(({ darkMode }) => ({
   },
 }));
 
-const ScheduleList = styled(Paper)(({ darkMode }) => ({
+const ScheduleTableWrapper = styled(Paper)(({ darkMode }) => ({
   padding: "25px",
   borderRadius: "12px",
   background: darkMode
@@ -72,9 +74,9 @@ const ScheduleList = styled(Paper)(({ darkMode }) => ({
     : "0 4px 20px rgba(0, 0, 0, 0.05)",
   border: darkMode ? "1px solid #3d4a4b" : "1px solid #e0e0e0",
   marginTop: "40px",
-  maxWidth: "600px",
+  maxWidth: "1000px",
   margin: "40px auto",
-  maxHeight: "350px",
+  maxHeight: "500px",
   overflowY: "auto",
 }));
 
@@ -97,13 +99,19 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
     return `${hour}:00:00`;
   });
 
+  const timeSlots = Array.from({ length: 24 }, (_, i) => {
+    const start = i < 10 ? `0${i}:00` : `${i}:00`;
+    const end = i + 1 < 10 ? `0${i + 1}:00` : `${i + 1}:00`;
+    return { start, end };
+  });
+
   useEffect(() => {
     const fetchSchedules = async () => {
       if (!therapistId || !authToken) return;
       try {
         const response = await getTherapistSchedules(authToken);
         const fetchedSchedules = Array.isArray(response.data) ? response.data : [];
-        setSchedules(fetchedSchedules.filter(schedule => schedule.therapistId === Number(therapistId)));
+        setSchedules(fetchedSchedules.filter((schedule) => schedule.therapistId === Number(therapistId)));
       } catch (error) {
         console.error("Error fetching schedules:", error.response?.data || error);
         setSchedules([]);
@@ -159,6 +167,21 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
   const handleBack = () => {
     navigate("/skintherapist/home", { state: { resetToHome: true } });
   };
+
+  // Prepare schedule data for the table
+  const scheduleGrid = timeSlots.map((slot) => {
+    const row = { time: `${slot.start}-${slot.end}` };
+    days.forEach((day, index) => {
+      const daySchedules = schedules.filter((s) => s.dayOfWeek === dayToNumber[day]);
+      const isScheduled = daySchedules.some(
+        (s) =>
+          (s.startWorkingTime || "00:00:00").slice(0, 5) <= slot.start &&
+          (s.endWorkingTime || "00:00:00").slice(0, 5) > slot.start
+      );
+      row[day] = isScheduled ? "✓" : "";
+    });
+    return row;
+  });
 
   return (
     <ScheduleContainer
@@ -291,7 +314,7 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
         </Box>
       </FormWrapper>
 
-      <ScheduleList
+      <ScheduleTableWrapper
         darkMode={darkMode}
         elevation={4}
         component={motion.div}
@@ -305,22 +328,33 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
         >
           Current Schedules
         </Typography>
-        <Divider sx={{ backgroundColor: darkMode ? "#3d4a4b" : "#e0e0e0", mb: 2 }} />
-        {schedules.length > 0 ? (
-          schedules.map((schedule, index) => (
-            <ListItem key={index} sx={{ py: 1.5 }}>
-              <ListItemText
-                primary={`${days[schedule.dayOfWeek]}: ${(schedule.startWorkingTime || "N/A").slice(0, 5)} - ${(schedule.endWorkingTime || "N/A").slice(0, 5)}`}
-                sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}
-              />
-            </ListItem>
-          ))
-        ) : (
-          <Typography sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", textAlign: "center" }}>
-            No schedules set yet.
-          </Typography>
-        )}
-      </ScheduleList>
+        <TableContainer>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ backgroundColor: darkMode ? "#2d3839" : "#f5f5f5", color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>Time</TableCell>
+                {days.map((day) => (
+                  <TableCell key={day} align="center" sx={{ backgroundColor: darkMode ? "#2d3839" : "#f5f5f5", color: darkMode ? "#a1a1a6" : "#6e6e73", fontWeight: 600 }}>
+                    {day}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {scheduleGrid.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 500 }}>{row.time}</TableCell>
+                  {days.map((day) => (
+                    <TableCell key={day} align="center" sx={{ color: row[day] ? (darkMode ? "#4caf50" : "#1976d2") : darkMode ? "#ffffff" : "#1d1d1f" }}>
+                      {row[day]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </ScheduleTableWrapper>
     </ScheduleContainer>
   );
 };

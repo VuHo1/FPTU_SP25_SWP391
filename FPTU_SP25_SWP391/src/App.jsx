@@ -32,6 +32,7 @@ import ProfileRole from "./page/ProfileRole";
 import EditProfileRole from "./page/EditProfileRole";
 import AddProfileRole from "./page/AddProfileRole";
 import ChooseScheduleTherapist from "./page/ChooseScheduleTherapist";
+import TimeSlotSchedule from "./page/TimeSlotSchedule";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const role = localStorage.getItem("role");
@@ -103,6 +104,8 @@ function App() {
                     <Route path="/edit-profilerole" element={<EditProfileRole darkMode={darkMode} />} />
                     <Route path="/add-profilerole" element={<AddProfileRole darkMode={darkMode} />} />
                     <Route path="/therapist/choose-schedule" element={<ChooseScheduleTherapist darkMode={true} />} />
+                    <Route path="/timeslot-schedule" element={<TimeSlotSchedule darkMode={darkMode} />} />
+
 
             <Route
               path="*"

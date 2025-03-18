@@ -39,6 +39,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import CreateUserForm from "./CreateUserForm";
 import ServicesDashboard from "./ServicesDashboard";
+import TimeSlotSchedule from "./TimeSlotSchedule"; // Import the component
 
 const MainContent = styled(Box)(({ darkMode }) => ({
   flexGrow: 1,
@@ -117,7 +118,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
   const handleDeleteUser = async (userId) => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found. Please log in again.");
+      if (!token) throw new Error("No authentication token found.");
       await deleteUser(userId, token);
       setUsers((prev) => prev.filter((user) => user.userId !== userId));
       setFilteredUsers((prev) => prev.filter((user) => user.userId !== userId));
@@ -137,7 +138,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) throw new Error("No authentication token found. Please log in again.");
+        if (!token) throw new Error("No authentication token found.");
 
         const usersResponse = await getAllUsers(token);
         setUsers(usersResponse.data || []);
@@ -200,6 +201,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     { text: "Dashboard", icon: <DashboardIcon />, action: () => setTabValue(0) },
     { text: "Users", icon: <PeopleIcon />, action: () => setTabValue(1) },
     { text: "Services", icon: <BusinessIcon />, action: () => setTabValue(2) },
+    { text: "Time Slots", icon: <BusinessIcon />, action: () => setTabValue(3) }, // Changed to tab switch
     { text: "User Profile", icon: <PersonIcon />, action: () => navigate("/profile-role") },
     { text: "Edit Profile", icon: <EditIcon />, action: () => navigate("/edit-profilerole") },
     { text: "Toggle Dark Mode", icon: <DarkModeIcon />, action: toggleDarkMode },
@@ -221,7 +223,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
             key={item.text}
             onClick={item.action}
             darkMode={darkMode}
-            isActive={tabValue === index && index < 3}
+            isActive={tabValue === index && index < 4} // Adjusted for 4 tabs
           >
             <ListItemIcon sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mr: 1 }}>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }} />
@@ -657,6 +659,9 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
 
         {/* Services Tab */}
         {tabValue === 2 && <ServicesDashboard darkMode={darkMode} />}
+
+        {/* Time Slots Tab */}
+        {tabValue === 3 && <TimeSlotSchedule darkMode={darkMode} onReturn={() => setTabValue(0)} />}
       </MainContent>
     </Box>
   );
