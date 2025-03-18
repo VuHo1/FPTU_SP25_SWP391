@@ -623,3 +623,35 @@ export const deleteTimeSlot = async (id, token) => {
     throw error;
   }
 };
+export const deleteTherapistSchedule = async (scheduleId, token) => {
+  try {
+    const response = await apiClient.delete(`/api/TherapistSchedule/${scheduleId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    console.log("Deleted schedule:", scheduleId);
+    return response;
+  } catch (error) {
+    console.error("Error deleting therapist schedule:", error.response?.data || error);
+    throw error;
+  }
+};
+// Update a therapist schedule
+export const updateTherapistSchedule = async (scheduleId, scheduleData, token) => {
+  try {
+    const response = await apiClient.put(`/api/TherapistSchedule/${scheduleId}`, scheduleData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Updated therapist schedule:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error updating therapist schedule:", JSON.stringify(error.response?.data, null, 2));
+    throw error;
+  }
+};
