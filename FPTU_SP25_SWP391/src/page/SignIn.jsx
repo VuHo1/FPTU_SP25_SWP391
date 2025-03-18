@@ -284,7 +284,7 @@ export default function SignIn({ darkMode }) {
             letterSpacing: "2px",
           }}
         >
-          Welcome Back
+          Welcome User
         </motion.h2>
 
         <motion.input

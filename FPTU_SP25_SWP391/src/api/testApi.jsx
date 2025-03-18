@@ -501,9 +501,6 @@ export const createTherapistSpecialty = async (therapistId, serviceCategoryId, t
     throw error;
   }
 };
-// Add this to your existing API file (e.g., test.api.js)
-
-// ... (existing imports and code remain unchanged)
 
 export const createTherapistSchedule = async (scheduleData, token) => {
   try {
@@ -535,6 +532,94 @@ export const getTherapistSchedules = async (token) => {
     return response;
   } catch (error) {
     console.error("Error fetching therapist schedules:", error.response?.data || error);
+    throw error;
+  }
+};
+// Add these to your existing testApi.js file
+
+// Get all time slots
+export const getAllTimeSlots = async (token) => {
+  try {
+    const response = await apiClient.get(`/api/TimeSlot`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "text/plain",
+      },
+    });
+    console.log("All time slots:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error fetching time slots:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Get a specific time slot by ID
+export const getTimeSlotById = async (id, token) => {
+  try {
+    const response = await apiClient.get(`/api/TimeSlot/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    console.log("Time slot by ID:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error fetching time slot by ID:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Create a time slot
+export const createTimeSlot = async (timeSlotData, token) => {
+  try {
+    const response = await apiClient.post(`/api/TimeSlot`, timeSlotData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "text/plain",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Created time slot:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error creating time slot:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Update a time slot
+export const updateTimeSlot = async (id, timeSlotData, token) => {
+  try {
+    const response = await apiClient.put(`/api/TimeSlot/${id}`, timeSlotData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Updated time slot:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error updating time slot:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Delete a time slot
+export const deleteTimeSlot = async (id, token) => {
+  try {
+    const response = await apiClient.delete(`/api/TimeSlot/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    console.log("Deleted time slot:", id);
+    return response;
+  } catch (error) {
+    console.error("Error deleting time slot:", error.response?.data || error);
     throw error;
   }
 };
