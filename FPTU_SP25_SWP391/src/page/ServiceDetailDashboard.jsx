@@ -16,6 +16,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Checkbox,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
@@ -27,6 +28,7 @@ import {
   deleteService,
   postImageService,
   getImageService,
+  deleteImageService,
 } from "../api/testApi";
 
 const DashboardCard = styled("div")(({ darkMode }) => ({
@@ -66,7 +68,8 @@ const ServiceDetailDashboard = ({ darkMode }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [editingService, setEditingService] = useState(null);
-  const [imageUrls, setImageUrls] = useState({}); // Now stores arrays of { imageServiceId, imageURL }
+  const [imageUrls, setImageUrls] = useState({}); // { serviceId: [{ imageServiceId, imageURL, isMain }] }
+  const [selectedImages, setSelectedImages] = useState({}); // For deletion
 
   const fetchData = async () => {
     setLoading(true);
@@ -83,34 +86,31 @@ const ServiceDetailDashboard = ({ darkMode }) => {
         getServiceCategories(token),
         getAllServices(token),
       ]);
-      console.log("Service Categories Response:", categoriesResponse.data);
-      console.log("Services Response:", servicesResponse.data);
       setServiceCategories(categoriesResponse.data || []);
       const servicesData = servicesResponse.data || [];
       setServices(servicesData);
 
-      // Fetch all images for each service
       const imagePromises = servicesData.map((service) =>
         getImageService(service.serviceId, token)
           .then((res) => ({
             serviceId: service.serviceId,
-            images: res.data || [], // Array of { imageServiceId, serviceId, imageURL }
+            images: (res.data || []).map((img, index) => ({
+              imageServiceId: img.imageServiceId,
+              imageURL: img.imageURL,
+              isMain: index === 0, // Default first image as main
+            })),
           }))
           .catch(() => ({
             serviceId: service.serviceId,
-            images: [], // Fallback if no images
+            images: [],
           }))
       );
       const imageResults = await Promise.all(imagePromises);
       const imageMap = imageResults.reduce((acc, { serviceId, images }) => {
-        acc[serviceId] = images.map((img) => ({
-          imageServiceId: img.imageServiceId,
-          imageURL: img.imageURL,
-        }));
+        acc[serviceId] = images;
         return acc;
       }, {});
       setImageUrls(imageMap);
-      console.log("Fetched image URLs:", imageMap);
     } catch (error) {
       console.error("Error fetching data:", error.response?.data || error.message);
       setError(
@@ -312,10 +312,10 @@ const ServiceDetailDashboard = ({ darkMode }) => {
         const token = localStorage.getItem("token");
         const imageData = { serviceId: serviceId, imageURL: imageUrl };
         const postResponse = await postImageService(imageData, token);
-        // Update imageUrls with the new image
         const newImage = {
-          imageServiceId: postResponse.data.imageServiceId, // Adjust based on actual response
+          imageServiceId: postResponse.data.imageServiceId,
           imageURL: imageUrl,
+          isMain: !imageUrls[serviceId]?.length, // First image is main by default
         };
         setImageUrls((prev) => ({
           ...prev,
@@ -333,13 +333,93 @@ const ServiceDetailDashboard = ({ darkMode }) => {
     }
   };
 
+  const handleImageSelection = (serviceId, imageServiceId) => {
+    setSelectedImages((prev) => {
+      const serviceSelections = prev[serviceId] || [];
+      if (serviceSelections.includes(imageServiceId)) {
+        return {
+          ...prev,
+          [serviceId]: serviceSelections.filter((id) => id !== imageServiceId),
+        };
+      } else {
+        return {
+          ...prev,
+          [serviceId]: [...serviceSelections, imageServiceId],
+        };
+      }
+    });
+  };
+
+  const handleDeleteSelectedImages = async (serviceId) => {
+    const imagesToDelete = selectedImages[serviceId] || [];
+    if (imagesToDelete.length === 0) {
+      alert("No images selected for deletion.");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to delete the selected images?")) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("token");
+      const deletePromises = imagesToDelete.map((imageServiceId) =>
+        deleteImageService(imageServiceId, token)
+      );
+      await Promise.all(deletePromises);
+      setImageUrls((prev) => {
+        const updatedImages = (prev[serviceId] || []).filter(
+          (img) => !imagesToDelete.includes(img.imageServiceId)
+        );
+        if (updatedImages.length > 0 && !updatedImages.some((img) => img.isMain)) {
+          updatedImages[0].isMain = true; // Set first remaining image as main
+        }
+        return {
+          ...prev,
+          [serviceId]: updatedImages,
+        };
+      });
+      setSelectedImages((prev) => ({
+        ...prev,
+        [serviceId]: [],
+      }));
+      alert("Selected images deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting images:", error.response?.data || error.message);
+      setError(
+        `Failed to delete images: ${error.response?.status} - ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetMainImage = (serviceId, imageServiceId) => {
+    setImageUrls((prev) => {
+      const updatedImages = (prev[serviceId] || []).map((img) => ({
+        ...img,
+        isMain: img.imageServiceId === imageServiceId,
+      }));
+      return {
+        ...prev,
+        [serviceId]: updatedImages,
+      };
+    });
+    // Note: Add backend API call here if supported (e.g., updateImageService)
+  };
+
   const activeServiceCategories = serviceCategories.filter((category) => category.status);
 
   return (
     <Box>
       <Typography
         variant="subtitle1"
-        sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 4, fontStyle: "italic" }}
+        sx={{
+          color: darkMode ? "#ffffff" : "#6e6e73",
+          mb: 4,
+          fontStyle: "italic",
+        }}
         component={motion.div}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -362,7 +442,10 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       )}
 
       {loading && (
-        <Typography variant="body2" sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 2 }}
+        >
           Loading...
         </Typography>
       )}
@@ -378,7 +461,11 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       >
         <Typography
           variant="h6"
-          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
+          sx={{
+            mb: 3,
+            color: darkMode ? "#ffffff" : "#1d1d1f",
+            fontWeight: 600,
+          }}
         >
           {editingService ? "Edit Service" : "Add New Service"}
         </Typography>
@@ -408,7 +495,10 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               >
                 <MenuItem value="">Select Category</MenuItem>
                 {activeServiceCategories.map((category) => (
-                  <MenuItem key={category.serviceCategoryId} value={category.serviceCategoryId}>
+                  <MenuItem
+                    key={category.serviceCategoryId}
+                    value={category.serviceCategoryId}
+                  >
                     {category.name}
                   </MenuItem>
                 ))}
@@ -426,12 +516,22 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: darkMode ? "#333333" : "#e0e0e0" },
-                  "&:hover fieldset": { borderColor: darkMode ? "#444444" : "#1d1d1f" },
-                  "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                  "& fieldset": {
+                    borderColor: darkMode ? "#333333" : "#e0e0e0",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: darkMode ? "#444444" : "#1d1d1f",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: darkMode ? "#ffffff" : "#1d1d1f",
+                  },
                 },
-                "& .MuiInputLabel-root": { color: darkMode ? "#ffffff" : "#6e6e73" },
-                "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
+                "& .MuiInputLabel-root": {
+                  color: darkMode ? "#ffffff" : "#6e6e73",
+                },
+                "& .MuiInputBase-input": {
+                  color: darkMode ? "#ffffff" : "#1d1d1f",
+                },
               }}
             />
           </Grid>
@@ -448,12 +548,22 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: darkMode ? "#333333" : "#e0e0e0" },
-                  "&:hover fieldset": { borderColor: darkMode ? "#444444" : "#1d1d1f" },
-                  "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                  "& fieldset": {
+                    borderColor: darkMode ? "#333333" : "#e0e0e0",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: darkMode ? "#444444" : "#1d1d1f",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: darkMode ? "#ffffff" : "#1d1d1f",
+                  },
                 },
-                "& .MuiInputLabel-root": { color: darkMode ? "#ffffff" : "#6e6e73" },
-                "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
+                "& .MuiInputLabel-root": {
+                  color: darkMode ? "#ffffff" : "#6e6e73",
+                },
+                "& .MuiInputBase-input": {
+                  color: darkMode ? "#ffffff" : "#1d1d1f",
+                },
               }}
             />
           </Grid>
@@ -469,18 +579,30 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               disabled={loading}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: darkMode ? "#333333" : "#e0e0e0" },
-                  "&:hover fieldset": { borderColor: darkMode ? "#444444" : "#1d1d1f" },
-                  "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                  "& fieldset": {
+                    borderColor: darkMode ? "#333333" : "#e0e0e0",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: darkMode ? "#444444" : "#1d1d1f",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: darkMode ? "#ffffff" : "#1d1d1f",
+                  },
                 },
-                "& .MuiInputLabel-root": { color: darkMode ? "#ffffff" : "#6e6e73" },
-                "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
+                "& .MuiInputLabel-root": {
+                  color: darkMode ? "#ffffff" : "#6e6e73",
+                },
+                "& .MuiInputBase-input": {
+                  color: darkMode ? "#ffffff" : "#1d1d1f",
+                },
               }}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel sx={{ color: darkMode ? "#ffffff" : "#6e6e73" }}>Status</InputLabel>
+              <InputLabel sx={{ color: darkMode ? "#ffffff" : "#6e6e73" }}>
+                Status
+              </InputLabel>
               <Select
                 name="status"
                 value={serviceForm.status}
@@ -575,7 +697,11 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       >
         <Typography
           variant="h6"
-          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
+          sx={{
+            mb: 3,
+            color: darkMode ? "#ffffff" : "#1d1d1f",
+            fontWeight: 600,
+          }}
         >
           All Services
         </Typography>
@@ -586,7 +712,9 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Name</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Category</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Price</TableCell>
-                <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Description</TableCell>
+                <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
+                  Description
+                </TableCell>
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Status</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Images</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Actions</TableCell>
@@ -626,7 +754,21 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                       {imageUrls[service.serviceId]?.length > 0 ? (
                         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                           {imageUrls[service.serviceId].map((img) => (
-                            <Box key={img.imageServiceId}>
+                            <Box
+                              key={img.imageServiceId}
+                              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                            >
+                              <Checkbox
+                                checked={img.isMain}
+                                onChange={() =>
+                                  handleSetMainImage(service.serviceId, img.imageServiceId)
+                                }
+                                disabled={loading}
+                                sx={{
+                                  color: darkMode ? "#ffffff" : "#1976d2",
+                                  "&.Mui-checked": { color: darkMode ? "#ffffff" : "#1976d2" },
+                                }}
+                              />
                               <img
                                 src={img.imageURL}
                                 alt={`${service.name} - ${img.imageServiceId}`}
@@ -636,18 +778,39 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                                   borderRadius: "8px",
                                 }}
                               />
-                              <Typography
-                                variant="body2"
+                              <Checkbox
+                                checked={(selectedImages[service.serviceId] || []).includes(
+                                  img.imageServiceId
+                                )}
+                                onChange={() =>
+                                  handleImageSelection(service.serviceId, img.imageServiceId)
+                                }
+                                disabled={loading}
                                 sx={{
-                                  color: darkMode ? "#cccccc" : "#6e6e73",
-                                  mt: 1,
-                                  wordBreak: "break-all",
+                                  color: darkMode ? "#ff5722" : "#d32f2f", // Red for deletion
+                                  "&.Mui-checked": {
+                                    color: darkMode ? "#ff5722" : "#d32f2f",
+                                  },
                                 }}
-                              >
-                                {img.imageURL}
-                              </Typography>
+                              />
                             </Box>
                           ))}
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={() => handleDeleteSelectedImages(service.serviceId)}
+                            disabled={
+                              loading || !(selectedImages[service.serviceId]?.length > 0)
+                            }
+                            sx={{
+                              mt: 1,
+                              color: darkMode ? "#ffffff" : "#d32f2f",
+                              borderColor: darkMode ? "#ffffff" : "#d32f2f",
+                              "&:hover": { borderColor: darkMode ? "#cccccc" : "#c62828" },
+                            }}
+                          >
+                            Delete Selected
+                          </Button>
                         </Box>
                       ) : (
                         "No images"
@@ -661,9 +824,23 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                         disabled={loading}
                         sx={{
                           mr: 1,
+                          py: 0.5,
+                          px: 2,
+                          borderRadius: "6px",
                           color: darkMode ? "#ffffff" : "#1976d2",
                           borderColor: darkMode ? "#ffffff" : "#1976d2",
-                          "&:hover": { borderColor: darkMode ? "#cccccc" : "#1565c0" },
+                          fontWeight: 500,
+                          textTransform: "none",
+                          "&:hover": {
+                            borderColor: darkMode ? "#cccccc" : "#1565c0",
+                            backgroundColor: darkMode
+                              ? "rgba(255, 255, 255, 0.1)"
+                              : "rgba(25, 118, 210, 0.1)",
+                          },
+                          "&.Mui-disabled": {
+                            color: darkMode ? "#666" : "#999",
+                            borderColor: darkMode ? "#424242" : "#e0e0e0",
+                          },
                         }}
                       >
                         Edit
@@ -675,20 +852,49 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                         disabled={loading}
                         sx={{
                           mr: 1,
+                          py: 0.5,
+                          px: 2,
+                          borderRadius: "6px",
                           color: darkMode ? "#ffffff" : "#d32f2f",
                           borderColor: darkMode ? "#ffffff" : "#d32f2f",
-                          "&:hover": { borderColor: darkMode ? "#cccccc" : "#c62828" },
+                          fontWeight: 500,
+                          textTransform: "none",
+                          "&:hover": {
+                            borderColor: darkMode ? "#cccccc" : "#c62828",
+                            backgroundColor: darkMode
+                              ? "rgba(255, 255, 255, 0.1)"
+                              : "rgba(211, 47, 47, 0.1)",
+                          },
+                          "&.Mui-disabled": {
+                            color: darkMode ? "#666" : "#999",
+                            borderColor: darkMode ? "#424242" : "#e0e0e0",
+                          },
                         }}
                       >
                         Delete
                       </Button>
                       <Button
-                        variant="contained"
+                        variant="outlined"
                         component="label"
                         disabled={loading}
                         sx={{
-                          background: darkMode ? "#1976d2" : "#1d1d1f",
-                          "&:hover": { background: darkMode ? "#1565c0" : "#333" },
+                          py: 0.5,
+                          px: 2,
+                          borderRadius: "6px",
+                          color: darkMode ? "#ffffff" : "#2e7d32",
+                          borderColor: darkMode ? "#ffffff" : "#2e7d32",
+                          fontWeight: 500,
+                          textTransform: "none",
+                          "&:hover": {
+                            borderColor: darkMode ? "#cccccc" : "#4caf50",
+                            backgroundColor: darkMode
+                              ? "rgba(255, 255, 255, 0.1)"
+                              : "rgba(46, 125, 50, 0.1)",
+                          },
+                          "&.Mui-disabled": {
+                            color: darkMode ? "#666" : "#999",
+                            borderColor: darkMode ? "#424242" : "#e0e0e0",
+                          },
                         }}
                       >
                         Add Picture
