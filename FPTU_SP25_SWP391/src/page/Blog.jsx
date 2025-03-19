@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,7 +14,7 @@ import {
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
-import { getServiceCategories, getAllServices } from "../api/testApi";
+import { getServiceCategories, getAllServices, getImageService } from "../api/testApi";
 
 const ServicesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,46 +25,102 @@ const ServicesPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // Add current page state
-  const servicesPerPage = 9; // Maximum services per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const servicesPerPage = 9;
+
+  const location = useLocation();
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    const token = localStorage.getItem("token");
+
+    try {
+      const [categoriesResponse, servicesResponse] = await Promise.all([
+        getServiceCategories(token),
+        getAllServices(token),
+      ]);
+      const servicesData = servicesResponse.data || [];
+      setCategories(categoriesResponse.data || []);
+
+      // Fetch image URLs for each service
+      const imagePromises = servicesData.map((service) =>
+        getImageService(service.serviceId, token)
+          .then((res) => ({
+            serviceId: service.serviceId,
+            images: res.data || [], // Array of { imageServiceId, serviceId, imageURL }
+          }))
+          .catch(() => ({
+            serviceId: service.serviceId,
+            images: [],
+          }))
+      );
+      const imageResults = await Promise.all(imagePromises);
+      const imageMap = imageResults.reduce((acc, { serviceId, images }) => {
+        acc[serviceId] = images.map((img) => ({
+          imageServiceId: img.imageServiceId,
+          imageURL: img.imageURL,
+        }));
+        return acc;
+      }, {});
+
+      // Merge first image URL with service data (or adjust for multiple images)
+      const updatedServices = servicesData.map((service) => ({
+        ...service,
+        imageUrl: imageMap[service.serviceId]?.[0]?.imageURL || null, // Use first image
+      }));
+      setServices(updatedServices);
+    } catch (err) {
+      if (!token || err.response?.status === 401) {
+        try {
+          const [categoriesResponse, servicesResponse] = await Promise.all([
+            getServiceCategories(null),
+            getAllServices(null),
+          ]);
+          const servicesData = servicesResponse.data || [];
+          setCategories(categoriesResponse.data || []);
+
+          const imagePromises = servicesData.map((service) =>
+            getImageService(service.serviceId, null)
+              .then((res) => ({
+                serviceId: service.serviceId,
+                images: res.data || [],
+              }))
+              .catch(() => ({
+                serviceId: service.serviceId,
+                images: [],
+              }))
+          );
+          const imageResults = await Promise.all(imagePromises);
+          const imageMap = imageResults.reduce((acc, { serviceId, images }) => {
+            acc[serviceId] = images.map((img) => ({
+              imageServiceId: img.imageServiceId,
+              imageURL: img.imageURL,
+            }));
+            return acc;
+          }, {});
+
+          const updatedServices = servicesData.map((service) => ({
+            ...service,
+            imageUrl: imageMap[service.serviceId]?.[0]?.imageURL || null,
+          }));
+          setServices(updatedServices);
+        } catch (publicErr) {
+          setError(`Failed to load services: ${publicErr.message}`);
+        }
+      } else {
+        setError(`Failed to load services: ${err.message}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      const token = localStorage.getItem("token");
-
-      try {
-        const [categoriesResponse, servicesResponse] = await Promise.all([
-          getServiceCategories(token),
-          getAllServices(token),
-        ]);
-        setCategories(categoriesResponse.data || []);
-        setServices(servicesResponse.data || []);
-      } catch (err) {
-        if (!token || err.response?.status === 401) {
-          try {
-            const [categoriesResponse, servicesResponse] = await Promise.all([
-              getServiceCategories(null),
-              getAllServices(null),
-            ]);
-            setCategories(categoriesResponse.data || []);
-            setServices(servicesResponse.data || []);
-          } catch (publicErr) {
-            setError(`Failed to load services: ${publicErr.message}`);
-          }
-        } else {
-          setError(`Failed to load services: ${err.message}`);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, []);
+  }, [location.pathname]);
 
-  // Filter and sort services
+  // Filter and sort services (unchanged)
   const filteredAndSortedServices = () => {
     let result = services.filter((service) => {
       const matchesSearch =
@@ -95,7 +151,7 @@ const ServicesPage = () => {
         result.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case "nameZA":
-        result.sort((a, b) => b.name.localeCompare(b.name));
+        result.sort((a, b) => b.name.localeCompare(a.name));
         break;
       case "durationLowToHigh":
         result.sort((a, b) => (a.duration || 0) - (b.duration || 0));
@@ -107,7 +163,7 @@ const ServicesPage = () => {
     return result;
   };
 
-  // Pagination logic
+  // Pagination logic (unchanged)
   const allServices = filteredAndSortedServices();
   const totalPages = Math.ceil(allServices.length / servicesPerPage);
   const indexOfLastService = currentPage * servicesPerPage;
@@ -116,10 +172,10 @@ const ServicesPage = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to top on page change
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Animation variants
+  // Animation variants (unchanged)
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -136,8 +192,9 @@ const ServicesPage = () => {
   };
 
   return (
+    // JSX remains largely unchanged except for the image handling, which is already covered by imageUrl
     <>
-      <style>{`
+     <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
         .services-page {
@@ -251,7 +308,6 @@ const ServicesPage = () => {
         .service-item:hover {
           transform: translateY(-8px);
           box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-          
         }
         .service-image-wrapper {
           position: relative;
@@ -462,7 +518,6 @@ const ServicesPage = () => {
 
       <div className="services-page">
         <div className="services-container">
-          {/* Filter Bar */}
           <motion.div
             className="filter-bar"
             variants={filterBarVariants}
@@ -524,7 +579,6 @@ const ServicesPage = () => {
             </div>
           </motion.div>
 
-          {/* Main Content */}
           <div className="main-content">
             <motion.div
               className="service-header"
@@ -570,7 +624,7 @@ const ServicesPage = () => {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  key={currentPage} // Re-render animation on page change
+                  key={currentPage}
                 >
                   {currentServices.length === 0 ? (
                     <div className="error">Không tìm thấy dịch vụ nào phù hợp.</div>
@@ -580,7 +634,7 @@ const ServicesPage = () => {
                         <Link to={`/service/${service.serviceId}`} className="service-item">
                           <div className="service-image-wrapper">
                             <img
-                              src={service.image || "https://via.placeholder.com/300x200"}
+                              src={service.imageUrl || "https://via.placeholder.com/300x200"}
                               alt={service.name}
                               className="service-image"
                             />
@@ -603,7 +657,6 @@ const ServicesPage = () => {
                   )}
                 </motion.div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="pagination">
                     <button

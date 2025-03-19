@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../page/AuthContext";
-import { getAllServices, getServiceCategories } from "../api/testApi";
+import { getAllServices, getServiceCategories, getImageService } from "../api/testApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 
@@ -29,7 +29,17 @@ const BlogDetail = ({ darkMode }) => {
           (s) => s.serviceId === parseInt(id, 10)
         );
         if (!foundService) throw new Error("Service not found");
-        setService(foundService);
+
+        // Fetch image URL for the service
+        let imageUrl = null;
+        try {
+          const imageResponse = await getImageService(foundService.serviceId, token || null);
+          imageUrl = imageResponse.data.imageURL; // Use imageURL from API response
+        } catch (imageErr) {
+          console.warn(`No image found for service ${foundService.serviceId}`);
+        }
+
+        setService({ ...foundService, imageUrl });
         setCategories(categoriesResponse.data || []);
       } catch (err) {
         setError(`Failed to load service details: ${err.message}`);
@@ -203,7 +213,7 @@ const BlogDetail = ({ darkMode }) => {
           </div>
           <div className="blog-image">
             <img
-              src={service.image || "https://via.placeholder.com/600x400"}
+              src={service.imageUrl || "https://via.placeholder.com/600x400"}
               alt={service.name}
             />
           </div>
