@@ -11,6 +11,8 @@ const BlogDetail = ({ darkMode }) => {
   const navigate = useNavigate();
   const [service, setService] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [images, setImages] = useState([]); // Array of { imageServiceId, imageURL, isMain }
+  const [mainImage, setMainImage] = useState(null); // URL of the current main image
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -30,16 +32,26 @@ const BlogDetail = ({ darkMode }) => {
         );
         if (!foundService) throw new Error("Service not found");
 
-        // Fetch image URL for the service
-        let imageUrl = null;
+        // Fetch all images for the service
+        let serviceImages = [];
         try {
           const imageResponse = await getImageService(foundService.serviceId, token || null);
-          imageUrl = imageResponse.data.imageURL; // Use imageURL from API response
+          serviceImages = (imageResponse.data || []).map((img, index) => ({
+            imageServiceId: img.imageServiceId,
+            imageURL: img.imageURL,
+            isMain: index === 0, // Default first image as main if no backend isMain
+          }));
+          setImages(serviceImages);
+          setMainImage(
+            serviceImages.find((img) => img.isMain)?.imageURL || serviceImages[0]?.imageURL || null
+          );
         } catch (imageErr) {
-          console.warn(`No image found for service ${foundService.serviceId}`);
+          console.warn(`No images found for service ${foundService.serviceId}`);
+          setImages([]);
+          setMainImage(null);
         }
 
-        setService({ ...foundService, imageUrl });
+        setService(foundService);
         setCategories(categoriesResponse.data || []);
       } catch (err) {
         setError(`Failed to load service details: ${err.message}`);
@@ -50,9 +62,9 @@ const BlogDetail = ({ darkMode }) => {
     fetchServiceAndCategories();
   }, [id]);
 
-  if (loading) return <div className="loading">Đang tải...</div>;
-  if (error) return <div className="error">{error}</div>;
-  if (!service) return <h2>Dịch vụ không tồn tại</h2>;
+  const handleImageClick = (imageURL) => {
+    setMainImage(imageURL);
+  };
 
   const handleBookingClick = () => {
     if (isLoggedIn) {
@@ -61,6 +73,10 @@ const BlogDetail = ({ darkMode }) => {
       navigate("/sign_in", { state: { from: `/service/${id}` } });
     }
   };
+
+  if (loading) return <div className="loading">Đang tải...</div>;
+  if (error) return <div className="error">{error}</div>;
+  if (!service) return <h2>Dịch vụ không tồn tại</h2>;
 
   const isServiceActive = service.status;
 
@@ -84,7 +100,7 @@ const BlogDetail = ({ darkMode }) => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 2rem;
-          align-items: center;
+          align-items: start;
         }
         .blog-text h1 {
           font-size: 2.5rem;
@@ -113,12 +129,47 @@ const BlogDetail = ({ darkMode }) => {
           color: #f39c12;
           margin-top: 0.5rem;
         }
-        .blog-image img {
+        .blog-image {
+          width: 100%;
+        }
+        .main-image {
           width: 100%;
           max-height: 400px;
           object-fit: cover;
           border-radius: 16px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          margin-bottom: 1rem;
+        }
+        .thumbnail-container {
+          display: flex;
+          overflow-x: auto;
+          gap: 1rem;
+          padding-bottom: 0.5rem;
+          scrollbar-width: thin;
+          scrollbar-color: ${darkMode ? "#34495e #1c2526" : "#6c757d #f8f9fa"};
+        }
+        .thumbnail-container::-webkit-scrollbar {
+          height: 8px;
+        }
+        .thumbnail-container::-webkit-scrollbar-thumb {
+          background: ${darkMode ? "#34495e" : "#6c757d"};
+          border-radius: 4px;
+        }
+        .thumbnail-container::-webkit-scrollbar-track {
+          background: ${darkMode ? "#1c2526" : "#f8f9fa"};
+        }
+        .thumbnail {
+          width: 100px;
+          height: 100px;
+          object-fit: cover;
+          border-radius: 8px;
+          cursor: pointer;
+          border: 2px solid ${mainImage === "imageURL" ? "#1abc9c" : "transparent"};
+          transition: border 0.3s ease, transform 0.2s ease;
+        }
+        .thumbnail:hover {
+          transform: scale(1.05);
+          border: 2px solid #1abc9c;
         }
         .back-button, .booking-button, .inactive-button {
           display: inline-block;
@@ -174,6 +225,13 @@ const BlogDetail = ({ darkMode }) => {
           .blog-text p {
             font-size: 1rem;
           }
+          .main-image {
+            max-height: 300px;
+          }
+          .thumbnail {
+            width: 80px;
+            height: 80px;
+          }
         }
       `}</style>
 
@@ -213,9 +271,29 @@ const BlogDetail = ({ darkMode }) => {
           </div>
           <div className="blog-image">
             <img
-              src={service.imageUrl || "https://via.placeholder.com/600x400"}
+              src={mainImage || "https://via.placeholder.com/600x400"}
               alt={service.name}
+              className="main-image"
             />
+            {images.length > 0 && (
+              <div className="thumbnail-container">
+                {images.map((img) => (
+                  <img
+                    key={img.imageServiceId}
+                    src={img.imageURL}
+                    alt={`Thumbnail ${img.imageServiceId}`}
+                    className="thumbnail"
+                    onClick={() => handleImageClick(img.imageURL)}
+                    style={{
+                      border:
+                        mainImage === img.imageURL
+                          ? "2px solid #1abc9c"
+                          : "2px solid transparent",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

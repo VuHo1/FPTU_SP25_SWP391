@@ -2,32 +2,65 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../page/AuthContext";
-import { getAllServices } from "../api/testApi"; // Import API to fetch services
+import { getAllServices, getImageService } from "../api/testApi"; // Import API functions
 
 const HomePage = ({ darkMode }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { isLoggedIn, username } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
-  const [services, setServices] = useState([]); // State for services
+  const [services, setServices] = useState([]); // State for services with images
   const [loadingServices, setLoadingServices] = useState(true); // Loading state for services
 
-  // Fetch services when the component mounts
+  // Function to shuffle an array (Fisher-Yates shuffle)
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Fetch services and their images when the component mounts
   useEffect(() => {
     const fetchServices = async () => {
       setLoadingServices(true);
       const token = localStorage.getItem("token");
       try {
         const servicesResponse = await getAllServices(token || null);
-        setServices(servicesResponse.data.slice(0, 3) || []); // Limit to 3 services for display
+        const allServices = servicesResponse.data || [];
+
+        // Shuffle services and take the first 3
+        const shuffledServices = shuffleArray(allServices).slice(0, 3);
+
+        // Fetch images for each selected service
+        const servicesWithImages = await Promise.all(
+          shuffledServices.map(async (service) => {
+            try {
+              const imageResponse = await getImageService(service.serviceId, token || null);
+              const images = imageResponse.data || [];
+              const mainImage = images.find((img) => img.isMain) || images[0]; // Prefer isMain if available
+              return {
+                ...service,
+                image: mainImage ? mainImage.imageURL : null,
+              };
+            } catch (imageErr) {
+              console.warn(`No images found for service ${service.serviceId}`);
+              return { ...service, image: null };
+            }
+          })
+        );
+
+        setServices(servicesWithImages);
       } catch (err) {
         console.error("Failed to fetch services:", err);
-        setServices([]); // Fallback to empty array on error
+        setServices([]);
       } finally {
         setLoadingServices(false);
       }
     };
     fetchServices();
-  }, []);
+  }, []); // Empty dependency array ensures this runs only on mount
 
   // Welcome message effect
   useEffect(() => {
@@ -192,6 +225,8 @@ const HomePage = ({ darkMode }) => {
       ? "0 4px 12px rgba(0, 0, 0, 0.3)"
       : "0 4px 12px rgba(0, 0, 0, 0.06)",
     textAlign: "left",
+    cursor: "pointer", // Indicate clickable
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
   };
 
   const facilityCardStyles = {
@@ -335,45 +370,65 @@ const HomePage = ({ darkMode }) => {
               </p>
             ) : (
               services.map((service, index) => (
-                <motion.div
+                <Link
                   key={service.serviceId}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  viewport={{ once: false }}
-                  style={serviceCardStyles}
+                  to={`/service/${service.serviceId}`} // Link to BlogDetail
+                  style={{ textDecoration: "none" }}
                 >
-                  <img
-                    src={service.image || "https://via.placeholder.com/300x200"}
-                    alt={service.name}
-                    style={{
-                      width: "100%",
-                      height: "150px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                      marginBottom: "10px",
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.6, delay: index * 0.2 }}
+                    viewport={{ once: false }}
+                    style={serviceCardStyles}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.05)";
+                      e.currentTarget.style.boxShadow = darkMode
+                        ? "0 8px 24px rgba(0, 0, 0, 0.5)"
+                        : "0 8px 24px rgba(0, 0, 0, 0.1)";
                     }}
-                  />
-                  <h3
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: "600",
-                      color: darkMode ? "#ffffff" : "#1d1d1f",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    {service.name}
-                  </h3>
-                  <p
-                    style={{
-                      ...paragraphStyles,
-                      margin: 0,
-                      color: darkMode ? "#bdc3c7" : "#555",
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                      e.currentTarget.style.boxShadow = darkMode
+                        ? "0 4px 12px rgba(0, 0, 0, 0.3)"
+                        : "0 4px 12px rgba(0, 0, 0, 0.06)";
                     }}
                   >
-                    ${service.price || "N/A"}
-                  </p>
-                </motion.div>
+                    <img
+                      src={
+                        service.image || "https://via.placeholder.com/300x200"
+                      }
+                      alt={service.name}
+                      style={{
+                        width: "100%",
+                        height: "150px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                        marginBottom: "10px",
+                      }}
+                    />
+                    <h3
+                      style={{
+                        fontSize: "24px",
+                        fontWeight: "600",
+                        color: darkMode ? "#ffffff" : "#1d1d1f",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      {service.name}
+                    </h3>
+                    <p
+                      style={{
+                        ...paragraphStyles,
+                        margin: 0,
+                        color: darkMode ? "#bdc3c7" : "#555",
+                      }}
+                    >
+                      ${service.price || "N/A"}
+                    </p>
+                  </motion.div>
+                </Link>
               ))
             )}
           </div>
@@ -409,7 +464,7 @@ const HomePage = ({ darkMode }) => {
         style={{
           ...sectionStyles,
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1517649763962-0c623066013b')", // Modern spa facility
+            "url('https://images.unsplash.com/photo-1517649763962-0c623066013b')",
         }}
       >
         <div style={overlayStyles}></div>
@@ -583,7 +638,7 @@ const HomePage = ({ darkMode }) => {
         style={{
           ...sectionStyles,
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1512290923902-8a9f81dc236c')", // Calm spa environment with skincare focus
+            "url('https://images.unsplash.com/photo-1512290923902-8a9f81dc236c')",
         }}
       >
         <div style={overlayStyles}></div>
@@ -610,7 +665,7 @@ const HomePage = ({ darkMode }) => {
                   "Làn da của tôi đã cải thiện rõ rệt sau liệu trình tại Beautishop. Dịch vụ tuyệt vời!",
                 rating: 5,
                 image:
-                  "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e", // Female portrait
+                  "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
               },
               {
                 name: "Trần Văn Hùng",
@@ -618,7 +673,7 @@ const HomePage = ({ darkMode }) => {
                   "Sản phẩm rất an toàn và hiệu quả. Tôi hoàn toàn tin tưởng Beautishop.",
                 rating: 5,
                 image:
-                  "https://images.unsplash.com/photo-1506794778202-cadffbf6435e", // Male portrait
+                  "https://images.unsplash.com/photo-1506794778202-cadffbf6435e",
               },
               {
                 name: "Lê Minh Anh",
@@ -626,7 +681,7 @@ const HomePage = ({ darkMode }) => {
                   "Đội ngũ chuyên gia rất nhiệt tình, tư vấn chi tiết và tận tâm.",
                 rating: 5,
                 image:
-                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330", // Another female portrait
+                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
               },
             ].map((testimonial, index) => (
               <motion.div
@@ -686,7 +741,7 @@ const HomePage = ({ darkMode }) => {
                     style={{
                       display: "flex",
                       gap: "5px",
-                      color: "#f1c40f", // Gold color for stars
+                      color: "#f1c40f",
                     }}
                   >
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -711,6 +766,7 @@ const HomePage = ({ darkMode }) => {
           </div>
         </div>
       </section>
+
       {/* Call to Action */}
       <section
         style={{

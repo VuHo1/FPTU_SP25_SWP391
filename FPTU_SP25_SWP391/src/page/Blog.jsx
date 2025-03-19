@@ -43,12 +43,15 @@ const ServicesPage = () => {
       const servicesData = servicesResponse.data || [];
       setCategories(categoriesResponse.data || []);
 
-      // Fetch image URLs for each service
       const imagePromises = servicesData.map((service) =>
         getImageService(service.serviceId, token)
           .then((res) => ({
             serviceId: service.serviceId,
-            images: res.data || [], // Array of { imageServiceId, serviceId, imageURL }
+            images: (res.data || []).map((img, index) => ({
+              imageServiceId: img.imageServiceId,
+              imageURL: img.imageURL,
+              isMain: index === 0, // Default first image as main
+            })),
           }))
           .catch(() => ({
             serviceId: service.serviceId,
@@ -57,17 +60,16 @@ const ServicesPage = () => {
       );
       const imageResults = await Promise.all(imagePromises);
       const imageMap = imageResults.reduce((acc, { serviceId, images }) => {
-        acc[serviceId] = images.map((img) => ({
-          imageServiceId: img.imageServiceId,
-          imageURL: img.imageURL,
-        }));
+        acc[serviceId] = images;
         return acc;
       }, {});
 
-      // Merge first image URL with service data (or adjust for multiple images)
       const updatedServices = servicesData.map((service) => ({
         ...service,
-        imageUrl: imageMap[service.serviceId]?.[0]?.imageURL || null, // Use first image
+        imageUrl:
+          imageMap[service.serviceId]?.find((img) => img.isMain)?.imageURL ||
+          imageMap[service.serviceId]?.[0]?.imageURL ||
+          null,
       }));
       setServices(updatedServices);
     } catch (err) {
@@ -84,7 +86,11 @@ const ServicesPage = () => {
             getImageService(service.serviceId, null)
               .then((res) => ({
                 serviceId: service.serviceId,
-                images: res.data || [],
+                images: (res.data || []).map((img, index) => ({
+                  imageServiceId: img.imageServiceId,
+                  imageURL: img.imageURL,
+                  isMain: index === 0,
+                })),
               }))
               .catch(() => ({
                 serviceId: service.serviceId,
@@ -93,16 +99,16 @@ const ServicesPage = () => {
           );
           const imageResults = await Promise.all(imagePromises);
           const imageMap = imageResults.reduce((acc, { serviceId, images }) => {
-            acc[serviceId] = images.map((img) => ({
-              imageServiceId: img.imageServiceId,
-              imageURL: img.imageURL,
-            }));
+            acc[serviceId] = images;
             return acc;
           }, {});
 
           const updatedServices = servicesData.map((service) => ({
             ...service,
-            imageUrl: imageMap[service.serviceId]?.[0]?.imageURL || null,
+            imageUrl:
+              imageMap[service.serviceId]?.find((img) => img.isMain)?.imageURL ||
+              imageMap[service.serviceId]?.[0]?.imageURL ||
+              null,
           }));
           setServices(updatedServices);
         } catch (publicErr) {
@@ -120,7 +126,6 @@ const ServicesPage = () => {
     fetchData();
   }, [location.pathname]);
 
-  // Filter and sort services (unchanged)
   const filteredAndSortedServices = () => {
     let result = services.filter((service) => {
       const matchesSearch =
@@ -163,7 +168,6 @@ const ServicesPage = () => {
     return result;
   };
 
-  // Pagination logic (unchanged)
   const allServices = filteredAndSortedServices();
   const totalPages = Math.ceil(allServices.length / servicesPerPage);
   const indexOfLastService = currentPage * servicesPerPage;
@@ -175,7 +179,6 @@ const ServicesPage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Animation variants (unchanged)
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -192,9 +195,8 @@ const ServicesPage = () => {
   };
 
   return (
-    // JSX remains largely unchanged except for the image handling, which is already covered by imageUrl
     <>
-     <style>{`
+      <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
         .services-page {
@@ -409,7 +411,7 @@ const ServicesPage = () => {
           width: 100%;
           padding: 0.9rem 1rem;
           border: 1px solid #d1d5db;
-          border-radius: 8px;
+          borderRadius: 8px;
           font-size: 1rem;
           color: #1f2937;
           background: #fff;
@@ -529,10 +531,7 @@ const ServicesPage = () => {
             </h4>
             <div className="filter-section">
               <label>Sắp xếp theo</label>
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-              >
+              <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
                 <option value="">Mặc định</option>
                 <option value="priceLowToHigh">
                   Giá: Thấp đến Cao <FontAwesomeIcon icon={faDollarSign} />
@@ -553,10 +552,7 @@ const ServicesPage = () => {
             </div>
             <div className="filter-section">
               <label>Danh mục</label>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-              >
+              <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
                 <option value="all">Tất cả danh mục</option>
                 {categories.map((category) => (
                   <option key={category.serviceCategoryId} value={category.name}>
