@@ -655,3 +655,85 @@ export const updateTherapistSchedule = async (scheduleId, scheduleData, token) =
     throw error;
   }
 };
+
+export const postImageService = async (imageData, token) => {
+  try {
+    const response = await apiClient.post(`/api/ImageService`, imageData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("ImageService response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error posting to ImageService:", error.response?.data || error);
+    throw error;
+  }
+};
+// export const getImageService = async (serviceId, token) => {
+//   try {
+//     const response = await apiClient.get(`/api/ImageService/${serviceId}`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         Accept: "*/*",
+//       },
+//     });
+//     console.log(`ImageService response for service ${serviceId}:`, response.data);
+//     return response;
+//   } catch (error) {
+//     console.error("Error fetching image service:", error.response?.data || error);
+//     throw error;
+//   }
+// };
+export const getImageService = async (serviceId, token) => {
+  try {
+    const response = await apiClient.get(`/api/ImageService/service/${serviceId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    console.log(`ImageService response for service ${serviceId}:`, response.data);
+    return response;
+  } catch (error) {
+    console.error("Error fetching image service:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Update an image service
+export const putImageService = async (imageServiceId, imageData, token) => {
+  try {
+    const response = await apiClient.put(`/api/ImageService/${imageServiceId}`, imageData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(`Updated ImageService response for imageServiceId ${imageServiceId}:`, response.data);
+    return response;
+  } catch (error) {
+    console.error("Error updating image service:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Delete an image service
+export const deleteImageService = async (imageServiceId, token) => {
+  try {
+    const response = await apiClient.delete(`/api/ImageService/${imageServiceId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+    console.log(`Deleted ImageService with imageServiceId ${imageServiceId}`);
+    return response;
+  } catch (error) {
+    console.error("Error deleting image service:", error.response?.data || error);
+    throw error;
+  }
+};

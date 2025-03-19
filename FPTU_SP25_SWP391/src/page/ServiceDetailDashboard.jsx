@@ -25,29 +25,31 @@ import {
   postCreateService,
   updateService,
   deleteService,
+  postImageService,
+  getImageService,
 } from "../api/testApi";
 
 const DashboardCard = styled("div")(({ darkMode }) => ({
   padding: "30px",
   borderRadius: "16px",
-  background: darkMode ? "#000000" : "#ffffff", // Black in dark mode to match StaffHomePage
+  background: darkMode ? "#000000" : "#ffffff",
   boxShadow: darkMode
-    ? "0 8px 24px rgba(255, 255, 255, 0.1)" // Subtle white shadow like StaffHomePage
+    ? "0 8px 24px rgba(255, 255, 255, 0.1)"
     : "0 8px 24px rgba(0, 0, 0, 0.1)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-8px)",
     boxShadow: darkMode
-      ? "0 12px 32px rgba(255, 255, 255, 0.15)" // Slightly stronger white shadow
+      ? "0 12px 32px rgba(255, 255, 255, 0.15)"
       : "0 12px 32px rgba(0, 0, 0, 0.15)",
   },
 }));
 
 const StyledTableContainer = styled(TableContainer)(({ darkMode }) => ({
-  background: darkMode ? "#000000" : "#ffffff", // Black in dark mode
+  background: darkMode ? "#000000" : "#ffffff",
   "& .MuiPaper-root": {
-    background: darkMode ? "#000000" : "#ffffff", // Ensure Paper matches
-    boxShadow: "none", // Remove default Paper shadow to avoid overlap
+    background: darkMode ? "#000000" : "#ffffff",
+    boxShadow: "none",
   },
 }));
 
@@ -64,6 +66,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [imageUrls, setImageUrls] = useState({}); // Now stores arrays of { imageServiceId, imageURL }
 
   const fetchData = async () => {
     setLoading(true);
@@ -83,7 +86,31 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       console.log("Service Categories Response:", categoriesResponse.data);
       console.log("Services Response:", servicesResponse.data);
       setServiceCategories(categoriesResponse.data || []);
-      setServices(servicesResponse.data || []);
+      const servicesData = servicesResponse.data || [];
+      setServices(servicesData);
+
+      // Fetch all images for each service
+      const imagePromises = servicesData.map((service) =>
+        getImageService(service.serviceId, token)
+          .then((res) => ({
+            serviceId: service.serviceId,
+            images: res.data || [], // Array of { imageServiceId, serviceId, imageURL }
+          }))
+          .catch(() => ({
+            serviceId: service.serviceId,
+            images: [], // Fallback if no images
+          }))
+      );
+      const imageResults = await Promise.all(imagePromises);
+      const imageMap = imageResults.reduce((acc, { serviceId, images }) => {
+        acc[serviceId] = images.map((img) => ({
+          imageServiceId: img.imageServiceId,
+          imageURL: img.imageURL,
+        }));
+        return acc;
+      }, {});
+      setImageUrls(imageMap);
+      console.log("Fetched image URLs:", imageMap);
     } catch (error) {
       console.error("Error fetching data:", error.response?.data || error.message);
       setError(
@@ -140,8 +167,6 @@ const ServiceDetailDashboard = ({ darkMode }) => {
     setError(null);
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found.");
-
       const serviceData = {
         serviceCategoryId: serviceForm.serviceCategoryId,
         name: serviceForm.name,
@@ -150,10 +175,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
         status: serviceForm.status,
         exist: true,
       };
-
-      const response = await postCreateService(serviceData, token);
-      console.log("Created service:", response.data);
-
+      await postCreateService(serviceData, token);
       setServiceForm({
         serviceCategoryId: "",
         name: "",
@@ -210,8 +232,6 @@ const ServiceDetailDashboard = ({ darkMode }) => {
     setError(null);
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found.");
-
       const serviceData = {
         serviceCategoryId: serviceForm.serviceCategoryId,
         name: serviceForm.name,
@@ -220,10 +240,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
         status: serviceForm.status,
         exist: true,
       };
-
-      const response = await updateService(editingService.serviceId, serviceData, token);
-      console.log("Updated service:", response.data);
-
+      await updateService(editingService.serviceId, serviceData, token);
       setServiceForm({
         serviceCategoryId: "",
         name: "",
@@ -252,9 +269,12 @@ const ServiceDetailDashboard = ({ darkMode }) => {
     setError(null);
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found.");
-
       await deleteService(serviceId, token);
+      setImageUrls((prev) => {
+        const newImageUrls = { ...prev };
+        delete newImageUrls[serviceId];
+        return newImageUrls;
+      });
       await fetchData();
       alert("Service deleted successfully!");
     } catch (error) {
@@ -269,13 +289,57 @@ const ServiceDetailDashboard = ({ darkMode }) => {
     }
   };
 
+  const handleFileUpload = async (event, serviceId) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "skincare");
+    data.append("cloud_name", "dhqfg7lrc");
+    data.append("api_key", "YOUR_API_KEY"); // Replace with your Cloudinary API key
+
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("https://api.cloudinary.com/v1_1/dhqfg7lrc/image/upload", {
+        method: "POST",
+        body: data,
+      });
+      if (res.ok) {
+        const uploadImgUrl = await res.json();
+        const imageUrl = uploadImgUrl.url;
+        const token = localStorage.getItem("token");
+        const imageData = { serviceId: serviceId, imageURL: imageUrl };
+        const postResponse = await postImageService(imageData, token);
+        // Update imageUrls with the new image
+        const newImage = {
+          imageServiceId: postResponse.data.imageServiceId, // Adjust based on actual response
+          imageURL: imageUrl,
+        };
+        setImageUrls((prev) => ({
+          ...prev,
+          [serviceId]: [...(prev[serviceId] || []), newImage],
+        }));
+        alert("Image uploaded and saved successfully!");
+      } else {
+        setError("Error uploading image to Cloudinary: " + res.statusText);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setError(`Failed to upload image: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const activeServiceCategories = serviceCategories.filter((category) => category.status);
 
   return (
     <Box>
       <Typography
         variant="subtitle1"
-        sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 4, fontStyle: "italic" }} // White in dark mode
+        sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 4, fontStyle: "italic" }}
         component={motion.div}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -287,7 +351,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       {error && (
         <Typography
           variant="body2"
-          sx={{ color: "#f44336", mb: 2 }} // Keep error red for visibility
+          sx={{ color: "#f44336", mb: 2 }}
           component={motion.div}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -298,10 +362,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       )}
 
       {loading && (
-        <Typography
-          variant="body2"
-          sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 2 }} // White in dark mode
-        >
+        <Typography variant="body2" sx={{ color: darkMode ? "#ffffff" : "#6e6e73", mb: 2 }}>
           Loading...
         </Typography>
       )}
@@ -317,7 +378,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       >
         <Typography
           variant="h6"
-          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }} // White in dark mode
+          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
         >
           {editingService ? "Edit Service" : "Add New Service"}
         </Typography>
@@ -335,7 +396,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                 sx={{
                   color: darkMode ? "#ffffff" : "#1d1d1f",
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: darkMode ? "#333333" : "#e0e0e0", // Match StaffHomePage border
+                    borderColor: darkMode ? "#333333" : "#e0e0e0",
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
                     borderColor: darkMode ? "#444444" : "#1d1d1f",
@@ -514,7 +575,7 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       >
         <Typography
           variant="h6"
-          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }} // White in dark mode
+          sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
         >
           All Services
         </Typography>
@@ -527,29 +588,70 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Price</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Description</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Status</TableCell>
+                <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Images</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {services.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", textAlign: "center" }}>
+                  <TableCell
+                    colSpan={7}
+                    sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", textAlign: "center" }}
+                  >
                     No services available.
                   </TableCell>
                 </TableRow>
               ) : (
                 services.map((service) => (
                   <TableRow key={service.serviceId}>
-                    <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>{service.name}</TableCell>
                     <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
-                      {serviceCategories.find((cat) => cat.serviceCategoryId === service.serviceCategoryId)?.name || "N/A"}
+                      {service.name}
                     </TableCell>
-                    <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>${service.price}</TableCell>
+                    <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
+                      {serviceCategories.find(
+                        (cat) => cat.serviceCategoryId === service.serviceCategoryId
+                      )?.name || "N/A"}
+                    </TableCell>
+                    <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
+                      ${service.price}
+                    </TableCell>
                     <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
                       {service.description ? "Yes" : "N/A"}
                     </TableCell>
                     <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
                       {service.status ? "Active" : "Inactive"}
+                    </TableCell>
+                    <TableCell>
+                      {imageUrls[service.serviceId]?.length > 0 ? (
+                        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                          {imageUrls[service.serviceId].map((img) => (
+                            <Box key={img.imageServiceId}>
+                              <img
+                                src={img.imageURL}
+                                alt={`${service.name} - ${img.imageServiceId}`}
+                                style={{
+                                  maxWidth: "100px",
+                                  maxHeight: "100px",
+                                  borderRadius: "8px",
+                                }}
+                              />
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: darkMode ? "#cccccc" : "#6e6e73",
+                                  mt: 1,
+                                  wordBreak: "break-all",
+                                }}
+                              >
+                                {img.imageURL}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      ) : (
+                        "No images"
+                      )}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -572,12 +674,30 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                         onClick={() => handleDeleteService(service.serviceId)}
                         disabled={loading}
                         sx={{
+                          mr: 1,
                           color: darkMode ? "#ffffff" : "#d32f2f",
                           borderColor: darkMode ? "#ffffff" : "#d32f2f",
                           "&:hover": { borderColor: darkMode ? "#cccccc" : "#c62828" },
                         }}
                       >
                         Delete
+                      </Button>
+                      <Button
+                        variant="contained"
+                        component="label"
+                        disabled={loading}
+                        sx={{
+                          background: darkMode ? "#1976d2" : "#1d1d1f",
+                          "&:hover": { background: darkMode ? "#1565c0" : "#333" },
+                        }}
+                      >
+                        Add Picture
+                        <input
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          onChange={(e) => handleFileUpload(e, service.serviceId)}
+                        />
                       </Button>
                     </TableCell>
                   </TableRow>
