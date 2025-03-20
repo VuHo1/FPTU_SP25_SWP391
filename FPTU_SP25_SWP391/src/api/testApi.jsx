@@ -246,7 +246,6 @@ export const getUserDetails = async (userId, token) => {
     const response = await apiClient.get(`/api/UserDetails/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
 
         Accept: '*/*',
       },
@@ -280,34 +279,64 @@ export const getUserDetails = async (userId, token) => {
 //     throw error;
 //   }
 // };
+// export const updateUserDetails = async (userId, data, token) => {
+//   try {
+//     console.log('Making PUT request to /api/UserDetails/UpdateUser');
+//     const formData = new FormData();
+//     formData.append('UserId', userId); // Add UserId to the body
+//     formData.append('FirstName', data.get('firstName'));
+//     formData.append('LastName', data.get('lastName'));
+//     formData.append('Address', data.get('address'));
+//     formData.append('Gender', data.get('gender'));
+//     if (data.get('Avatar')) {
+//       formData.append('avatarFile', data.get('Avatar')); // Match server's expected field name
+//     }
+
+//     console.log('Update data being sent:', Object.fromEntries(formData));
+//     const response = await apiClient.put(`/api/UserDetails/UpdateUser`, formData, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         Accept: '*/*',
+//         // No need to set Content-Type; Axios sets it to multipart/form-data automatically
+//       },
+//     });
+//     console.log('PUT UserDetails response:', response.data);
+//     return response;
+//   } catch (error) {
+//     console.error('Error updating user details:', error.response?.data || error);
+//     throw error;
+//   }
+// };
 export const updateUserDetails = async (userId, data, token) => {
   try {
-    console.log('Making PUT request to /api/UserDetails/UpdateUser');
-    const formData = new FormData();
-    formData.append('UserId', userId); // Add UserId to the body
-    formData.append('FirstName', data.get('firstName'));
-    formData.append('LastName', data.get('lastName'));
-    formData.append('Address', data.get('address'));
-    formData.append('Gender', data.get('gender'));
-    if (data.get('Avatar')) {
-      formData.append('avatarFile', data.get('Avatar')); // Match server's expected field name
-    }
-
-    console.log('Update data being sent:', Object.fromEntries(formData));
-    const response = await apiClient.put(`/api/UserDetails/UpdateUser`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: '*/*',
-        // No need to set Content-Type; Axios sets it to multipart/form-data automatically
-      },
-    });
-    console.log('PUT UserDetails response:', response.data);
+    console.log("Making PUT request to /api/UserDetails/UpdateUser");
+    const updatedData = {
+      UserId: userId,
+      FirstName: data.FirstName,
+      LastName: data.LastName,
+      Address: data.Address,
+      Gender: data.Gender,
+      Avatar: data.Avatar, // Send as a string (URL)
+    };
+    const response = await apiClient.put(
+      `/api/UserDetails/UpdateUser`,
+      updatedData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "*/*",
+        },
+      }
+    );
+    console.log("PUT UserDetails response:", response.data);
     return response;
   } catch (error) {
-    console.error('Error updating user details:', error.response?.data || error);
+    console.error("Error updating user details:", error.response?.data || error);
     throw error;
   }
 };
+
 
 // Admin-specific endpoints
 export const createTherapist = async (data, token) => {
@@ -379,7 +408,7 @@ export const createUserDetails = async (data, token) => {
     const response = await apiClient.post(`/api/UserDetails/CreateUserDetail`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/json',
         Accept: '*/*',
       },
     });
