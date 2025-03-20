@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./page/AuthContext";
 import HomePage from "./page/HomePage";
-// import BookingPage from "./page/BookingPage";
+import BookingPage from "./page/BookingPage";
 import CartPage from "./page/CartPage";
 import ProductListPage from "./page/ProductListPage";
 import Contact from "./page/Contact";
@@ -82,29 +82,29 @@ function App() {
                 </ProtectedRoute>
               }
             />
-                <Route
-                      path="/staff/home"
-                      element={
-                        <ProtectedRoute allowedRole="Staff">
-                          <StaffHomePage darkMode={darkMode}
-                          toggleDarkMode={toggleDarkMode} />
-                        </ProtectedRoute>
-                      }
-                    />
-                       <Route
-                      path="/skintherapist/home"
-                      element={
-                        <ProtectedRoute allowedRole="Therapist">
-                          <TherapistHomePage darkMode={darkMode}
-                          toggleDarkMode={toggleDarkMode} />
-                        </ProtectedRoute>
-                      }
-                    />
-                       <Route path="/profile-role" element={<ProfileRole darkMode={darkMode} />} />
-                    <Route path="/edit-profilerole" element={<EditProfileRole darkMode={darkMode} />} />
-                    <Route path="/add-profilerole" element={<AddProfileRole darkMode={darkMode} />} />
-                    <Route path="/therapist/choose-schedule" element={<ChooseScheduleTherapist darkMode={true} />} />
-                    <Route path="/timeslot-schedule" element={<TimeSlotSchedule darkMode={darkMode} />} />
+            <Route
+              path="/staff/home"
+              element={
+                <ProtectedRoute allowedRole="Staff">
+                  <StaffHomePage darkMode={darkMode}
+                    toggleDarkMode={toggleDarkMode} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/skintherapist/home"
+              element={
+                <ProtectedRoute allowedRole="Therapist">
+                  <TherapistHomePage darkMode={darkMode}
+                    toggleDarkMode={toggleDarkMode} />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/profile-role" element={<ProfileRole darkMode={darkMode} />} />
+            <Route path="/edit-profilerole" element={<EditProfileRole darkMode={darkMode} />} />
+            <Route path="/add-profilerole" element={<AddProfileRole darkMode={darkMode} />} />
+            <Route path="/therapist/choose-schedule" element={<ChooseScheduleTherapist darkMode={true} />} />
+            <Route path="/timeslot-schedule" element={<TimeSlotSchedule darkMode={darkMode} />} />
 
 
             <Route
@@ -113,7 +113,7 @@ function App() {
                 <Layout darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
                   <Routes>
                     <Route path="/" element={<HomePage darkMode={darkMode} />} />
-                    {/* <Route path="/booking_page" element={<BookingPage />} /> */}
+                    <Route path="/booking_page" element={<BookingPage />} />
                     <Route
                       path="/service/:id"
                       element={<BlogDetail darkMode={darkMode} />}
@@ -145,12 +145,12 @@ function App() {
                       path="/profile"
                       element={<Profile darkMode={darkMode} />}
                     />
-                 
-                
+
+
                     <Route path="/edit-profile" element={<EditProfile darkMode={darkMode} />} />
                     <Route path="/add-profile" element={<AddProfile darkMode={darkMode} />} />
                     <Route path="*" element={<Error darkMode={darkMode} />} />
-                 
+
                   </Routes>
                 </Layout>
               }
