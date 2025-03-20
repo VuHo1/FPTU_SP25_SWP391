@@ -12,10 +12,10 @@ import {
   faPhone,
   faExclamationTriangle,
   faTimes,
-  faHome, // Added home icon
+  faHome,
 } from "@fortawesome/free-solid-svg-icons";
 
-const ProfileRole = ({ darkMode, role }) => { // Added role prop if passed explicitly
+const ProfileRole = ({ darkMode, role }) => {
   const { userId, token, isLoggedIn, username } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,14 +46,14 @@ const ProfileRole = ({ darkMode, role }) => { // Added role prop if passed expli
     };
 
     fetchUserDetails();
-  }, [userId, token, isLoggedIn, navigate]);
+  }, [userId, token, isLoggedIn, navigate, location.state?.refresh]);
 
   const handleAddProfile = () => {
     navigate("/add-profilerole");
   };
 
   const handleReturn = () => {
-    navigate(-1); // Go back to the previous page
+    navigate(-1); // Navigate back to the previous page
   };
 
   const handleReturnToHome = () => {
@@ -215,7 +215,6 @@ const ProfileRole = ({ darkMode, role }) => { // Added role prop if passed expli
           align-items: center;
           gap: 0.5rem;
           transition: background 0.3s ease, transform 0.2s ease;
-          margin-right: 1rem; /* Added spacing between buttons */
         }
         .cv-page.dark .edit-btn, .cv-page.dark .add-btn, .cv-page.dark .return-btn, .cv-page.dark .home-btn {
           background: #1abc9c;
@@ -335,7 +334,7 @@ const ProfileRole = ({ darkMode, role }) => { // Added role prop if passed expli
               </div>
 
               <div className="cv-section">
-                <Link to="/edit-profileRole" className="edit-btn">
+                <Link to="/edit-profilerole" className="edit-btn">
                   <FontAwesomeIcon icon={faEdit} /> Edit Profile
                 </Link>
                 <button onClick={handleReturnToHome} className="home-btn">

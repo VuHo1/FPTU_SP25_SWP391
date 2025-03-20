@@ -22,7 +22,7 @@ const EditProfileRole = ({ darkMode }) => {
     lastName: "",
     address: "",
     gender: "",
-    avatar: null,
+    avatarUrl: "", // Changed from 'avatar' to 'avatarUrl' for Cloudinary URL
   });
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,7 @@ const EditProfileRole = ({ darkMode }) => {
             lastName: data.lastName || "",
             address: data.address || "",
             gender: data.gender || "",
-            avatar: null,
+            avatarUrl: data.avatar || "", // Use existing avatar URL
           });
           setAvatarPreview(data.avatar || null);
         }
@@ -68,46 +68,83 @@ const EditProfileRole = ({ darkMode }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAvatarChange = (e) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const validTypes = ["image/jpeg", "image/png", "image/gif"];
-      if (!validTypes.includes(file.type)) {
-        setError("Please upload a valid image file (JPEG, PNG, or GIF).");
-        return;
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      setError("Please upload a valid image file (JPEG, PNG, or GIF).");
+      return;
+    }
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setError("File size must not exceed 5MB.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    // Upload to Cloudinary
+    const cloudinaryData = new FormData();
+    cloudinaryData.append("file", file);
+    cloudinaryData.append("upload_preset", "skincare"); // Replace with your Cloudinary upload preset
+    cloudinaryData.append("cloud_name", "dhqfg7lrc"); // Replace with your Cloudinary cloud name
+    cloudinaryData.append("api_key", "YOUR_API_KEY"); // Replace with your Cloudinary API key
+
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dhqfg7lrc/image/upload", // Replace 'dhqfg7lrc' with your cloud name
+        {
+          method: "POST",
+          body: cloudinaryData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image to Cloudinary");
       }
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        setError("File size must not exceed 5MB.");
-        return;
-      }
-      setFormData((prev) => ({ ...prev, avatar: file }));
-      setAvatarPreview(URL.createObjectURL(file));
-      setError(null); // Clear any previous error
+
+      const result = await response.json();
+      const imageUrl = result.secure_url; // Get the secure URL from Cloudinary
+
+      setFormData((prev) => ({ ...prev, avatarUrl: imageUrl }));
+      setAvatarPreview(URL.createObjectURL(file)); // Local preview
+    } catch (err) {
+      console.error("Cloudinary upload error:", err);
+      setError("Failed to upload image: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
-      const updatedData = new FormData();
-      updatedData.append("firstName", formData.firstName);
-      updatedData.append("lastName", formData.lastName);
-      updatedData.append("address", formData.address);
-      updatedData.append("gender", formData.gender);
-      if (formData.avatar) {
-        updatedData.append("Avatar", formData.avatar); // Adjusted to "Avatar" (capitalized)
-      }
+      const updatedData = {
+        UserId: userId,
+        FirstName: formData.firstName,
+        LastName: formData.lastName,
+        Address: formData.address,
+        Gender: formData.gender,
+        Avatar: formData.avatarUrl, // Send Cloudinary URL as 'Avatar'
+      };
 
       await updateUserDetails(userId, updatedData, token);
       alert("Profile updated successfully!");
-      navigate("/profile-role");
+      navigate("/profile-role", { state: { refresh: true } }); // Pass state to trigger refresh
     } catch (err) {
-      console.error("Full error:", err.response?.data);
+      console.error("Full error:", err.response?.data || err);
       const errorDetails = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join(", ")
         : err.response?.data?.title || err.message;
       setError(`Failed to update profile: ${errorDetails}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,6 +167,7 @@ const EditProfileRole = ({ darkMode }) => {
   return (
     <>
       <style>{`
+        /* Same styles as before, unchanged */
         .profile-page {
           min-height: 100vh;
           display: flex;
@@ -378,6 +416,7 @@ const EditProfileRole = ({ darkMode }) => {
                   <FontAwesomeIcon icon={faUser} /> Edit Profile
                 </h2>
               </div>
+              {error && <div className="error">{error}</div>}
               <form className="profile-form" onSubmit={handleSubmit}>
                 <div className="avatar-section">
                   <div className="avatar-wrapper">
@@ -392,6 +431,7 @@ const EditProfileRole = ({ darkMode }) => {
                         type="file"
                         accept="image/*"
                         onChange={handleAvatarChange}
+                        disabled={loading}
                         hidden
                       />
                     </label>
@@ -407,6 +447,7 @@ const EditProfileRole = ({ darkMode }) => {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
+                    disabled={loading}
                   />
                 </div>
                 <div className="form-group">
@@ -419,6 +460,7 @@ const EditProfileRole = ({ darkMode }) => {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
+                    disabled={loading}
                   />
                 </div>
                 <div className="form-group">
@@ -430,6 +472,7 @@ const EditProfileRole = ({ darkMode }) => {
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
+                    disabled={loading}
                   />
                 </div>
                 <div className="form-group">
@@ -440,6 +483,7 @@ const EditProfileRole = ({ darkMode }) => {
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
+                    disabled={loading}
                   >
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
@@ -448,10 +492,15 @@ const EditProfileRole = ({ darkMode }) => {
                   </select>
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn save-btn">
-                    <FontAwesomeIcon icon={faSave} /> Save
+                  <button type="submit" className="btn save-btn" disabled={loading}>
+                    <FontAwesomeIcon icon={faSave} /> {loading ? "Saving..." : "Save"}
                   </button>
-                  <button type="button" className="btn cancel-btn" onClick={handleReturn}>
+                  <button
+                    type="button"
+                    className="btn cancel-btn"
+                    onClick={handleReturn}
+                    disabled={loading}
+                  >
                     <FontAwesomeIcon icon={faTimes} /> Cancel
                   </button>
                 </div>

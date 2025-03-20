@@ -2,16 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../page/AuthContext";
-import { getAllServices, getImageService } from "../api/testApi"; // Import API functions
+import { getAllServices, getImageService } from "../api/testApi";
 
 const HomePage = ({ darkMode }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { isLoggedIn, username } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
-  const [services, setServices] = useState([]); // State for services with images
-  const [loadingServices, setLoadingServices] = useState(true); // Loading state for services
+  const [services, setServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(true);
 
-  // Function to shuffle an array (Fisher-Yates shuffle)
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -21,7 +20,6 @@ const HomePage = ({ darkMode }) => {
     return shuffled;
   };
 
-  // Fetch services and their images when the component mounts
   useEffect(() => {
     const fetchServices = async () => {
       setLoadingServices(true);
@@ -29,17 +27,14 @@ const HomePage = ({ darkMode }) => {
       try {
         const servicesResponse = await getAllServices(token || null);
         const allServices = servicesResponse.data || [];
-
-        // Shuffle services and take the first 3
         const shuffledServices = shuffleArray(allServices).slice(0, 3);
 
-        // Fetch images for each selected service
         const servicesWithImages = await Promise.all(
           shuffledServices.map(async (service) => {
             try {
               const imageResponse = await getImageService(service.serviceId, token || null);
               const images = imageResponse.data || [];
-              const mainImage = images.find((img) => img.isMain) || images[0]; // Prefer isMain if available
+              const mainImage = images.find((img) => img.isMain) || images[0];
               return {
                 ...service,
                 image: mainImage ? mainImage.imageURL : null,
@@ -60,9 +55,8 @@ const HomePage = ({ darkMode }) => {
       }
     };
     fetchServices();
-  }, []); // Empty dependency array ensures this runs only on mount
+  }, []);
 
-  // Welcome message effect
   useEffect(() => {
     if (isLoggedIn && username) {
       setShowWelcome(true);
@@ -71,6 +65,7 @@ const HomePage = ({ darkMode }) => {
     }
   }, [isLoggedIn, username]);
 
+  // Base Styles
   const containerStyles = {
     width: "100vw",
     minHeight: "100vh",
@@ -84,29 +79,50 @@ const HomePage = ({ darkMode }) => {
     position: "relative",
   };
 
+  // Updated Welcome Styles
   const welcomeStyles = {
     position: "absolute",
-    top: "80px",
+    top: "120px", // Adjusted to sit below navbar or header
     left: "50%",
     transform: "translateX(-50%)",
-    fontSize: "26px",
-    fontWeight: "600",
-    color: darkMode ? "#ffffff" : "#1d1d1f",
+    width: "90%",
+    maxWidth: "600px",
     background: darkMode
-      ? "linear-gradient(135deg, rgba(52, 199, 89, 0.2), rgba(44, 62, 80, 0.9))"
-      : "linear-gradient(135deg, rgba(230, 126, 34, 0.2), rgba(255, 255, 255, 0.9))",
-    padding: "12px 28px",
-    borderRadius: "50px",
-    border: darkMode
-      ? "1px solid rgba(52, 199, 89, 0.5)"
-      : "1px solid rgba(230, 126, 34, 0.5)",
+      ? "linear-gradient(135deg, rgba(44, 62, 80, 0.95), rgba(52, 199, 89, 0.15))"
+      : "linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(230, 126, 34, 0.15))",
+    borderRadius: "16px",
+    border: darkMode ? "1px solid #5a758c" : "1px solid #e0e0e0",
     boxShadow: darkMode
-      ? "0 8px 24px rgba(0, 0, 0, 0.4)"
-      : "0 8px 24px rgba(0, 0, 0, 0.1)",
-    backdropFilter: "blur(8px)",
-    transition: "all 0.3s ease",
+      ? "0 12px 32px rgba(0, 0, 0, 0.5)"
+      : "0 12px 32px rgba(0, 0, 0, 0.1)",
+    padding: "20px 30px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
     zIndex: 10,
-    letterSpacing: "0.5px",
+    backdropFilter: "blur(10px)",
+    transition: "all 0.3s ease",
+  };
+
+  const welcomeTextStyles = {
+    fontSize: "22px",
+    fontWeight: "600",
+    color: darkMode ? "#ecf0f1" : "#2c3e50",
+    letterSpacing: "0.2px",
+    fontFamily: "'Poppins', sans-serif",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  };
+
+  const dismissButtonStyles = {
+    background: "transparent",
+    border: "none",
+    color: darkMode ? "#bdc3c7" : "#7f8c8d",
+    fontSize: "16px",
+    cursor: "pointer",
+    padding: "5px 10px",
+    transition: "color 0.3s ease",
   };
 
   const sectionStyles = {
@@ -225,7 +241,7 @@ const HomePage = ({ darkMode }) => {
       ? "0 4px 12px rgba(0, 0, 0, 0.3)"
       : "0 4px 12px rgba(0, 0, 0, 0.06)",
     textAlign: "left",
-    cursor: "pointer", // Indicate clickable
+    cursor: "pointer",
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
   };
 
@@ -243,9 +259,9 @@ const HomePage = ({ darkMode }) => {
   };
 
   const welcomeVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20, transition: { duration: 1 } },
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.5 } },
   };
 
   return (
@@ -259,13 +275,35 @@ const HomePage = ({ darkMode }) => {
             exit="exit"
             style={welcomeStyles}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateX(-50%) scale(1.05)")
+              (e.currentTarget.style.transform = "translateX(-50%) scale(1.02)")
             }
             onMouseLeave={(e) =>
               (e.currentTarget.style.transform = "translateX(-50%) scale(1)")
             }
           >
-            Welcome, {username}!
+            <div style={welcomeTextStyles}>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={darkMode ? "#34c759" : "#e67e22"}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              <span>Welcome back, {username}!</span>
+            </div>
+            <button
+              style={dismissButtonStyles}
+              onClick={() => setShowWelcome(false)}
+              onMouseEnter={(e) => (e.currentTarget.style.color = darkMode ? "#34c759" : "#e67e22")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = darkMode ? "#bdc3c7" : "#7f8c8d")}
+            >
+              ✕
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -280,8 +318,8 @@ const HomePage = ({ darkMode }) => {
           justifyContent: "center",
           alignItems: "center",
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1592333841676-1eecfefde529')",
-          paddingTop: isLoggedIn && username ? "120px" : "60px",
+            "url('https://www.dermalogica.com.au/cdn/shop/articles/better-skin-see-a-therapist.jpg?v=1600386693')",
+          paddingTop: isLoggedIn && username ? "180px" : "60px", // Adjusted for welcome message
         }}
       >
         <div style={overlayStyles}></div>
@@ -372,7 +410,7 @@ const HomePage = ({ darkMode }) => {
               services.map((service, index) => (
                 <Link
                   key={service.serviceId}
-                  to={`/service/${service.serviceId}`} // Link to BlogDetail
+                  to={`/service/${service.serviceId}`}
                   style={{ textDecoration: "none" }}
                 >
                   <motion.div
