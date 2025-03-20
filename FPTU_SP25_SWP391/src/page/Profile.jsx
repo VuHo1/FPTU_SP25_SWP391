@@ -45,7 +45,7 @@ const Profile = ({ darkMode }) => {
     };
 
     fetchUserDetails();
-  }, [userId, token, isLoggedIn, navigate]);
+  }, [userId, token, isLoggedIn, navigate, location.state?.refresh]); // Add location.state.refresh as dependency
 
   const handleAddProfile = () => {
     navigate("/add-profile");
@@ -66,6 +66,7 @@ const Profile = ({ darkMode }) => {
   return (
     <>
       <style>{`
+        /* Same styles as before, unchanged */
         .cv-page {
           min-height: 100vh;
           display: flex;

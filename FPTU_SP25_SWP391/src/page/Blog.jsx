@@ -40,10 +40,22 @@ const ServicesPage = () => {
         getServiceCategories(token),
         getAllServices(token),
       ]);
+      const categoriesData = categoriesResponse.data || [];
       const servicesData = servicesResponse.data || [];
-      setCategories(categoriesResponse.data || []);
+      setCategories(categoriesData);
 
-      const imagePromises = servicesData.map((service) =>
+      // Adjust service status based on category status
+      const adjustedServices = servicesData.map((service) => {
+        const category = categoriesData.find(
+          (cat) => cat.serviceCategoryId === service.serviceCategoryId
+        );
+        return {
+          ...service,
+          effectiveStatus: category?.status === false ? false : service.status, // Sync with category status
+        };
+      });
+
+      const imagePromises = adjustedServices.map((service) =>
         getImageService(service.serviceId, token)
           .then((res) => ({
             serviceId: service.serviceId,
@@ -64,7 +76,7 @@ const ServicesPage = () => {
         return acc;
       }, {});
 
-      const updatedServices = servicesData.map((service) => ({
+      const updatedServices = adjustedServices.map((service) => ({
         ...service,
         imageUrl:
           imageMap[service.serviceId]?.find((img) => img.isMain)?.imageURL ||
@@ -79,10 +91,21 @@ const ServicesPage = () => {
             getServiceCategories(null),
             getAllServices(null),
           ]);
+          const categoriesData = categoriesResponse.data || [];
           const servicesData = servicesResponse.data || [];
-          setCategories(categoriesResponse.data || []);
+          setCategories(categoriesData);
 
-          const imagePromises = servicesData.map((service) =>
+          const adjustedServices = servicesData.map((service) => {
+            const category = categoriesData.find(
+              (cat) => cat.serviceCategoryId === service.serviceCategoryId
+            );
+            return {
+              ...service,
+              effectiveStatus: category?.status === false ? false : service.status,
+            };
+          });
+
+          const imagePromises = adjustedServices.map((service) =>
             getImageService(service.serviceId, null)
               .then((res) => ({
                 serviceId: service.serviceId,
@@ -103,7 +126,7 @@ const ServicesPage = () => {
             return acc;
           }, {});
 
-          const updatedServices = servicesData.map((service) => ({
+          const updatedServices = adjustedServices.map((service) => ({
             ...service,
             imageUrl:
               imageMap[service.serviceId]?.find((img) => img.isMain)?.imageURL ||
@@ -128,6 +151,8 @@ const ServicesPage = () => {
 
   const filteredAndSortedServices = () => {
     let result = services.filter((service) => {
+      // Only include services with effectiveStatus === true
+      const isActive = service.effectiveStatus === true;
       const matchesSearch =
         service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (service.description &&
@@ -139,10 +164,10 @@ const ServicesPage = () => {
       const price = service.price || 0;
       const matchesPriceRange =
         filterPriceRange === "all" ||
-        (filterPriceRange === "0-50" && price <= 50) ||
-        (filterPriceRange === "51-100" && price > 50 && price <= 100) ||
-        (filterPriceRange === "101+" && price > 100);
-      return matchesSearch && matchesCategory && matchesPriceRange;
+        (filterPriceRange === "0-500000" && price <= 500000) ||
+        (filterPriceRange === "500001-1000000" && price > 500000 && price <= 1000000) ||
+        (filterPriceRange === "1000001+" && price > 1000000);
+      return isActive && matchesSearch && matchesCategory && matchesPriceRange;
     });
 
     switch (sortOption) {
@@ -166,6 +191,11 @@ const ServicesPage = () => {
     }
 
     return result;
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return "N/A";
+    return `${price.toLocaleString("vi-VN")} ₫`;
   };
 
   const allServices = filteredAndSortedServices();
@@ -568,9 +598,9 @@ const ServicesPage = () => {
                 onChange={(e) => setFilterPriceRange(e.target.value)}
               >
                 <option value="all">Tất cả giá</option>
-                <option value="0-50">$0 - $50</option>
-                <option value="51-100">$51 - $100</option>
-                <option value="101+">$101+</option>
+                <option value="0-500000">0 - 500,000 ₫</option>
+                <option value="500001-1000000">500,001 - 1,000,000 ₫</option>
+                <option value="1000001+">1,000,001+ ₫</option>
               </select>
             </div>
           </motion.div>
@@ -640,7 +670,7 @@ const ServicesPage = () => {
                           </div>
                           <div className="service-content">
                             <h2>{service.name}</h2>
-                            <p className="price">${service.price || "N/A"}</p>
+                            <p className="price">{formatPrice(service.price)}</p>
                             <div className="rating">
                               {[...Array(5)].map((_, i) => (
                                 <FontAwesomeIcon key={i} icon={faStar} />

@@ -16,19 +16,21 @@ import { styled } from "@mui/system";
 import { motion } from "framer-motion";
 import { createTherapist, createStaff, getAllUsers } from "../api/testApi";
 
+// Dashboard Card Styling (Matching AdminHomePage)
 const DashboardCard = styled("div")(({ darkMode }) => ({
   padding: "30px",
   borderRadius: "16px",
-  background: darkMode ? "#252525" : "#ffffff",
+  background: darkMode ? "rgba(52, 73, 94, 0.98)" : "rgba(255, 255, 255, 0.98)",
   boxShadow: darkMode
-    ? "0 8px 24px rgba(0, 0, 0, 0.6)"
-    : "0 8px 24px rgba(0, 0, 0, 0.1)",
+    ? "0 8px 24px rgba(0, 0, 0, 0.4)"
+    : "0 8px 24px rgba(0, 0, 0, 0.15)",
+  border: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-8px)",
     boxShadow: darkMode
-      ? "0 12px 32px rgba(0, 0, 0, 0.8)"
-      : "0 12px 32px rgba(0, 0, 0, 0.15)",
+      ? "0 12px 32px rgba(0, 0, 0, 0.6)"
+      : "0 12px 32px rgba(0, 0, 0, 0.2)",
   },
 }));
 
@@ -129,7 +131,12 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
       {/* User Creation Section */}
       <Typography
         variant="h6"
-        sx={{ mb: 3, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
+        sx={{
+          mb: 3,
+          color: darkMode ? "#ecf0f1" : "#2c3e50",
+          fontWeight: 600,
+          fontFamily: "'Poppins', sans-serif",
+        }}
       >
         Create New User
       </Typography>
@@ -144,12 +151,20 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
             variant="outlined"
             sx={{
               "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                "& fieldset": { borderColor: darkMode ? "#5a758c" : "#ccc" },
+                "&:hover fieldset": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
+                "&.Mui-focused fieldset": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
+                backgroundColor: darkMode ? "#2c3e50" : "#fff",
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
               },
-              "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-              "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
+              "& .MuiInputLabel-root": {
+                color: darkMode ? "#bdc3c7" : "#7f8c8d",
+                "&.Mui-focused": { color: darkMode ? "#1abc9c" : "#6c4f37" },
+              },
+              "& .MuiInputBase-input": {
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                fontFamily: "'Roboto', sans-serif",
+              },
             }}
           />
         </Grid>
@@ -163,12 +178,20 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
             variant="outlined"
             sx={{
               "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                "& fieldset": { borderColor: darkMode ? "#5a758c" : "#ccc" },
+                "&:hover fieldset": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
+                "&.Mui-focused fieldset": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
+                backgroundColor: darkMode ? "#2c3e50" : "#fff",
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
               },
-              "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-              "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
+              "& .MuiInputLabel-root": {
+                color: darkMode ? "#bdc3c7" : "#7f8c8d",
+                "&.Mui-focused": { color: darkMode ? "#1abc9c" : "#6c4f37" },
+              },
+              "& .MuiInputBase-input": {
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                fontFamily: "'Roboto', sans-serif",
+              },
             }}
           />
         </Grid>
@@ -183,27 +206,37 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
             variant="outlined"
             sx={{
               "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                "& fieldset": { borderColor: darkMode ? "#5a758c" : "#ccc" },
+                "&:hover fieldset": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
+                "&.Mui-focused fieldset": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
+                backgroundColor: darkMode ? "#2c3e50" : "#fff",
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
               },
-              "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-              "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
+              "& .MuiInputLabel-root": {
+                color: darkMode ? "#bdc3c7" : "#7f8c8d",
+                "&.Mui-focused": { color: darkMode ? "#1abc9c" : "#6c4f37" },
+              },
+              "& .MuiInputBase-input": {
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                fontFamily: "'Roboto', sans-serif",
+              },
             }}
           />
         </Grid>
         <Grid item xs={12}>
           <Button
             variant="contained"
-            color="primary"
             onClick={() => handleCreateUser("Therapist")}
             sx={{
               mr: 2,
               py: 1.5,
               px: 4,
               borderRadius: "8px",
-              background: darkMode ? "#1976d2" : "#1d1d1f",
-              "&:hover": { background: darkMode ? "#1565c0" : "#333" },
+              background: darkMode ? "#1abc9c" : "#6c4f37",
+              color: "#fff",
+              "&:hover": { background: darkMode ? "#16a085" : "#5a3f2e" },
+              fontFamily: "'Roboto', sans-serif",
+              fontWeight: 500,
             }}
             component={motion.div}
             whileHover={{ scale: 1.05 }}
@@ -213,14 +246,16 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
           </Button>
           <Button
             variant="contained"
-            color="secondary"
             onClick={() => handleCreateUser("Staff")}
             sx={{
               py: 1.5,
               px: 4,
               borderRadius: "8px",
-              background: darkMode ? "#d81b60" : "#6e6e73",
-              "&:hover": { background: darkMode ? "#c2185b" : "#555" },
+              background: darkMode ? "#3498db" : "#8e6f4e",
+              color: "#fff",
+              "&:hover": { background: darkMode ? "#2980b9" : "#7a5d41" },
+              fontFamily: "'Roboto', sans-serif",
+              fontWeight: 500,
             }}
             component={motion.div}
             whileHover={{ scale: 1.05 }}
@@ -234,14 +269,23 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
       {/* User Search Section */}
       <Typography
         variant="h6"
-        sx={{ mb: 2, color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}
+        sx={{
+          mb: 2,
+          color: darkMode ? "#ecf0f1" : "#2c3e50",
+          fontWeight: 600,
+          fontFamily: "'Poppins', sans-serif",
+        }}
       >
         Search Users
       </Typography>
       {loading && (
         <Typography
           variant="body2"
-          sx={{ color: darkMode ? "#a1a1a6" : "#6e6e73", mb: 2 }}
+          sx={{
+            color: darkMode ? "#bdc3c7" : "#7f8c8d",
+            mb: 2,
+            fontFamily: "'Roboto', sans-serif",
+          }}
         >
           Loading...
         </Typography>
@@ -256,27 +300,39 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
             variant="outlined"
             sx={{
               "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: darkMode ? "#a1a1a6" : "#e0e0e0" },
-                "&:hover fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
-                "&.Mui-focused fieldset": { borderColor: darkMode ? "#ffffff" : "#1d1d1f" },
+                "& fieldset": { borderColor: darkMode ? "#5a758c" : "#ccc" },
+                "&:hover fieldset": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
+                "&.Mui-focused fieldset": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
+                backgroundColor: darkMode ? "#2c3e50" : "#fff",
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
               },
-              "& .MuiInputLabel-root": { color: darkMode ? "#a1a1a6" : "#6e6e73" },
-              "& .MuiInputBase-input": { color: darkMode ? "#ffffff" : "#1d1d1f" },
+              "& .MuiInputLabel-root": {
+                color: darkMode ? "#bdc3c7" : "#7f8c8d",
+                "&.Mui-focused": { color: darkMode ? "#1abc9c" : "#6c4f37" },
+              },
+              "& .MuiInputBase-input": {
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                fontFamily: "'Roboto', sans-serif",
+              },
             }}
           />
         </Grid>
         <Grid item xs={12} sm={2}>
           <Button
             variant="outlined"
-            color="secondary"
             onClick={handleClearSearch}
             fullWidth
             sx={{
               py: 1.5,
               borderRadius: "8px",
-              color: darkMode ? "#d81b60" : "#6e6e73",
-              borderColor: darkMode ? "#d81b60" : "#6e6e73",
-              "&:hover": { borderColor: darkMode ? "#c2185b" : "#555" },
+              color: darkMode ? "#f44336" : "#721c24",
+              borderColor: darkMode ? "#f44336" : "#721c24",
+              "&:hover": {
+                borderColor: darkMode ? "#d32f2f" : "#5a171d",
+                backgroundColor: darkMode ? "rgba(244, 67, 54, 0.1)" : "rgba(114, 28, 36, 0.1)",
+              },
+              fontFamily: "'Roboto', sans-serif",
+              fontWeight: 500,
             }}
             component={motion.div}
             whileHover={{ scale: 1.05 }}
@@ -286,17 +342,48 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
           </Button>
         </Grid>
       </Grid>
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          mt: 2,
+          background: darkMode ? "rgba(52, 73, 94, 0.98)" : "rgba(255, 255, 255, 0.98)",
+          border: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
+          boxShadow: darkMode
+            ? "0 8px 24px rgba(0, 0, 0, 0.4)"
+            : "0 8px 24px rgba(0, 0, 0, 0.15)",
+        }}
+      >
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}>
+              <TableCell
+                sx={{
+                  color: darkMode ? "#bdc3c7" : "#7f8c8d",
+                  fontWeight: 600,
+                  fontFamily: "'Poppins', sans-serif",
+                  backgroundColor: darkMode ? "#5a758c" : "#e0e0e0",
+                }}
+              >
                 Username
               </TableCell>
-              <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}>
+              <TableCell
+                sx={{
+                  color: darkMode ? "#bdc3c7" : "#7f8c8d",
+                  fontWeight: 600,
+                  fontFamily: "'Poppins', sans-serif",
+                  backgroundColor: darkMode ? "#5a758c" : "#e0e0e0",
+                }}
+              >
                 Email
               </TableCell>
-              <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", fontWeight: 600 }}>
+              <TableCell
+                sx={{
+                  color: darkMode ? "#bdc3c7" : "#7f8c8d",
+                  fontWeight: 600,
+                  fontFamily: "'Poppins', sans-serif",
+                  backgroundColor: darkMode ? "#5a758c" : "#e0e0e0",
+                }}
+              >
                 Role
               </TableCell>
             </TableRow>
@@ -306,21 +393,36 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
               <TableRow>
                 <TableCell
                   colSpan={3}
-                  sx={{ color: darkMode ? "#ffffff" : "#1d1d1f", textAlign: "center" }}
+                  sx={{
+                    color: darkMode ? "#ecf0f1" : "#2c3e50",
+                    textAlign: "center",
+                    fontFamily: "'Roboto', sans-serif",
+                  }}
                 >
                   {searchTerm ? "No matching users found." : "Enter a username to search."}
                 </TableCell>
               </TableRow>
             ) : (
               searchResult.map((user) => (
-                <TableRow key={user.userName}>
-                  <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
+                <TableRow
+                  key={user.userName}
+                  sx={{
+                    "&:hover": { background: darkMode ? "#455a64" : "#f8f4e1" },
+                  }}
+                >
+                  <TableCell
+                    sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontFamily: "'Roboto', sans-serif" }}
+                  >
                     {user.userName}
                   </TableCell>
-                  <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
+                  <TableCell
+                    sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontFamily: "'Roboto', sans-serif" }}
+                  >
                     {user.email}
                   </TableCell>
-                  <TableCell sx={{ color: darkMode ? "#ffffff" : "#1d1d1f" }}>
+                  <TableCell
+                    sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontFamily: "'Roboto', sans-serif" }}
+                  >
                     {user.role || "N/A"}
                   </TableCell>
                 </TableRow>

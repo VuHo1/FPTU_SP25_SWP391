@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../page/AuthContext";
 import { getAllServices, getServiceCategories, getImageService } from "../api/testApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons"; // Added icons for slideshow
 
 const BlogDetail = ({ darkMode }) => {
   const { id } = useParams();
@@ -12,7 +12,7 @@ const BlogDetail = ({ darkMode }) => {
   const [service, setService] = useState(null);
   const [categories, setCategories] = useState([]);
   const [images, setImages] = useState([]); // Array of { imageServiceId, imageURL, isMain }
-  const [mainImage, setMainImage] = useState(null); // URL of the current main image
+  const [mainImageIndex, setMainImageIndex] = useState(0); // Index of the current main image
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -39,16 +39,14 @@ const BlogDetail = ({ darkMode }) => {
           serviceImages = (imageResponse.data || []).map((img, index) => ({
             imageServiceId: img.imageServiceId,
             imageURL: img.imageURL,
-            isMain: index === 0, // Default first image as main if no backend isMain
+            isMain: index === 0, // Default first image as main
           }));
           setImages(serviceImages);
-          setMainImage(
-            serviceImages.find((img) => img.isMain)?.imageURL || serviceImages[0]?.imageURL || null
-          );
+          setMainImageIndex(0); // Start with the first image
         } catch (imageErr) {
           console.warn(`No images found for service ${foundService.serviceId}`);
           setImages([]);
-          setMainImage(null);
+          setMainImageIndex(-1); // No images
         }
 
         setService(foundService);
@@ -62,8 +60,20 @@ const BlogDetail = ({ darkMode }) => {
     fetchServiceAndCategories();
   }, [id]);
 
-  const handleImageClick = (imageURL) => {
-    setMainImage(imageURL);
+  const handleImageClick = (index) => {
+    setMainImageIndex(index);
+  };
+
+  const handlePrevImage = () => {
+    setMainImageIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : images.length - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setMainImageIndex((prevIndex) =>
+      prevIndex < images.length - 1 ? prevIndex + 1 : 0
+    );
   };
 
   const handleBookingClick = () => {
@@ -79,6 +89,7 @@ const BlogDetail = ({ darkMode }) => {
   if (!service) return <h2>Dịch vụ không tồn tại</h2>;
 
   const isServiceActive = service.status;
+  const mainImage = images.length > 0 ? images[mainImageIndex]?.imageURL : null;
 
   return (
     <>
@@ -131,6 +142,7 @@ const BlogDetail = ({ darkMode }) => {
         }
         .blog-image {
           width: 100%;
+          position: relative;
         }
         .main-image {
           width: 100%;
@@ -139,6 +151,33 @@ const BlogDetail = ({ darkMode }) => {
           border-radius: 16px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
           margin-bottom: 1rem;
+        }
+        .slideshow-controls {
+          position: absolute;
+          top: 50%;
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          transform: translateY(-50%);
+          padding: 0 10px;
+        }
+        .slideshow-button {
+          background: rgba(0, 0, 0, 0.5);
+          color: #fff;
+          border: none;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          font-size: 1.2rem;
+          cursor: pointer;
+          transition: background 0.3s ease;
+        }
+        .slideshow-button:hover {
+          background: rgba(0, 0, 0, 0.8);
+        }
+        .slideshow-button:disabled {
+          background: rgba(0, 0, 0, 0.3);
+          cursor: not-allowed;
         }
         .thumbnail-container {
           display: flex;
@@ -164,7 +203,9 @@ const BlogDetail = ({ darkMode }) => {
           object-fit: cover;
           border-radius: 8px;
           cursor: pointer;
-          border: 2px solid ${mainImage === "imageURL" ? "#1abc9c" : "transparent"};
+          border: 2px solid ${
+            mainImageIndex === "index" ? "#1abc9c" : "transparent"
+          };
           transition: border 0.3s ease, transform 0.2s ease;
         }
         .thumbnail:hover {
@@ -232,6 +273,11 @@ const BlogDetail = ({ darkMode }) => {
             width: 80px;
             height: 80px;
           }
+          .slideshow-button {
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+          }
         }
       `}</style>
 
@@ -241,8 +287,8 @@ const BlogDetail = ({ darkMode }) => {
             <h1>{service.name}</h1>
             <p>{service.description || "Không có mô tả chi tiết."}</p>
             <div className="blog-info">
-              <p className="price">Giá: ${service.price || "N/A"}</p>
-              <p>Trạng thái: {service.status ? "Hoạt động" : "Không hoạt động"}</p>
+            <p className="price">Giá: {service.price ? `${service.price.toLocaleString("vi-VN")} VND` : "N/A"}</p>
+            <p>Trạng thái: {service.status ? "Hoạt động" : "Không hoạt động"}</p>
               <p>
                 Danh mục:{" "}
                 {categories.find(
@@ -270,23 +316,43 @@ const BlogDetail = ({ darkMode }) => {
             </button>
           </div>
           <div className="blog-image">
-            <img
-              src={mainImage || "https://via.placeholder.com/600x400"}
-              alt={service.name}
-              className="main-image"
-            />
+            <div style={{ position: "relative" }}>
+              <img
+                src={mainImage || "https://via.placeholder.com/600x400"}
+                alt={service.name}
+                className="main-image"
+              />
+              {images.length > 1 && (
+                <div className="slideshow-controls">
+                  <button
+                    onClick={handlePrevImage}
+                    className="slideshow-button"
+                    disabled={images.length <= 1}
+                  >
+                    <FontAwesomeIcon icon={faChevronLeft} />
+                  </button>
+                  <button
+                    onClick={handleNextImage}
+                    className="slideshow-button"
+                    disabled={images.length <= 1}
+                  >
+                    <FontAwesomeIcon icon={faChevronRight} />
+                  </button>
+                </div>
+              )}
+            </div>
             {images.length > 0 && (
               <div className="thumbnail-container">
-                {images.map((img) => (
+                {images.map((img, index) => (
                   <img
                     key={img.imageServiceId}
                     src={img.imageURL}
                     alt={`Thumbnail ${img.imageServiceId}`}
                     className="thumbnail"
-                    onClick={() => handleImageClick(img.imageURL)}
+                    onClick={() => handleImageClick(index)}
                     style={{
                       border:
-                        mainImage === img.imageURL
+                        mainImageIndex === index
                           ? "2px solid #1abc9c"
                           : "2px solid transparent",
                     }}

@@ -20,10 +20,11 @@ const AddProfile = ({ darkMode }) => {
     lastName: "",
     address: "",
     gender: "",
-    avatar: null,
+    avatarUrl: "", // Changed from 'avatar' to 'avatarUrl' to store the Cloudinary URL
   });
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   if (!isLoggedIn || !userId || !token) {
     navigate("/sign_in");
@@ -35,47 +36,83 @@ const AddProfile = ({ darkMode }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAvatarChange = (e) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const validTypes = ["image/jpeg", "image/png", "image/gif"];
-      if (!validTypes.includes(file.type)) {
-        setError("Please upload a valid image file (JPEG, PNG, or GIF).");
-        return;
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      setError("Please upload a valid image file (JPEG, PNG, or GIF).");
+      return;
+    }
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setError("File size must not exceed 5MB.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    // Upload to Cloudinary
+    const cloudinaryData = new FormData();
+    cloudinaryData.append("file", file);
+    cloudinaryData.append("upload_preset", "skincare"); // Replace with your Cloudinary upload preset
+    cloudinaryData.append("cloud_name", "dhqfg7lrc"); // Replace with your Cloudinary cloud name
+    cloudinaryData.append("api_key", "YOUR_API_KEY"); // Replace with your Cloudinary API key
+
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dhqfg7lrc/image/upload", // Replace 'dhqfg7lrc' with your cloud name
+        {
+          method: "POST",
+          body: cloudinaryData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image to Cloudinary");
       }
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        setError("File size must not exceed 5MB.");
-        return;
-      }
-      setFormData((prev) => ({ ...prev, avatar: file }));
-      setAvatarPreview(URL.createObjectURL(file));
-      setError(null); // Clear any previous error
+
+      const result = await response.json();
+      const imageUrl = result.secure_url; // Get the secure URL from Cloudinary
+
+      setFormData((prev) => ({ ...prev, avatarUrl: imageUrl }));
+      setAvatarPreview(URL.createObjectURL(file)); // For local preview
+    } catch (err) {
+      console.error("Cloudinary upload error:", err);
+      setError("Failed to upload image: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
-      const newProfileData = new FormData();
-      newProfileData.append("userId", userId);
-      newProfileData.append("firstName", formData.firstName);
-      newProfileData.append("lastName", formData.lastName);
-      newProfileData.append("address", formData.address);
-      newProfileData.append("gender", formData.gender);
-      if (formData.avatar) {
-        newProfileData.append("avatar", formData.avatar); // Adjusted to "Avatar" (capitalized)
-      }
+      const newProfileData = {
+        userId,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        address: formData.address,
+        gender: formData.gender,
+        avatar: formData.avatarUrl, // Send the Cloudinary URL as 'avatar'
+      };
 
       await createUserDetails(newProfileData, token);
       alert("Profile created successfully!");
       navigate("/profile");
     } catch (err) {
-      console.error("Full error:", err.response?.data);
+      console.error("Full error:", err.response?.data || err);
       const errorDetails = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join(", ")
         : err.response?.data?.title || err.message;
       setError(`Failed to create profile: ${errorDetails}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -320,6 +357,7 @@ const AddProfile = ({ darkMode }) => {
                     type="file"
                     accept="image/*"
                     onChange={handleAvatarChange}
+                    disabled={loading}
                     hidden
                   />
                 </label>
@@ -334,6 +372,7 @@ const AddProfile = ({ darkMode }) => {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleInputChange}
+                disabled={loading}
                 required
               />
             </div>
@@ -346,6 +385,7 @@ const AddProfile = ({ darkMode }) => {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleInputChange}
+                disabled={loading}
                 required
               />
             </div>
@@ -358,6 +398,7 @@ const AddProfile = ({ darkMode }) => {
                 name="address"
                 value={formData.address}
                 onChange={handleInputChange}
+                disabled={loading}
               />
             </div>
             <div className="form-group">
@@ -368,6 +409,7 @@ const AddProfile = ({ darkMode }) => {
                 name="gender"
                 value={formData.gender}
                 onChange={handleInputChange}
+                disabled={loading}
               >
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
@@ -376,10 +418,15 @@ const AddProfile = ({ darkMode }) => {
               </select>
             </div>
             <div className="form-actions">
-              <button type="submit" className="btn save-btn">
-                <FontAwesomeIcon icon={faSave} /> Save
+              <button type="submit" className="btn save-btn" disabled={loading}>
+                <FontAwesomeIcon icon={faSave} /> {loading ? "Saving..." : "Save"}
               </button>
-              <button type="button" className="btn cancel-btn" onClick={handleCancel}>
+              <button
+                type="button"
+                className="btn cancel-btn"
+                onClick={handleCancel}
+                disabled={loading}
+              >
                 <FontAwesomeIcon icon={faTimes} /> Cancel
               </button>
             </div>
