@@ -48,7 +48,7 @@ const Header = ({ darkMode, toggleDarkMode }) => {
         </Link>
         {isLoggedIn && (
           <Link to="/cart_page" className="link">
-            <FontAwesomeIcon icon={faShoppingCart} /> Cart
+            {/* <FontAwesomeIcon icon={faShoppingCart} /> Cart */}
           </Link>
         )}
         {isLoggedIn ? (

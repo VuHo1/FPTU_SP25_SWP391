@@ -347,7 +347,7 @@ const BookingPage = () => {
                             />
                         </div>
 
-                        <div className='flex items-center mt-6 space-x-3'>
+                        {/* <div className='flex items-center mt-6 space-x-3'>
                             <div className='relative inline-block w-10 mr-2 align-middle select-none'>
                                 <input
                                     type='checkbox'
@@ -365,7 +365,7 @@ const BookingPage = () => {
                             <label htmlFor='useWallet' className='text-sm font-medium text-gray-700'>
                                 Use Wallet for Payment
                             </label>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div className='mt-6 space-y-1'>
