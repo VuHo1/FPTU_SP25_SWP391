@@ -91,14 +91,13 @@ const ServiceDetailDashboard = ({ darkMode }) => {
       setServiceCategories(categories);
       const servicesData = servicesResponse.data || [];
 
-      // Adjust service status based on category status
       const adjustedServices = servicesData.map((service) => {
         const category = categories.find(
           (cat) => cat.serviceCategoryId === service.serviceCategoryId
         );
         return {
           ...service,
-          status: category?.status === false ? false : service.status, // If category is inactive, service is inactive
+          status: category?.status === false ? false : service.status,
         };
       });
       setServices(adjustedServices);
@@ -113,10 +112,17 @@ const ServiceDetailDashboard = ({ darkMode }) => {
               isMain: index === 0,
             })),
           }))
-          .catch(() => ({
-            serviceId: service.serviceId,
-            images: [],
-          }))
+          .catch((error) => {
+            if (error.response?.status === 404) {
+              console.warn(`No images found for service ${service.serviceId}`);
+            } else {
+              console.error(`Error fetching images for service ${service.serviceId}:`, error);
+            }
+            return {
+              serviceId: service.serviceId,
+              images: [],
+            };
+          })
       );
       const imageResults = await Promise.all(imagePromises);
       const imageMap = imageResults.reduce((acc, { serviceId, images }) => {
@@ -142,10 +148,17 @@ const ServiceDetailDashboard = ({ darkMode }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setServiceForm((prev) => ({
-      ...prev,
-      [name]: name === "status" ? value === "true" : value,
-    }));
+    console.log("Input change:", name, value, "Type:", typeof value); // Log type to confirm
+    setServiceForm((prev) => {
+      const newValue = name === "status" ? value === "true" || value === true : value; // Handle both string "true" and boolean true
+      const newForm = {
+        ...prev,
+        [name]: newValue,
+      };
+      console.log("New value for", name, ":", newValue); // Log the computed value
+      setTimeout(() => console.log("Updated serviceForm after set:", newForm), 0);
+      return newForm;
+    });
   };
 
   const isDuplicateName = (name, excludeServiceId = null) => {
@@ -255,9 +268,10 @@ const ServiceDetailDashboard = ({ darkMode }) => {
         name: serviceForm.name,
         description: serviceForm.description,
         price: parseFloat(serviceForm.price),
-        status: selectedCategory.status === false ? false : serviceForm.status, // Sync with category status
+        status: serviceForm.status,
         exist: true,
       };
+      console.log("Service data to be sent:", serviceData);
       await updateService(editingService.serviceId, serviceData, token);
       setServiceForm({
         serviceCategoryId: "",
@@ -468,7 +482,6 @@ const ServiceDetailDashboard = ({ darkMode }) => {
         </Typography>
       )}
 
-      {/* Service Creation/Edit Form */}
       <DashboardCard
         darkMode={darkMode}
         sx={{ mb: 4 }}
@@ -626,26 +639,26 @@ const ServiceDetailDashboard = ({ darkMode }) => {
                 Status
               </InputLabel>
               <Select
-                name="status"
-                value={serviceForm.status}
-                onChange={handleInputChange}
-                disabled={loading || (editingService && !serviceCategories.find(cat => cat.serviceCategoryId === serviceForm.serviceCategoryId)?.status)}
-                sx={{
-                  color: darkMode ? "#ecf0f1" : "#2c3e50",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: darkMode ? "#5a758c" : "#ccc",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: darkMode ? "#1abc9c" : "#6c4f37",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: darkMode ? "#1abc9c" : "#6c4f37",
-                  },
-                }}
-              >
-                <MenuItem value={true}>Active</MenuItem>
-                <MenuItem value={false}>Inactive</MenuItem>
-              </Select>
+  name="status"
+  value={serviceForm.status} // Already a boolean (true/false)
+  onChange={handleInputChange}
+  disabled={loading || (editingService && !serviceCategories.find(cat => cat.serviceCategoryId === serviceForm.serviceCategoryId)?.status)}
+  sx={{
+    color: darkMode ? "#ecf0f1" : "#2c3e50",
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: darkMode ? "#5a758c" : "#ccc",
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: darkMode ? "#1abc9c" : "#6c4f37",
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: darkMode ? "#1abc9c" : "#6c4f37",
+    },
+  }}
+>
+  <MenuItem value={true}>Active</MenuItem>
+  <MenuItem value={false}>Inactive</MenuItem>
+</Select>
             </FormControl>
           </Grid>
           <Grid item xs={12}>
@@ -709,7 +722,6 @@ const ServiceDetailDashboard = ({ darkMode }) => {
         </Grid>
       </DashboardCard>
 
-      {/* Service List */}
       <DashboardCard
         darkMode={darkMode}
         component={motion.div}
