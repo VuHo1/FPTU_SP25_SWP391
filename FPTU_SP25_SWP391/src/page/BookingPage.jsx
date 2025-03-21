@@ -339,7 +339,7 @@ const BookingPage = () => {
                         <div className='space-y-1'>
                             <label className='text-sm font-medium text-gray-700'>Appointment Date</label>
                             <input
-                                type='datetime-local'
+                                type='date'
                                 name='appointmentDate'
                                 onChange={handleDateChange}
                                 className='w-full p-3 text-gray-700 transition border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
