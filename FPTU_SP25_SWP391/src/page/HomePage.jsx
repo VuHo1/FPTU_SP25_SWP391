@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../page/AuthContext';
-import { getAllServices, getImageService, handlePaymentReturn } from '../api/testApi'; // Import API functions
+import { getAllServices, getImageService, handlePaymentReturn } from '../api/testApi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -10,14 +10,13 @@ const HomePage = ({ darkMode }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { isLoggedIn, username, token } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
-  const [services, setServices] = useState([]); // State for services with images
-  const [loadingServices, setLoadingServices] = useState(true); // Loading state for services
+  const [services, setServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(true);
   const location = useLocation();
 
   // Check for payment return params
   useEffect(() => {
     const checkPaymentReturn = async () => {
-      // Parse query params
       const queryParams = new URLSearchParams(location.search);
       const code = queryParams.get('code');
       const id = queryParams.get('id');
@@ -25,13 +24,9 @@ const HomePage = ({ darkMode }) => {
       const status = queryParams.get('status');
       const orderCode = queryParams.get('orderCode');
 
-      // If all required parameters exist, process payment return
       if (code && id && (cancel || status) && orderCode) {
         try {
-          // Call API to handle payment return
           const response = await handlePaymentReturn(code, id, cancel, status, orderCode, token);
-
-          // Show success or failure toast depending on status
           if (status === 'CANCELLED' || cancel === 'true') {
             toast.error('Thanh toán đã bị hủy. Bạn có thể thử lại sau.', {
               position: 'top-right',
@@ -56,8 +51,6 @@ const HomePage = ({ darkMode }) => {
               draggable: true,
             });
           }
-
-          // Clean up URL params (optional)
           const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
           window.history.replaceState({}, document.title, cleanUrl);
         } catch (error) {
@@ -96,16 +89,14 @@ const HomePage = ({ darkMode }) => {
         const servicesResponse = await getAllServices(token || null);
         const allServices = servicesResponse.data || [];
 
-        // Shuffle services and take the first 3
         const shuffledServices = shuffleArray(allServices).slice(0, 3);
 
-        // Fetch images for each selected service
         const servicesWithImages = await Promise.all(
           shuffledServices.map(async (service) => {
             try {
               const imageResponse = await getImageService(service.serviceId, token || null);
               const images = imageResponse.data || [];
-              const mainImage = images.find((img) => img.isMain) || images[0]; // Prefer isMain if available
+              const mainImage = images.find((img) => img.isMain) || images[0];
               return {
                 ...service,
                 image: mainImage ? mainImage.imageURL : null,
@@ -126,7 +117,7 @@ const HomePage = ({ darkMode }) => {
       }
     };
     fetchServices();
-  }, []); // Empty dependency array ensures this runs only on mount
+  }, []);
 
   // Welcome message effect
   useEffect(() => {
@@ -281,7 +272,7 @@ const HomePage = ({ darkMode }) => {
     borderRadius: '12px',
     boxShadow: darkMode ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.06)',
     textAlign: 'left',
-    cursor: 'pointer', // Indicate clickable
+    cursor: 'pointer',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   };
 
@@ -298,6 +289,12 @@ const HomePage = ({ darkMode }) => {
     hidden: { opacity: 0, y: -20 },
     visible: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20, transition: { duration: 1 } },
+  };
+
+  // Function to format price in VND
+  const formatPriceVND = (price) => {
+    if (!price) return 'N/A';
+    return `${Number(price).toLocaleString('vi-VN')} ₫`;
   };
 
   return (
@@ -327,7 +324,7 @@ const HomePage = ({ darkMode }) => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundImage: "url('https://images.unsplash.com/photo-1592333841676-1eecfefde529')",
+          backgroundImage: "url('https://www.coastalskincare.net/wp-content/uploads/2023/01/coastal-skin-care-spa-facials.jpg')",
           paddingTop: isLoggedIn && username ? '120px' : '60px',
         }}
       >
@@ -379,7 +376,7 @@ const HomePage = ({ darkMode }) => {
       <section
         style={{
           ...sectionStyles,
-          backgroundImage: "url('https://images.unsplash.com/photo-1556228578-567ba5e7e57c')",
+          backgroundImage: "url('https://static.vecteezy.com/system/resources/previews/005/942/301/non_2x/retro-abstract-background-vintage-geometric-stripes-design-simple-colorful-lines-classic-grunge-wallpaper-vector.jpg')",
         }}
       >
         <div style={overlayStyles}></div>
@@ -406,7 +403,7 @@ const HomePage = ({ darkMode }) => {
               services.map((service, index) => (
                 <Link
                   key={service.serviceId}
-                  to={`/service/${service.serviceId}`} // Link to BlogDetail
+                  to={`/service/${service.serviceId}`}
                   style={{ textDecoration: 'none' }}
                 >
                   <motion.div
@@ -457,7 +454,7 @@ const HomePage = ({ darkMode }) => {
                         color: darkMode ? '#bdc3c7' : '#555',
                       }}
                     >
-                      ${service.price || 'N/A'}
+                      {formatPriceVND(service.price)} {/* Updated to VND */}
                     </p>
                   </motion.div>
                 </Link>
@@ -491,15 +488,14 @@ const HomePage = ({ darkMode }) => {
       <section
         style={{
           ...sectionStyles,
-          backgroundImage: "url('https://images.unsplash.com/photo-1517649763962-0c623066013b')",
+          backgroundImage: "url('https://images.fresha.com/locations/location-profile-images/663592/2761399/a09ac1fc-e81b-473b-b19a-00009fe63a5a-TheSkinTherapist-GB-England-Telford-Fresha.jpg?class=gallery-modal-large')",
         }}
       >
         <div style={overlayStyles}></div>
         <div style={contentStyles}>
           <h2 style={headingStyles}>Cơ Sở Vật Chất</h2>
           <p style={paragraphStyles}>
-            Beautishop tự hào sở hữu cơ sở vật chất hiện đại, mang đến trải nghiệm thư giãn và thoải mái tối
-            ưu cho khách hàng.
+            Beautishop tự hào sở hữu cơ sở vật chất hiện đại, mang đến trải nghiệm thư giãn và thoải mái tối ưu cho khách hàng.
           </p>
           <div
             style={{
@@ -515,17 +511,17 @@ const HomePage = ({ darkMode }) => {
               {
                 title: 'Phòng Trị Liệu Cao Cấp',
                 desc: 'Không gian yên tĩnh với thiết bị công nghệ cao.',
-                image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2Q7cCmg0hmeqf_desdUXC39uLQILLH46jbw&s',
               },
               {
                 title: 'Khu Vực Tư Vấn',
                 desc: 'Thiết kế thân thiện, hỗ trợ phân tích da chuyên sâu.',
-                image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881',
+                image: 'https://file.hstatic.net/1000288522/article/s10_b0bf8ff7708c4369844b8a691da59da7_1024x1024.png',
               },
               {
                 title: 'Sảnh Đón Tiếp',
                 desc: 'Không gian sang trọng, ấm cúng chào đón bạn.',
-                image: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToZpj9WwXNNd3-n46EPl29nlf4bfdL3N-Jvg&s',
               },
             ].map((facility, index) => (
               <motion.div
@@ -583,8 +579,7 @@ const HomePage = ({ darkMode }) => {
         <div style={contentStyles}>
           <h2 style={headingStyles}>Tại Sao Chọn Beautishop?</h2>
           <p style={paragraphStyles}>
-            Chúng tôi tự hào mang đến sự khác biệt với đội ngũ chuyên gia hàng đầu, công nghệ tiên tiến, và
-            cam kết chất lượng vượt trội.
+            Chúng tôi tự hào mang đến sự khác biệt với đội ngũ chuyên gia hàng đầu, công nghệ tiên tiến, và cam kết chất lượng vượt trội.
           </p>
           <div
             style={{
@@ -734,7 +729,7 @@ const HomePage = ({ darkMode }) => {
                       marginBottom: '10px',
                     }}
                   >
-                    &quot;{testimonial.quote}&quot;
+                    "{testimonial.quote}"
                   </p>
                   <p
                     style={{

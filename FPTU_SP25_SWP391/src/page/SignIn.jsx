@@ -1,108 +1,3 @@
-// import React, { useState } from "react";
-// import { Link, useNavigate } from "react-router-dom";
-// import Swal from "sweetalert2";
-// import { login } from "../api/testApi"; // Adjust the path as needed
-// import { motion } from "framer-motion";
-// import { useAuth } from "../page/AuthContext"; // Import useAuth
-// import { jwtDecode } from "jwt-decode";
-
-
-// export default function SignIn({ darkMode }) {
-//   const [userName, setUserName] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [role, setRole] = useState("User"); // Role selection state
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [inputType, setInputType] = useState("password");
-//   const navigate = useNavigate();
-//   const { login: setLoggedIn } = useAuth(); // Rename to avoid conflict with imported login function
-
-//   const handleEmailChange = (event) => {
-//     setUserName(event.target.value);
-//   };
-
-//   const handlePasswordChange = (event) => {
-//     setPassword(event.target.value);
-//   };
-
-//   const togglePasswordVisibility = () => {
-//     setInputType(inputType === "password" ? "text" : "password");
-//   };
-
-//   const handleSave = async () => {
-//     if (!userName || !password) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Oops...",
-//         text: "Please fill in all required fields!",
-//       });
-//       setIsLoading(false);
-//       return;
-//     }
-//     const data = { userName: userName, password: password };
-//     setIsLoading(true);
-
-//     try {
-//       const response = await login(data);
-//       Swal.fire({
-//         icon: "success",
-//         title: "Login success!",
-//         text: response?.data?.message || "Successfully",
-//       });
-//       console.log("Data: ", response);
-
-//       const token = response.data.token;
-//       localStorage.setItem("token", token);
-//       console.log("Token: ", token);
-
-//       const decodedToken = jwtDecode(token);
-//       const role =
-//         decodedToken.role
-//         console.log("role",role);
-        
-//       localStorage.setItem("role", role);
-//       console.log("decode: ", decodedToken);
-
-//       // Store the username and role in AuthContext and localStorage
-//       setLoggedIn(userName);
-//       localStorage.setItem("role", role); // Store selected role in localStorage
-
-//       // Redirect based on the selected role
-//       if (role === "Customer") {
-//         navigate("/");
-//       } else if (role === "Staff") {
-//         navigate("/staff/home");
-//       } else if (role === "Admin") {
-//         navigate("/admin/home"); // Redirect to AdminHomePage
-//       } else if (role === "SkinTherapist") {
-//         navigate("/skintherapist/home"); // Redirect to TherapistHomePage
-//       }
-
-//       setIsLoading(false); // Reset loading state
-//     } catch (error) {
-//       let errorMessage = "An unknown error occurred.";
-
-//       if (error.response) {
-//         errorMessage = error.response.data.message || error.response.data || "Login failed.";
-//       } else if (error.request) {
-//         errorMessage = "No response from the server. Please check your network.";
-//       } else {
-//         errorMessage = error.message || "An unexpected error occurred.";
-//       }
-
-//       Swal.fire({
-//         icon: "error",
-//         title: "Please check your input!!!",
-//         text: errorMessage,
-//       });
-//       setIsLoading(false);
-//     }
-//   };
-
-//   const handleKeyDown = (event) => {
-//     if (event.key === "Enter") {
-//       handleSave();
-//     }
-//   };
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -117,7 +12,7 @@ export default function SignIn({ darkMode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [inputType, setInputType] = useState("password");
   const navigate = useNavigate();
-  const { login: setAuthData } = useAuth(); // Renamed to avoid conflict
+  const { login: setAuthData } = useAuth();
 
   const handleEmailChange = (event) => {
     setUserName(event.target.value);
@@ -153,14 +48,13 @@ export default function SignIn({ darkMode }) {
       });
 
       const token = response.data.token;
-      const userId = response.data.userId; // Get userId from response, not token
+      const userId = response.data.userId;
       const decodedToken = jwtDecode(token);
       const role = decodedToken.role;
-      // const userId = decodedToken.sub || decodedToken.userId; // Adjust based on your token structure
       console.log("Login response:", response.data);
-
       console.log("Decoded token:", decodedToken);
       console.log("Extracted values:", { userId, role, token });
+
       setAuthData({
         username: userName,
         userId: userId,
@@ -168,7 +62,6 @@ export default function SignIn({ darkMode }) {
         role: role,
       });
 
-      // Redirect based on role
       switch (role) {
         case "Customer":
           navigate("/");
@@ -210,6 +103,7 @@ export default function SignIn({ darkMode }) {
       handleSave();
     }
   };
+
   return (
     <div
       style={{
@@ -245,11 +139,17 @@ export default function SignIn({ darkMode }) {
             : "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
+        {/* Centered Logo */}
         <motion.div
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ marginBottom: "25px" }}
+          style={{
+            display: "flex",
+            justifyContent: "center", // Center horizontally
+            alignItems: "center", // Center vertically within the div
+            marginBottom: "25px",
+          }}
         >
           <Link to={`/`}>
             <img
@@ -373,8 +273,6 @@ export default function SignIn({ darkMode }) {
           </span>
         </motion.div>
 
-      
-
         <motion.button
           type="submit"
           onClick={handleSave}
@@ -401,14 +299,10 @@ export default function SignIn({ darkMode }) {
               : "0 4px 15px rgba(108, 79, 55, 0.2)",
           }}
           onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = darkMode
-              ? "#16a085"
-              : "#503a28")
+            (e.currentTarget.style.backgroundColor = darkMode ? "#16a085" : "#503a28")
           }
           onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = darkMode
-              ? "#1abc9c"
-              : "#6c4f37")
+            (e.currentTarget.style.backgroundColor = darkMode ? "#1abc9c" : "#6c4f37")
           }
         >
           {isLoading ? "Logging In..." : "Log In"}
