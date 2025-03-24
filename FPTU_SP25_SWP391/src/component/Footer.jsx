@@ -8,54 +8,63 @@ import twitter from '../assets/images/logo/twitter.png'
 const Footer = ({ darkMode }) => {
 
     return (
-        <div className= {`Footer ${darkMode ? 'dark' : ''}`} >
+        <div className={`Footer ${darkMode ? 'dark' : ''}`} >
             <div className="sb_footer section-padding">
 
                 <div className="sb_footer-links">
                     <div className='sb_footer-links_div'>
-                        <h3>About</h3>
-                        <a href="/">
+                        <a href="/about" >
+                            <p>About</p></a>
+                        <a href="/service">
                             <p>Our Service</p>
                         </a>
-                        <a href="/Blog">
-                            <p>Our Team</p>
-                        </a>
-                        <a href="/">
-                            <p>Testimonials</p>
-                        </a>
+
                     </div>
                     <div className='sb_footer-links_div'>
-                        <h4>Booking</h4>
-                        <a href="/">
+
+                        <a href="/booking_page">
                             <p>Book Now</p>
                         </a>
-                        <a href="/">
-                            <p>Check Availability</p>
-                        </a>
-                        <a href="/">
-                            <p>Cancellation Policy</p>
-                        </a>
+
                     </div>
                     <div className='sb_footer-links_div'>
-                        <h4>Adress & Contact</h4>
-                        <a href="/">
+                        <a href="/contact">
+                            <p>Adress & Contact</p></a>
+                        <a href="/contact">
                             <p>Lưu Hữu Phước Tân Lập, Đông Hoà, Dĩ An, Bình Dương, Việt Nam </p>
                         </a>
                         <a href="/">
-                            <p>03xxxxxxx25 </p>
+                            <p>0359898301 </p>
                         </a>
                         <a href="/">
-                            <p>asbasdad@gmail.com </p>
+                            <p>vuhhase162048@gmail.com </p>
                         </a>
                     </div>
                     <div className='sb_footer-links_div'>
                         <h4>Comming soon on </h4>
                         <div className='social_media'>
-                            <p> <img src= {facebook} alt="" /> </p>
-                            <p> <img src={instagram} alt="" /> </p>
-                            <p> <img src={tiktok} alt="" /> </p>
-                            <p> <img src={twitter} alt="" /> </p>
+                            <p>
+                                <a href="https://www.facebook.com/vu.ho.900388" target="_blank" rel="noopener noreferrer">
+                                    <img src={facebook} alt="Facebook" />
+                                </a>
+                            </p>
+                            <p>
+                                <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+                                    <img src={instagram} alt="Instagram" />
+                                </a>
+                            </p>
+                            <p>
+                                <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">
+                                    <img src={tiktok} alt="TikTok" />
+                                </a>
+                            </p>
+                            <p>
+                                <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer">
+                                    <img src={twitter} alt="Twitter" />
+                                </a>
+                            </p>
                         </div>
+
                     </div>
                 </div>
 
@@ -64,7 +73,7 @@ const Footer = ({ darkMode }) => {
                 <div className='sb_footer-below'>
                     <div className='sb_footer-coppyright'>
                         <p>
-                            @{new Date().getFullYear()} SWP391 NET1804 Group_5.
+                            @{new Date().getFullYear()} Project_SWP391_SP25
                         </p>
                     </div>
                     <div className='sb_footer-below-links'>
@@ -75,7 +84,7 @@ const Footer = ({ darkMode }) => {
                 </div>
 
             </div>
-        </div>
+        </div >
     )
 }
 export default Footer

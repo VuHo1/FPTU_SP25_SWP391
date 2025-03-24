@@ -106,7 +106,7 @@ export default function ProductListPage({ darkMode }) {
           }}
         >
           <motion.img
-            src="/assets/company-office.jpg"
+            src="https://maisoninterior.vn/wp-content/uploads/2025/02/mau-van-phong-lam-viec-dep-02.jpg"
             alt="Văn phòng SkinCare Pro"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -201,14 +201,14 @@ export default function ProductListPage({ darkMode }) {
                   transition: "background-color 0.3s ease",
                 }}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = darkMode
-                    ? "#2ea74d"
-                    : "#d2691e")
+                (e.currentTarget.style.backgroundColor = darkMode
+                  ? "#2ea74d"
+                  : "#d2691e")
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = darkMode
-                    ? "#34c759"
-                    : "#e67e22")
+                (e.currentTarget.style.backgroundColor = darkMode
+                  ? "#34c759"
+                  : "#e67e22")
                 }
               >
                 Khám Phá Dịch Vụ
@@ -285,19 +285,19 @@ export default function ProductListPage({ darkMode }) {
               {
                 name: "Dr. Nguyễn Minh",
                 role: "Chuyên gia da liễu",
-                img: "/assets/doctor1.jpg",
+                img: "https://bizweb.dktcdn.net/100/175/849/files/z4277782048544-ed8d504b298a553f544c17838ff9f090.jpg?v=1681895249035",
                 bio: "Chuyên gia với hơn 15 năm kinh nghiệm trong điều trị các vấn đề da liễu.",
               },
               {
                 name: "Dr. Lê Hoàng",
                 role: "Chuyên gia trị liệu",
-                img: "/assets/doctor2.jpg",
+                img: "https://bizweb.dktcdn.net/100/175/849/files/bacsidsc-7090k.jpg?v=1647837404831",
                 bio: "Chuyên về liệu pháp tái tạo da không xâm lấn.",
               },
               {
                 name: "ThS. Trần Mai",
                 role: "Chuyên gia nghiên cứu",
-                img: "/assets/doctor3.jpg",
+                img: "https://hthaostudio.com/wp-content/uploads/2022/08/Anh-profile-bac-si-min.jpg",
                 bio: "Đóng góp vào việc phát triển sản phẩm chăm sóc da tự nhiên.",
               },
             ].map((expert, index) => (
@@ -900,14 +900,14 @@ export default function ProductListPage({ darkMode }) {
                 transition: "background-color 0.3s ease, transform 0.2s ease",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode
-                  ? "#2ea74d"
-                  : "#d2691e")
+              (e.currentTarget.style.backgroundColor = darkMode
+                ? "#2ea74d"
+                : "#d2691e")
               }
               onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode
-                  ? "#34c759"
-                  : "#e67e22")
+              (e.currentTarget.style.backgroundColor = darkMode
+                ? "#34c759"
+                : "#e67e22")
               }
             >
               Xem Chính Sách Công Ty
