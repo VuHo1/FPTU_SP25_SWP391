@@ -782,7 +782,7 @@ export const postBooking = async (bookingData, token) => {
 };
 
 export const createPayment = async (bookingId, token) => {
-  return apiClient.post('/create-payos-payment', null, {
+  return apiClient.post('/api/Payment/create-payos-payment', null, {
     params: {
       bookingID: bookingId,
     },

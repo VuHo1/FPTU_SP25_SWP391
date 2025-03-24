@@ -30,13 +30,13 @@ const Footer = ({ darkMode }) => {
                     <div className='sb_footer-links_div'>
                         <a href="/contact">
                             <p>Adress & Contact</p></a>
-                        <a href="/contact">
+                        <a href="https://maps.app.goo.gl/HKHFYHCucm71gAJH8">
                             <p>Lưu Hữu Phước Tân Lập, Đông Hoà, Dĩ An, Bình Dương, Việt Nam </p>
                         </a>
-                        <a href="/">
+                        <a >
                             <p>0359898301 </p>
                         </a>
-                        <a href="/">
+                        <a>
                             <p>vuhhase162048@gmail.com </p>
                         </a>
                     </div>

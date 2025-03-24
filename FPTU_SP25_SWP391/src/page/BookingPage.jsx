@@ -73,27 +73,46 @@ const BookingPage = () => {
         }
     };
 
+    // const updateTherapistTimeSlotsBySchedule = (scheduleId) => {
+    //     const selectedSchedule = therapists.find((t) => t.scheduleId.toString() === scheduleId.toString());
+    //     console.log('Selected schedule:', selectedSchedule);
+
+    //     if (selectedSchedule) {
+    //         setSelectedTherapistData(selectedSchedule);
+
+    //         console.log('Raw time slots:', selectedSchedule.timeSlots);
+    //         console.log('Time slots status:', selectedSchedule.timeSlots.map(slot => ({
+    //             id: slot.timeSlotId,
+    //             description: slot.timeSlotDescription,
+    //             status: slot.status
+    //         })));
+
+    //         setTherapistTimeSlots(selectedSchedule.timeSlots || []);
+    //     } else {
+    //         setTherapistTimeSlots([]);
+    //         setSelectedTherapistData(null);
+    //     }
+    // };
     const updateTherapistTimeSlotsBySchedule = (scheduleId) => {
         const selectedSchedule = therapists.find((t) => t.scheduleId.toString() === scheduleId.toString());
         console.log('Selected schedule:', selectedSchedule);
 
         if (selectedSchedule) {
             setSelectedTherapistData(selectedSchedule);
-
-            console.log('Raw time slots:', selectedSchedule.timeSlots);
-            console.log('Time slots status:', selectedSchedule.timeSlots.map(slot => ({
-                id: slot.timeSlotId,
-                description: slot.timeSlotDescription,
-                status: slot.status
-            })));
-
             setTherapistTimeSlots(selectedSchedule.timeSlots || []);
+            setFormData((prev) => ({
+                ...prev,
+                therapistId: selectedSchedule.therapistId.toString(), // Gán therapistId từ schedule
+            }));
         } else {
             setTherapistTimeSlots([]);
             setSelectedTherapistData(null);
+            setFormData((prev) => ({
+                ...prev,
+                therapistId: '',
+            }));
         }
     };
-
     const processPayment = async (bookingId) => {
         try {
             setPaymentProcessing(true);
@@ -121,20 +140,7 @@ const BookingPage = () => {
         });
     };
 
-    const handleDateChange = (e) => {
-        const selectedDate = new Date(e.target.value);
-        const currentDate = new Date();
 
-        if (selectedDate < currentDate) {
-            toast.error('Please select a future date and time.');
-            return;
-        }
-
-        setFormData({
-            ...formData,
-            appointmentDate: selectedDate.toISOString(),
-        });
-    };
 
     const handleRandomTherapist = (e) => {
         e.preventDefault();
@@ -181,22 +187,36 @@ const BookingPage = () => {
         setLoading(true);
         setError(null);
 
+        if (!formData.userId || !formData.timeSlotId || !formData.serviceId) {
+            toast.error('Please fill in all required fields: Time Slot and Service');
+            setLoading(false);
+            return;
+        }
+
+        if (!token) {
+            toast.error('Authentication token is missing. Please log in again.');
+            setLoading(false);
+            return;
+        }
+
         try {
             const bookingData = {
-                userId: formData.userId,
-                timeSlotId: formData.timeSlotId,
-                appointmentDate: formData.appointmentDate,
+                userId: parseInt(formData.userId, 10),
+                timeSlotId: parseInt(formData.timeSlotId, 10),
                 useWallet: formData.useWallet,
-                note: formData.note,
-                serviceId: formData.serviceId,
+                note: formData.note || '',
+                serviceId: parseInt(formData.serviceId, 10),
             };
 
             if (formData.therapistId) {
-                bookingData.therapistId = formData.therapistId;
+                bookingData.therapistId = parseInt(formData.therapistId, 10);
             }
 
             console.log('Submitting booking data:', bookingData);
+            console.log('Token:', token);
+
             const res = await postBooking(bookingData, token);
+            console.log('Booking response:', res.data);
             setResponse(res.data);
 
             toast.success('Booking confirmed! Your appointment has been scheduled successfully.', {
@@ -219,12 +239,12 @@ const BookingPage = () => {
                 therapistId: '',
                 timeSlotId: '',
                 scheduleId: '',
-                appointmentDate: '',
                 useWallet: false,
                 note: '',
                 serviceId: '',
             });
         } catch (err) {
+            console.log('Error details:', err.response?.data, err.response?.status, err.message);
             setError(err.response ? err.response.data : 'Something went wrong');
             setLoading(false);
             toast.error(
