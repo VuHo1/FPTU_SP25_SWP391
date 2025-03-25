@@ -33,6 +33,7 @@ import EditProfileRole from "./page/EditProfileRole";
 import AddProfileRole from "./page/AddProfileRole";
 import ChooseScheduleTherapist from "./page/ChooseScheduleTherapist";
 import TimeSlotSchedule from "./page/TimeSlotSchedule";
+import QaStaff from "./page/QaStaff";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const role = localStorage.getItem("role");
@@ -105,6 +106,7 @@ function App() {
             <Route path="/add-profilerole" element={<AddProfileRole darkMode={darkMode} />} />
             <Route path="/therapist/choose-schedule" element={<ChooseScheduleTherapist darkMode={true} />} />
             <Route path="/timeslot-schedule" element={<TimeSlotSchedule darkMode={darkMode} />} />
+            <Route path="/staff/qa-customer" element={<QaStaff darkMode={darkMode} />} />
 
 
             <Route
