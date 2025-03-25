@@ -160,7 +160,7 @@ const ServicesPage = () => {
       const matchesCategory =
         filterCategory === "all" ||
         service.serviceCategoryId ===
-          categories.find((cat) => cat.name === filterCategory)?.serviceCategoryId;
+        categories.find((cat) => cat.name === filterCategory)?.serviceCategoryId;
       const price = service.price || 0;
       const matchesPriceRange =
         filterPriceRange === "all" ||
@@ -306,7 +306,7 @@ const ServicesPage = () => {
           border-color: #3b82f6;
           box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
         }
-        .contact-btn {
+        .QA-btn {
           padding: 1rem 2rem;
           font-size: 1rem;
           font-weight: 600;
@@ -320,7 +320,7 @@ const ServicesPage = () => {
           gap: 0.5rem;
           transition: background 0.3s ease, transform 0.2s ease;
         }
-        .contact-btn:hover {
+        .QA-btn:hover {
           background: #2563eb;
           transform: translateY(-2px);
         }
@@ -537,7 +537,7 @@ const ServicesPage = () => {
             margin: 0 auto;
             max-width: 100%;
           }
-          .contact-btn {
+          .QA-btn {
             width: 100%;
             justify-content: center;
           }
@@ -634,8 +634,8 @@ const ServicesPage = () => {
                   className="search-input"
                 />
               </div>
-              <Link to="/contact" className="contact-btn">
-                <FontAwesomeIcon icon={faEnvelope} /> Liên hệ chúng tôi
+              <Link to="/contact" className="QA-btn">
+                <FontAwesomeIcon icon={faEnvelope} /> Làm Q&A
               </Link>
             </motion.div>
 
