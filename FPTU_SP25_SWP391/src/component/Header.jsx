@@ -13,6 +13,7 @@ import {
   faMoon,
   faSun,
   faUser,
+  faPenToSquare
 } from "@fortawesome/free-solid-svg-icons";
 import "./Header.css";
 import { useAuth } from "../page/AuthContext";
@@ -38,6 +39,9 @@ const Header = ({ darkMode, toggleDarkMode }) => {
           <FontAwesomeIcon icon={faInfoCircle} /> About
         </Link>
         <Link to="/booking_page" className="link">
+          <Link to="/userquiz" className="link">
+            <FontAwesomeIcon icon={faPenToSquare} /> Quiz
+          </Link>
           <FontAwesomeIcon icon={faCalendarCheck} /> Booking
         </Link>
         <Link to="/contact" className="link">
@@ -52,7 +56,7 @@ const Header = ({ darkMode, toggleDarkMode }) => {
           </Link>
         )}
         {isLoggedIn ? (
-          <div 
+          <div
             className="user-profile"
             onMouseEnter={() => setIsDropdownOpen(true)}
             onMouseLeave={() => setIsDropdownOpen(false)}
@@ -61,22 +65,22 @@ const Header = ({ darkMode, toggleDarkMode }) => {
               <FontAwesomeIcon icon={faUser} />
             </button>
             <div className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`}>
-              <Link 
-                to="/profile" 
-                className="dropdown-item" 
+              <Link
+                to="/profile"
+                className="dropdown-item"
                 onClick={() => setIsDropdownOpen(false)}
               >
                 User Profile
               </Link>
-              <Link 
-                to="/edit-profile" 
-                className="dropdown-item" 
+              <Link
+                to="/edit-profile"
+                className="dropdown-item"
                 onClick={() => setIsDropdownOpen(false)}
               >
                 Edit Profile
               </Link>
-              <button 
-                className="dropdown-item logout-btn" 
+              <button
+                className="dropdown-item logout-btn"
                 onClick={handleLogout}
               >
                 Logout
