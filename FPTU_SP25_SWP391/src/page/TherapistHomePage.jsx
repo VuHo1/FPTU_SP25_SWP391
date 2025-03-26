@@ -8,6 +8,7 @@ import {
   ListItemText,
   Typography,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
@@ -20,7 +21,9 @@ import {
   faEdit,
   faMoon,
   faSignOutAlt,
+  faBook, // Icon mới cho View Bookings
 } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
 
 // Sidebar Styling
 const Sidebar = styled(Drawer)(({ darkMode }) => ({
@@ -33,11 +36,11 @@ const Sidebar = styled(Drawer)(({ darkMode }) => ({
       ? "linear-gradient(180deg, #1c2526 0%, #34495e 100%)"
       : "linear-gradient(180deg, #f8f4e1 0%, #e5e5e5 100%)",
     borderRight: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
-    paddingTop: "10px", // Reduced padding
+    paddingTop: "10px",
     boxShadow: darkMode
       ? "2px 0 8px rgba(0, 0, 0, 0.4)"
       : "2px 0 8px rgba(0, 0, 0, 0.15)",
-    overflowY: "hidden", // No scrolling
+    overflowY: "hidden",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -58,8 +61,8 @@ const MainContent = styled(Box)(({ darkMode }) => ({
 // Styled List Item
 const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
   borderRadius: "8px",
-  margin: "4px 12px", // Reduced margin
-  padding: "8px 16px", // Reduced padding
+  margin: "4px 12px",
+  padding: "8px 16px",
   background: isActive ? (darkMode ? "#5a758c" : "#e0e0e0") : "transparent",
   transition: "background 0.3s ease, transform 0.2s ease",
   "&:hover": {
@@ -68,11 +71,60 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
   },
 }));
 
+// Booking Card Styling
+const BookingCard = styled(Box)(({ darkMode }) => ({
+  padding: "15px",
+  marginBottom: "15px",
+  background: darkMode ? "rgba(69, 90, 100, 0.9)" : "rgba(248, 244, 225, 0.9)",
+  borderRadius: "10px",
+  color: darkMode ? "#ecf0f1" : "#2c3e50",
+  '& *': {
+    color: 'inherit',
+  },
+}));
+
 const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("home");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [users, setUsers] = useState([]);
+  const [expandedBookingId, setExpandedBookingId] = useState(null);
+  const [timeSlots, setTimeSlots] = useState([]);
   const { logout, userId, token } = useAuth();
+
+  const axiosInstance = axios.create({
+    baseURL: "https://kinaa1410-001-site1.qtempurl.com/api",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "Accept": "*/*",
+    },
+  });
+
+  const fetchBookings = async () => {
+    if (!userId) {
+      alert("Therapist ID not found. Please log in.");
+      navigate("/sign_in");
+      return;
+    }
+    setLoading(true);
+    try {
+      const [bookingsResponse, usersResponse, timeSlotsResponse] = await Promise.all([
+        axiosInstance.get(`/bookings/therapist/${userId}/bookings`),
+        axiosInstance.get("/users"),
+        axiosInstance.get("/timeslot"),
+      ]);
+      setBookings(bookingsResponse.data);
+      setUsers(usersResponse.data);
+      setTimeSlots(timeSlotsResponse.data);
+    } catch (err) {
+      console.error("Error fetching therapist data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (location.state?.resetToHome) {
@@ -89,6 +141,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
 
   const menuItems = [
     { text: "Choose Schedule", icon: <FontAwesomeIcon icon={faCalendar} />, section: "schedule" },
+    { text: "View Bookings", icon: <FontAwesomeIcon icon={faBook} />, section: "bookings" },
     { text: "View Profile", icon: <FontAwesomeIcon icon={faUser} />, section: "view-profile" },
     { text: "Edit Profile", icon: <FontAwesomeIcon icon={faEdit} />, section: "edit-profile" },
     { text: "Toggle Dark Mode", icon: <FontAwesomeIcon icon={faMoon} />, action: toggleDarkMode },
@@ -110,9 +163,12 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
       }
       if (section === "view-profile") navigate("/profile-role");
       if (section === "edit-profile") navigate("/edit-profilerole");
+      if (section === "bookings") fetchBookings();
     }
   };
-
+  const handleToggleExpand = (bookingId) => {
+    setExpandedBookingId(expandedBookingId === bookingId ? null : bookingId);
+  };
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", p: 1 }}>
       <Box>
@@ -120,11 +176,11 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
           variant="h6"
           sx={{
             color: darkMode ? "#ecf0f1" : "#2c3e50",
-            mb: 2, // Reduced margin
+            mb: 2,
             fontWeight: 700,
             textAlign: "center",
             fontFamily: "'Poppins', sans-serif",
-            fontSize: "1.2rem", // Smaller font
+            fontSize: "1.2rem",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -137,7 +193,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
         >
           <FontAwesomeIcon icon={faUser} /> Therapist Control Panel
         </Typography>
-        <Divider sx={{ backgroundColor: darkMode ? "#5a758c" : "#ccc", my: 1 }} /> {/* Reduced margin */}
+        <Divider sx={{ backgroundColor: darkMode ? "#5a758c" : "#ccc", my: 1 }} />
         <List sx={{ padding: 0 }}>
           {menuItems.map((item) => (
             <StyledListItem
@@ -160,7 +216,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
                     fontFamily: "'Roboto', sans-serif",
                     fontWeight: 500,
                     color: darkMode ? "#ecf0f1" : "#2c3e50",
-                    fontSize: "0.9rem", // Smaller font
+                    fontSize: "0.9rem",
                   },
                 }}
               />
@@ -225,6 +281,59 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
             >
               Use the control panel on the left to manage your tasks and profile.
             </Typography>
+          </Box>
+        )}
+
+        {activeSection === "bookings" && (
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                mb: 2,
+                fontFamily: "'Poppins', sans-serif",
+                fontWeight: 600,
+              }}
+            >
+              My Bookings
+            </Typography>
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <CircularProgress sx={{ color: darkMode ? "#1abc9c" : "#6c4f37" }} />
+              </Box>
+            ) : bookings.length > 0 ? (
+              bookings.map((booking) => {
+                const user = users.find(u => u.userId === booking.userId) || {};
+                const timeSlot = timeSlots.find(ts => ts.timeSlotId === booking.timeSlotId) || {};
+                const isExpanded = expandedBookingId === booking.bookingId;
+                return (
+                  <BookingCard key={booking.bookingId} darkMode={darkMode} onClick={() => handleToggleExpand(booking.bookingId)}
+                    component={motion.div}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    sx={{ cursor: "pointer" }}>
+                    <Typography>Booking ID: {booking.bookingId}</Typography>
+                    <Typography>Appointment Date: {new Date(booking.appointmentDate).toLocaleDateString()}</Typography>
+                    {isExpanded && (
+                      <>
+                        <Typography>User: {user.userName || "Unknown"} (ID: {booking.userId})</Typography>
+                        <Typography>Therapist ID: {booking.therapistId}</Typography>
+                        <Typography>Time Slot: {timeSlot.description || "N/A"} (ID: {booking.timeSlotId})</Typography>
+                        <Typography>Date Created: {new Date(booking.dateCreated).toLocaleString()}</Typography>
+
+                        <Typography>Total Price: {booking.totalPrice} VND</Typography>
+                        <Typography>Note: {booking.note || "N/A"}</Typography>
+                        <Typography>Status: {booking.status ? "Active" : "Inactive"}</Typography>
+                        <Typography>Is Paid: {booking.isPaid ? "Yes" : "No"}</Typography>
+                        <Typography>Use Wallet: {booking.useWallet ? "Yes" : "No"}</Typography>
+                      </>
+                    )}
+                  </BookingCard>
+                );
+              })
+            ) : (
+              <Typography>No bookings available.</Typography>
+            )}
           </Box>
         )}
       </MainContent>
