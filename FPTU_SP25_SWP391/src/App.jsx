@@ -34,6 +34,7 @@ import AddProfileRole from "./page/AddProfileRole";
 import ChooseScheduleTherapist from "./page/ChooseScheduleTherapist";
 import TimeSlotSchedule from "./page/TimeSlotSchedule";
 import QaStaff from "./page/QaStaff";
+import UserQuiz from "./page/UserQuiz";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const role = localStorage.getItem("role");
@@ -146,6 +147,10 @@ function App() {
                     <Route
                       path="/profile"
                       element={<Profile darkMode={darkMode} />}
+                    />
+                    <Route
+                      path="/userquiz"
+                      element={<UserQuiz darkMode={darkMode} />}
                     />
 
 

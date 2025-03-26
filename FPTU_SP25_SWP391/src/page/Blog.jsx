@@ -634,7 +634,7 @@ const ServicesPage = () => {
                   className="search-input"
                 />
               </div>
-              <Link to="/contact" className="QA-btn">
+              <Link to="/userquiz" className="QA-btn">
                 <FontAwesomeIcon icon={faEnvelope} /> Làm Q&A
               </Link>
             </motion.div>

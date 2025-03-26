@@ -848,20 +848,36 @@ const HomePage = ({ darkMode }) => {
           transition={{ duration: 0.3 }}
           style={popupStyles}
         >
-          <p style={{ fontSize: '18px', margin: '0 0 10px' }}>Hãy liên hệ với chúng tôi!</p>
-          <Link to='/contact'>
-            <button
-              style={popupButtonStyles}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode ? '#2ea74d' : '#d2691e')
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode ? '#34c759' : '#e67e22')
-              }
-            >
-              Đi đến trang liên hệ
-            </button>
-          </Link>
+          <div>
+            <Link to='/userquiz'>
+              <button
+                style={popupButtonStyles}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = darkMode ? '#2ea74d' : '#d2691e')
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = darkMode ? '#34c759' : '#e67e22')
+                }
+              >
+                Do the Quiz
+              </button>
+            </Link>
+          </div>
+          <div>
+            <Link to='/contact'>
+              <button
+                style={popupButtonStyles}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = darkMode ? '#2ea74d' : '#d2691e')
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = darkMode ? '#34c759' : '#e67e22')
+                }
+              >
+                Contact Us
+              </button>
+            </Link>
+          </div>
         </motion.div>
       )}
 
