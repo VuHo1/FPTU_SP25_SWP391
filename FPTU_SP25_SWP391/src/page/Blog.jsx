@@ -195,7 +195,7 @@ const ServicesPage = () => {
 
   const formatPrice = (price) => {
     if (!price) return "N/A";
-    return `${price.toLocaleString("vi-VN")} ₫`;
+    return `${price.toLocaleString("en-US")} ₫`; // Changed to "en-US" for consistency with English content
   };
 
   const allServices = filteredAndSortedServices();
@@ -227,7 +227,7 @@ const ServicesPage = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400 RatioRatio;500;600;700&display=swap');
 
         .services-page {
           min-height: 100vh;
@@ -441,7 +441,7 @@ const ServicesPage = () => {
           width: 100%;
           padding: 0.9rem 1rem;
           border: 1px solid #d1d5db;
-          borderRadius: 8px;
+          border-radius: 8px;
           font-size: 1rem;
           color: #1f2937;
           background: #fff;
@@ -450,7 +450,7 @@ const ServicesPage = () => {
         }
         .filter-bar select:focus {
           border-color: #3b82f6;
-          box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+          box-shadow: 6 0 8px rgba(59, 130, 246, 0.2);
           outline: none;
         }
         .main-content {
@@ -557,33 +557,33 @@ const ServicesPage = () => {
             animate="visible"
           >
             <h4>
-              <FontAwesomeIcon icon={faFilter} /> Bộ Lọc
+              <FontAwesomeIcon icon={faFilter} /> Filters
             </h4>
             <div className="filter-section">
-              <label>Sắp xếp theo</label>
+              <label>Sort by</label>
               <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
-                <option value="">Mặc định</option>
+                <option value="">Default</option>
                 <option value="priceLowToHigh">
-                  Giá: Thấp đến Cao <FontAwesomeIcon icon={faDollarSign} />
+                  Price: Low to High <FontAwesomeIcon icon={faDollarSign} />
                 </option>
                 <option value="priceHighToLow">
-                  Giá: Cao đến Thấp <FontAwesomeIcon icon={faDollarSign} />
+                  Price: High to Low <FontAwesomeIcon icon={faDollarSign} />
                 </option>
                 <option value="nameAZ">
-                  Tên: A-Z <FontAwesomeIcon icon={faSortAlphaDown} />
+                  Name: A-Z <FontAwesomeIcon icon={faSortAlphaDown} />
                 </option>
                 <option value="nameZA">
-                  Tên: Z-A <FontAwesomeIcon icon={faSortAlphaUp} />
+                  Name: Z-A <FontAwesomeIcon icon={faSortAlphaUp} />
                 </option>
                 <option value="durationLowToHigh">
-                  Thời gian: Ngắn đến Dài <FontAwesomeIcon icon={faClock} />
+                  Duration: Short to Long <FontAwesomeIcon icon={faClock} />
                 </option>
               </select>
             </div>
             <div className="filter-section">
-              <label>Danh mục</label>
+              <label>Category</label>
               <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-                <option value="all">Tất cả danh mục</option>
+                <option value="all">All Categories</option>
                 {categories.map((category) => (
                   <option key={category.serviceCategoryId} value={category.name}>
                     {category.name}
@@ -592,12 +592,12 @@ const ServicesPage = () => {
               </select>
             </div>
             <div className="filter-section">
-              <label>Khoảng giá</label>
+              <label>Price Range</label>
               <select
                 value={filterPriceRange}
                 onChange={(e) => setFilterPriceRange(e.target.value)}
               >
-                <option value="all">Tất cả giá</option>
+                <option value="all">All Prices</option>
                 <option value="0-500000">0 - 500,000 ₫</option>
                 <option value="500001-1000000">500,001 - 1,000,000 ₫</option>
                 <option value="1000001+">1,000,001+ ₫</option>
@@ -612,9 +612,9 @@ const ServicesPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="service-title">Trung Tâm Tư Vấn Chăm Sóc Da</h1>
+              <h1 className="service-title">Skincare Consultation Center</h1>
               <p className="service-description">
-                Khám phá các dịch vụ chăm sóc da và làm đẹp chuyên nghiệp với chất lượng hàng đầu.
+                Discover professional skincare and beauty services with top-quality standards.
               </p>
             </motion.div>
 
@@ -628,19 +628,19 @@ const ServicesPage = () => {
                 <FontAwesomeIcon icon={faSearch} className="search-icon" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm dịch vụ..."
+                  placeholder="Search services..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="search-input"
                 />
               </div>
               <Link to="/userquiz" className="QA-btn">
-                <FontAwesomeIcon icon={faEnvelope} /> Làm Q&A
+                <FontAwesomeIcon icon={faEnvelope} /> Take Q&A
               </Link>
             </motion.div>
 
             {loading ? (
-              <div className="loading">Đang tải dịch vụ...</div>
+              <div className="loading">Loading services...</div>
             ) : error ? (
               <div className="error">{error}</div>
             ) : (
@@ -653,7 +653,7 @@ const ServicesPage = () => {
                   key={currentPage}
                 >
                   {currentServices.length === 0 ? (
-                    <div className="error">Không tìm thấy dịch vụ nào phù hợp.</div>
+                    <div className="error">No matching services found.</div>
                   ) : (
                     currentServices.map((service) => (
                       <motion.div key={service.serviceId} variants={itemVariants}>
@@ -665,7 +665,7 @@ const ServicesPage = () => {
                               className="service-image"
                             />
                             <div className="service-overlay">
-                              <span>Xem chi tiết</span>
+                              <span>View Details</span>
                             </div>
                           </div>
                           <div className="service-content">

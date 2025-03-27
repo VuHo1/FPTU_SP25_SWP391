@@ -81,7 +81,7 @@ export default function PolicyPage({ darkMode }) {
               color: darkMode ? "#e5e7eb" : "#1f2937",
             }}
           >
-            Chính Sách Công Ty{" "}
+            Company Policy{" "}
             <span style={{ color: "#e67e22", fontWeight: "800" }}>
               SkinCare Pro
             </span>
@@ -93,7 +93,7 @@ export default function PolicyPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Tại SkinCare Pro, chúng tôi cam kết mang đến cho khách hàng những dịch vụ và sản phẩm chăm sóc da chất lượng cao nhất, đồng thời đảm bảo quyền lợi tối đa trong mọi giao dịch và trải nghiệm. Dưới đây là các chính sách chi tiết được xây dựng dựa trên sự minh bạch, công bằng và sự hài lòng của bạn.
+            At SkinCare Pro, we are committed to providing our customers with the highest quality skincare products and services while ensuring maximum benefits in every transaction and experience. Below are detailed policies built on transparency, fairness, and your satisfaction.
           </motion.p>
 
           {/* Policy Items */}
@@ -110,34 +110,34 @@ export default function PolicyPage({ darkMode }) {
           >
             {[
               {
-                title: "Chính Sách Đổi Trả Sản Phẩm",
+                title: "Product Return Policy",
                 content:
-                  "Khách hàng có quyền đổi trả sản phẩm trong vòng 7 ngày kể từ ngày mua hàng, với điều kiện sản phẩm phải còn nguyên vẹn, chưa qua sử dụng và kèm theo hóa đơn mua hàng hợp lệ. Chi phí vận chuyển đổi trả sẽ do khách hàng chịu trách nhiệm, trừ trường hợp sản phẩm bị lỗi do nhà sản xuất hoặc SkinCare Pro.",
+                  "Customers may return products within 7 days from the purchase date, provided the product remains unopened, unused, and accompanied by a valid purchase receipt. Return shipping costs will be borne by the customer, except in cases where the product is defective due to the manufacturer or SkinCare Pro.",
               },
               {
-                title: "Chính Sách Bảo Hành Dịch Vụ",
+                title: "Service Warranty Policy",
                 content:
-                  "Tất cả các liệu trình chăm sóc da tại SkinCare Pro đều được bảo hành trong vòng 30 ngày kể từ ngày thực hiện dịch vụ. Nếu trong thời gian này, khách hàng gặp phải bất kỳ vấn đề nào liên quan đến lỗi kỹ thuật hoặc quy trình thực hiện, chúng tôi cam kết hỗ trợ miễn phí để khắc phục.",
+                  "All skincare treatments at SkinCare Pro come with a 30-day warranty from the date of service. If any issues related to technical errors or the procedure arise within this period, we commit to providing free support to resolve them.",
               },
               {
-                title: "Chính Sách Bảo Mật Thông Tin",
+                title: "Privacy Policy",
                 content:
-                  "Chúng tôi hiểu rằng quyền riêng tư của khách hàng là tối quan trọng. Mọi thông tin cá nhân được thu thập sẽ được bảo vệ nghiêm ngặt theo tiêu chuẩn GDPR.",
+                  "We understand that customer privacy is paramount. All personal information collected will be strictly protected in accordance with GDPR standards.",
               },
               {
-                title: "Chính Sách Hỗ Trợ Khách Hàng",
+                title: "Customer Support Policy",
                 content:
-                  "Đội ngũ hỗ trợ khách hàng của SkinCare Pro hoạt động 24/7 nhằm mang đến sự hỗ trợ nhanh chóng và hiệu quả nhất cho bạn. Bạn có thể liên hệ với chúng tôi qua hotline, email, hoặc các kênh mạng xã hội chính thức.",
+                  "The SkinCare Pro customer support team operates 24/7 to provide you with the fastest and most effective assistance. You can reach us via hotline, email, or our official social media channels.",
               },
               {
-                title: "Chính Sách Hoàn Tiền",
+                title: "Refund Policy",
                 content:
-                  "Trong trường hợp khách hàng không hài lòng với dịch vụ hoặc sản phẩm đã mua, SkinCare Pro cung cấp chính sách hoàn tiền linh hoạt. Yêu cầu hoàn tiền cần được gửi trong vòng 14 ngày kể từ ngày giao dịch.",
+                  "If customers are dissatisfied with a purchased service or product, SkinCare Pro offers a flexible refund policy. Refund requests must be submitted within 14 days from the transaction date.",
               },
               {
-                title: "Chính Sách Giao Hàng",
+                title: "Shipping Policy",
                 content:
-                  "Chúng tôi cung cấp dịch vụ giao hàng toàn quốc với thời gian giao hàng dự kiến từ 2-5 ngày làm việc. Trong trường hợp đơn hàng bị thất lạc hoặc hư hỏng, SkinCare Pro sẽ chịu trách nhiệm hoàn toàn.",
+                  "We offer nationwide shipping with an estimated delivery time of 2-5 business days. In case of lost or damaged orders, SkinCare Pro will take full responsibility.",
               },
             ].map((policy, index) => (
               <motion.div
@@ -217,7 +217,7 @@ export default function PolicyPage({ darkMode }) {
                   : "#e67e22")
               }
             >
-              Quay Lại Trang Giới Thiệu
+              Back to About Page
             </Link>
           </motion.div>
         </div>

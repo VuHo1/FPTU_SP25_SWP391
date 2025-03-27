@@ -38,6 +38,7 @@ import {
   faSignOutAlt,
   faTrashAlt,
   faCalendar,
+  faHistory // Added icon for Transaction History
 } from "@fortawesome/free-solid-svg-icons";
 import CreateUserForm from "./CreateUserForm";
 import ServicesDashboard from "./ServicesDashboard";
@@ -84,11 +85,11 @@ const Sidebar = styled(Drawer)(({ darkMode }) => ({
       ? "linear-gradient(180deg, #1c2526 0%, #34495e 100%)"
       : "linear-gradient(180deg, #f8f4e1 0%, #e5e5e5 100%)",
     borderRight: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
-    paddingTop: "10px", // Reduced padding
+    paddingTop: "10px",
     boxShadow: darkMode
       ? "2px 0 10px rgba(0, 0, 0, 0.4)"
       : "2px 0 10px rgba(0, 0, 0, 0.15)",
-    overflowY: "hidden", // No scrolling
+    overflowY: "hidden",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -98,8 +99,8 @@ const Sidebar = styled(Drawer)(({ darkMode }) => ({
 // Styled List Item
 const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
   borderRadius: "8px",
-  margin: "4px 12px", // Reduced margin
-  padding: "8px 16px", // Reduced padding
+  margin: "4px 12px",
+  padding: "8px 16px",
   background: isActive ? (darkMode ? "#5a758c" : "#e0e0e0") : "transparent",
   transition: "background 0.3s ease, transform 0.2s ease",
   "&:hover": {
@@ -111,8 +112,8 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
 // Styled Logout Item
 const LogoutListItem = styled(ListItem)(({ darkMode }) => ({
   borderRadius: "8px",
-  margin: "4px 12px", // Reduced margin
-  padding: "8px 16px", // Reduced padding
+  margin: "4px 12px",
+  padding: "8px 16px",
   background: darkMode ? "#e74c3c" : "#f2dede",
   color: darkMode ? "#ecf0f1" : "#721c24",
   transition: "background 0.3s ease, transform 0.2s ease",
@@ -227,12 +228,14 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     return acc;
   }, {});
 
+  // Updated menuItems with Transaction History
   const menuItems = [
     { text: "Dashboard", icon: <FontAwesomeIcon icon={faTachometerAlt} />, action: () => setTabValue(0) },
     { text: "Users", icon: <FontAwesomeIcon icon={faUsers} />, action: () => setTabValue(1) },
     { text: "Services", icon: <FontAwesomeIcon icon={faBuilding} />, action: () => setTabValue(2) },
     { text: "Time Slots", icon: <FontAwesomeIcon icon={faBuilding} />, action: () => setTabValue(3) },
     { text: "Schedules", icon: <FontAwesomeIcon icon={faCalendar} />, action: () => setTabValue(4) },
+    { text: "Transaction History", icon: <FontAwesomeIcon icon={faHistory} />, action: () => navigate("/history-transaction-admin") }, // New menu item
     { text: "User Profile", icon: <FontAwesomeIcon icon={faUser} />, action: () => navigate("/profile-role") },
     { text: "Edit Profile", icon: <FontAwesomeIcon icon={faEdit} />, action: () => navigate("/edit-profilerole") },
     { text: "Toggle Dark Mode", icon: <FontAwesomeIcon icon={faMoon} />, action: toggleDarkMode },
@@ -245,11 +248,11 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
           variant="h6"
           sx={{
             color: darkMode ? "#ecf0f1" : "#2c3e50",
-            mb: 2, // Reduced margin
+            mb: 2,
             fontWeight: 700,
             textAlign: "center",
             fontFamily: "'Poppins', sans-serif",
-            fontSize: "1.2rem", // Slightly smaller font
+            fontSize: "1.2rem",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -265,7 +268,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
               key={item.text}
               onClick={item.action}
               darkMode={darkMode}
-              isActive={tabValue === index && index < 5}
+              isActive={tabValue === index && index < 5} // Adjusted to only highlight first 5 tabs
               component={motion.div}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -280,7 +283,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                     fontFamily: "'Roboto', sans-serif",
                     fontWeight: 500,
                     color: darkMode ? "#ecf0f1" : "#2c3e50",
-                    fontSize: "0.9rem", // Smaller font size
+                    fontSize: "0.9rem",
                   },
                 }}
               />
@@ -289,7 +292,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
         </List>
       </Box>
       <Box sx={{ mt: "auto" }}>
-        <Divider sx={{ my: 1, backgroundColor: darkMode ? "#5a758c" : "#ccc" }} /> {/* Reduced margin */}
+        <Divider sx={{ my: 1, backgroundColor: darkMode ? "#5a758c" : "#ccc" }} />
         <LogoutListItem
           button
           onClick={handleLogout}
@@ -308,7 +311,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                 fontFamily: "'Roboto', sans-serif",
                 fontWeight: 600,
                 color: darkMode ? "#ecf0f1" : "#721c24",
-                fontSize: "0.9rem", // Smaller font size
+                fontSize: "0.9rem",
               },
             }}
           />
