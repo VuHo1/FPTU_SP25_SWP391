@@ -28,12 +28,12 @@ const HomePage = ({ darkMode }) => {
         try {
           const response = await handlePaymentReturn(code, id, cancel, status, orderCode, token);
           if (status === 'CANCELLED' || cancel === 'true') {
-            toast.error('Thanh toán đã bị hủy. Bạn có thể thử lại sau.', {
+            toast.error('Payment has been canceled. You can try again later.', {
               position: 'top-right',
               autoClose: 5000,
             });
           } else if (status === 'SUCCESS' || status === 'PAID') {
-            toast.success('Thanh toán thành công! Đơn hàng của bạn đã được xác nhận.', {
+            toast.success('Payment successful! Your order has been confirmed.', {
               position: 'top-right',
               autoClose: 5000,
               hideProgressBar: false,
@@ -42,7 +42,7 @@ const HomePage = ({ darkMode }) => {
               draggable: true,
             });
           } else {
-            toast.info(`Trạng thái thanh toán: ${status || 'Không xác định'}`, {
+            toast.info(`Payment status: ${status || 'Unknown'}`, {
               position: 'top-right',
               autoClose: 5000,
               hideProgressBar: false,
@@ -55,7 +55,7 @@ const HomePage = ({ darkMode }) => {
           window.history.replaceState({}, document.title, cleanUrl);
         } catch (error) {
           console.error('Error processing payment return:', error);
-          toast.error('Đã xảy ra lỗi khi xử lý thanh toán. Vui lòng liên hệ hỗ trợ.', {
+          toast.error('An error occurred while processing the payment. Please contact support.', {
             position: 'top-right',
             autoClose: 5000,
             hideProgressBar: false,
@@ -294,7 +294,7 @@ const HomePage = ({ darkMode }) => {
   // Function to format price in VND
   const formatPriceVND = (price) => {
     if (!price) return 'N/A';
-    return `${Number(price).toLocaleString('vi-VN')} ₫`;
+    return `${Number(price).toLocaleString('en-US')} VND`;
   };
 
   return (
@@ -349,7 +349,7 @@ const HomePage = ({ darkMode }) => {
             ))}
           </h1>
           <p style={{ ...paragraphStyles, fontSize: '24px', marginTop: '20px' }}>
-            Nơi mang đến vẻ đẹp tự nhiên và sự tự tin với các giải pháp chăm sóc da chuyên sâu.
+            The place to bring natural beauty and confidence with advanced skincare solutions.
           </p>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -366,7 +366,7 @@ const HomePage = ({ darkMode }) => {
                 (e.currentTarget.style.backgroundColor = darkMode ? '#34c759' : '#e67e22')
               }
             >
-              Khám Phá Ngay
+              Explore Now
             </Link>
           </motion.div>
         </div>
@@ -381,9 +381,9 @@ const HomePage = ({ darkMode }) => {
       >
         <div style={overlayStyles}></div>
         <div style={contentStyles}>
-          <h2 style={headingStyles}>Dịch Vụ Nổi Bật</h2>
+          <h2 style={headingStyles}>Featured Services</h2>
           <p style={paragraphStyles}>
-            Khám phá một số dịch vụ chăm sóc da được yêu thích nhất tại Beautishop.
+            Discover some of the most popular skincare services at Beautishop.
           </p>
           <div
             style={{
@@ -396,9 +396,9 @@ const HomePage = ({ darkMode }) => {
             }}
           >
             {loadingServices ? (
-              <p style={{ ...paragraphStyles, color: '#ffffff' }}>Đang tải dịch vụ...</p>
+              <p style={{ ...paragraphStyles, color: '#ffffff' }}>Loading services...</p>
             ) : services.length === 0 ? (
-              <p style={{ ...paragraphStyles, color: '#ffffff' }}>Không có dịch vụ nào để hiển thị.</p>
+              <p style={{ ...paragraphStyles, color: '#ffffff' }}>No services available to display.</p>
             ) : (
               services.map((service, index) => (
                 <Link
@@ -454,7 +454,7 @@ const HomePage = ({ darkMode }) => {
                         color: darkMode ? '#bdc3c7' : '#555',
                       }}
                     >
-                      {formatPriceVND(service.price)} {/* Updated to VND */}
+                      {formatPriceVND(service.price)}
                     </p>
                   </motion.div>
                 </Link>
@@ -478,7 +478,7 @@ const HomePage = ({ darkMode }) => {
                 (e.currentTarget.style.backgroundColor = darkMode ? '#34c759' : '#e67e22')
               }
             >
-              Xem Tất Cả Dịch Vụ
+              View All Services
             </Link>
           </motion.div>
         </div>
@@ -493,9 +493,9 @@ const HomePage = ({ darkMode }) => {
       >
         <div style={overlayStyles}></div>
         <div style={contentStyles}>
-          <h2 style={headingStyles}>Cơ Sở Vật Chất</h2>
+          <h2 style={headingStyles}>Our Facilities</h2>
           <p style={paragraphStyles}>
-            Beautishop tự hào sở hữu cơ sở vật chất hiện đại, mang đến trải nghiệm thư giãn và thoải mái tối ưu cho khách hàng.
+            Beautishop proudly offers modern facilities, providing the ultimate relaxation and comfort experience for our customers.
           </p>
           <div
             style={{
@@ -509,18 +509,18 @@ const HomePage = ({ darkMode }) => {
           >
             {[
               {
-                title: 'Phòng Trị Liệu Cao Cấp',
-                desc: 'Không gian yên tĩnh với thiết bị công nghệ cao.',
+                title: 'Premium Treatment Rooms',
+                desc: 'Quiet spaces with high-tech equipment.',
                 image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2Q7cCmg0hmeqf_desdUXC39uLQILLH46jbw&s',
               },
               {
-                title: 'Khu Vực Tư Vấn',
-                desc: 'Thiết kế thân thiện, hỗ trợ phân tích da chuyên sâu.',
+                title: 'Consultation Area',
+                desc: 'Friendly design with in-depth skin analysis support.',
                 image: 'https://file.hstatic.net/1000288522/article/s10_b0bf8ff7708c4369844b8a691da59da7_1024x1024.png',
               },
               {
-                title: 'Sảnh Đón Tiếp',
-                desc: 'Không gian sang trọng, ấm cúng chào đón bạn.',
+                title: 'Reception Lounge',
+                desc: 'Luxurious and cozy space to welcome you.',
                 image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToZpj9WwXNNd3-n46EPl29nlf4bfdL3N-Jvg&s',
               },
             ].map((facility, index) => (
@@ -577,9 +577,9 @@ const HomePage = ({ darkMode }) => {
       >
         <div style={overlayStyles}></div>
         <div style={contentStyles}>
-          <h2 style={headingStyles}>Tại Sao Chọn Beautishop?</h2>
+          <h2 style={headingStyles}>Why Choose Beautishop?</h2>
           <p style={paragraphStyles}>
-            Chúng tôi tự hào mang đến sự khác biệt với đội ngũ chuyên gia hàng đầu, công nghệ tiên tiến, và cam kết chất lượng vượt trội.
+            We pride ourselves on delivering excellence with a top-tier team of experts, cutting-edge technology, and a commitment to superior quality.
           </p>
           <div
             style={{
@@ -593,20 +593,20 @@ const HomePage = ({ darkMode }) => {
           >
             {[
               {
-                title: 'Chuyên Gia Kinh Nghiệm',
-                desc: 'Hơn 10 năm trong ngành chăm sóc da.',
+                title: 'Experienced Experts',
+                desc: 'Over 10 years in the skincare industry.',
               },
               {
-                title: 'Công Nghệ Hiện Đại',
-                desc: 'Ứng dụng AI và thiết bị tiên tiến.',
+                title: 'Modern Technology',
+                desc: 'Utilizing AI and advanced equipment.',
               },
               {
-                title: 'Sản Phẩm An Toàn',
-                desc: 'Được chứng nhận quốc tế, không hóa chất độc hại.',
+                title: 'Safe Products',
+                desc: 'Internationally certified, free from harmful chemicals.',
               },
               {
-                title: 'Hỗ Trợ 24/7',
-                desc: 'Đội ngũ luôn sẵn sàng giải đáp mọi thắc mắc.',
+                title: '24/7 Support',
+                desc: 'Our team is always ready to assist with any questions.',
               },
             ].map((reason, index) => (
               <motion.div
@@ -658,8 +658,8 @@ const HomePage = ({ darkMode }) => {
       >
         <div style={overlayStyles}></div>
         <div style={contentStyles}>
-          <h2 style={headingStyles}>Khách Hàng Nói Gì?</h2>
-          <p style={paragraphStyles}>Nghe từ chính những khách hàng đã trải nghiệm dịch vụ tại Beautishop.</p>
+          <h2 style={headingStyles}>What Our Customers Say</h2>
+          <p style={paragraphStyles}>Hear from customers who have experienced Beautishop’s services.</p>
           <div
             style={{
               display: 'flex',
@@ -672,20 +672,20 @@ const HomePage = ({ darkMode }) => {
           >
             {[
               {
-                name: 'Nguyễn Thị Lan',
-                quote: 'Làn da của tôi đã cải thiện rõ rệt sau liệu trình tại Beautishop. Dịch vụ tuyệt vời!',
+                name: 'Jane Smith',
+                quote: 'My skin has noticeably improved after a treatment at Beautishop. Amazing service!',
                 rating: 5,
                 image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e',
               },
               {
-                name: 'Trần Văn Hùng',
-                quote: 'Sản phẩm rất an toàn và hiệu quả. Tôi hoàn toàn tin tưởng Beautishop.',
+                name: 'John Doe',
+                quote: 'The products are safe and effective. I completely trust Beautishop.',
                 rating: 5,
                 image: 'https://images.unsplash.com/photo-1506794778202-cadffbf6435e',
               },
               {
-                name: 'Lê Minh Anh',
-                quote: 'Đội ngũ chuyên gia rất nhiệt tình, tư vấn chi tiết và tận tâm.',
+                name: 'Emily Brown',
+                quote: 'The team of experts is very enthusiastic and provides detailed, caring advice.',
                 rating: 5,
                 image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
               },
@@ -780,7 +780,7 @@ const HomePage = ({ darkMode }) => {
       >
         <div style={overlayStyles}></div>
         <div style={contentStyles}>
-          <h2 style={headingStyles}>Bắt Đầu Hành Trình Làm Đẹp</h2>
+          <h2 style={headingStyles}>Start Your Beauty Journey</h2>
           <p
             style={{
               ...paragraphStyles,
@@ -788,7 +788,7 @@ const HomePage = ({ darkMode }) => {
               marginBottom: '40px',
             }}
           >
-            Đặt lịch ngay hôm nay để trải nghiệm dịch vụ chăm sóc da đẳng cấp tại Beautishop.
+            Book an appointment today to experience premium skincare services at Beautishop.
           </p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -806,7 +806,7 @@ const HomePage = ({ darkMode }) => {
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e0e0e0')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
             >
-              Đặt Lịch Ngay
+              Book Now
             </Link>
           </motion.div>
         </div>

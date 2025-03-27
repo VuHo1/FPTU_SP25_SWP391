@@ -35,6 +35,8 @@ import ChooseScheduleTherapist from "./page/ChooseScheduleTherapist";
 import TimeSlotSchedule from "./page/TimeSlotSchedule";
 import QaStaff from "./page/QaStaff";
 import UserQuiz from "./page/UserQuiz";
+import HistoryTransactionAdmin from './page/HistoryTransactionAdmin';
+import HistoryTransactionUser from "./page/HistoryTransactionUser"; // Add this import
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const role = localStorage.getItem("role");
@@ -108,6 +110,8 @@ function App() {
             <Route path="/therapist/choose-schedule" element={<ChooseScheduleTherapist darkMode={true} />} />
             <Route path="/timeslot-schedule" element={<TimeSlotSchedule darkMode={darkMode} />} />
             <Route path="/staff/qa-customer" element={<QaStaff darkMode={darkMode} />} />
+            <Route path="/history-transaction-admin" element={<HistoryTransactionAdmin darkMode={darkMode}/>} />
+
 
 
             <Route
@@ -156,6 +160,9 @@ function App() {
 
                     <Route path="/edit-profile" element={<EditProfile darkMode={darkMode} />} />
                     <Route path="/add-profile" element={<AddProfile darkMode={darkMode} />} />
+                    <Route path="/history-transaction-user"  element={<HistoryTransactionUser darkMode={darkMode} />}
+/>
+                    
                     <Route path="*" element={<Error darkMode={darkMode} />} />
 
                   </Routes>
