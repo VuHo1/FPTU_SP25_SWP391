@@ -10,6 +10,10 @@ import {
   Typography,
   Divider,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
@@ -24,7 +28,9 @@ import {
   faEdit,
   faMoon,
   faSignOutAlt,
-  faBook, // Icon mới cho View Bookings
+  faBook,
+  faStar,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import ScheduleSelectionStaff from "../page/ScheduleSelectionStaff";
@@ -85,27 +91,43 @@ const BookingCard = styled(Box)(({ darkMode }) => ({
   background: darkMode ? "rgba(69, 90, 100, 0.9)" : "rgba(248, 244, 225, 0.9)",
   borderRadius: "10px",
   color: darkMode ? "#ecf0f1" : "#2c3e50",
-  '& *': { // Áp dụng màu chữ cho tất cả phần tử con (Typography)
-    color: 'inherit', // Đảm bảo Typography kế thừa màu từ BookingCard
+  "& *": {
+    color: "inherit",
   },
+  textAlign: "left"
 }));
-
+const FeedbackCard = styled(Box)(({ darkMode }) => ({
+  padding: "20px",
+  marginBottom: "20px",
+  background: darkMode ? "rgba(52, 73, 94, 0.9)" : "rgba(229, 229, 229, 0.9)",
+  borderRadius: "8px",
+  color: darkMode ? "#ecf0f1" : "#34495e",
+  "& *": {
+    color: "inherit",
+  },
+  display: "flex", // Dùng flex để căn icon xóa sang phải
+  justifyContent: "space-between",
+}));
 const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("home");
   const [bookings, setBookings] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [services, setServices] = useState([]); // State cho danh sách dịch vụ
+  const [users, setUsers] = useState([]); // State cho danh sách users
   const [loading, setLoading] = useState(false);
+  const [serviceIdFilter, setServiceIdFilter] = useState("All"); // Filter cho serviceId
+  const [ratingFilter, setRatingFilter] = useState("All"); // Filter cho rating
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const [users, setUsers] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
   const [expandedBookingId, setExpandedBookingId] = useState(null);
   const token = localStorage.getItem("token");
   const axiosInstance = axios.create({
     baseURL: "https://kinaa1410-001-site1.qtempurl.com/api",
     headers: {
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-      "Accept": "*/*",
+      Accept: "*/*",
     },
   });
 
@@ -114,21 +136,52 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
     try {
       const [bookingsResponse, usersResponse, timeSlotsResponse] = await Promise.all([
         axiosInstance.get("/bookings"),
-        axiosInstance.get("/users"),
+        axiosInstance.get("/UserDetails"),
         axiosInstance.get("/timeslot"),
       ]);
       setBookings(bookingsResponse.data);
       setUsers(usersResponse.data);
       setTimeSlots(timeSlotsResponse.data);
     } catch (err) {
-      console.error("Error fetching data:", err);
+      console.error("Error fetching bookings:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const fetchFeedbacks = async () => {
+    setLoading(true);
+    try {
+      const [feedbacksResponse, usersResponse, servicesResponse] = await Promise.all([
+        axiosInstance.get("/feedbacks"),
+        axiosInstance.get("/UserDetails"),
+        axiosInstance.get("/service"),
+      ]);
+      setFeedbacks(feedbacksResponse.data);
+      setUsers(usersResponse.data);
+      setServices(servicesResponse.data);
+    } catch (err) {
+      console.error("Error fetching feedbacks:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteFeedback = async (feedbackId) => {
+    try {
+      const response = await axiosInstance.delete(`/feedbacks/${feedbackId}`);
+      if (response.status === 200) {
+        setFeedbacks(feedbacks.filter((fb) => fb.feedbackId !== feedbackId));
+      }
+    } catch (err) {
+      console.error("Error deleting feedback:", err);
+    }
+  };
+
   const handleToggleExpand = (bookingId) => {
     setExpandedBookingId(expandedBookingId === bookingId ? null : bookingId);
   };
+
   const handleLogout = () => {
     logout();
     localStorage.removeItem("token");
@@ -141,7 +194,8 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
     { text: "View Services", icon: <FontAwesomeIcon icon={faBuilding} />, section: "services" },
     { text: "View QA Customer", icon: <FontAwesomeIcon icon={faComments} />, section: "qa-customer" },
     { text: "View Schedules", icon: <FontAwesomeIcon icon={faCalendar} />, section: "schedules" },
-    { text: "View Bookings", icon: <FontAwesomeIcon icon={faBook} />, section: "bookings" }, // Nút mới
+    { text: "View Bookings", icon: <FontAwesomeIcon icon={faBook} />, section: "bookings" },
+    { text: "View Feedbacks", icon: <FontAwesomeIcon icon={faStar} />, section: "feedbacks" },
     { text: "View Profile", icon: <FontAwesomeIcon icon={faUser} />, section: "view-profile" },
     { text: "Edit Profile", icon: <FontAwesomeIcon icon={faEdit} />, section: "edit-profile" },
     { text: "Toggle Dark Mode", icon: <FontAwesomeIcon icon={faMoon} />, action: toggleDarkMode },
@@ -156,8 +210,21 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
       if (section === "qa-customer") navigate("/staff/qa-customer");
       if (section === "view-profile") navigate("/profile-role");
       if (section === "edit-profile") navigate("/edit-profilerole");
-      if (section === "bookings") fetchBookings(); // Fetch khi nhấn "View Bookings"
+      if (section === "bookings") fetchBookings();
+      if (section === "feedbacks") fetchFeedbacks();
     }
+  };
+
+  // Hàm lọc feedbacks dựa trên serviceId và rating
+  const filteredFeedbacks = () => {
+    let filtered = feedbacks;
+    if (serviceIdFilter !== "All") {
+      filtered = filtered.filter((fb) => fb.serviceId === parseInt(serviceIdFilter));
+    }
+    if (ratingFilter !== "All") {
+      filtered = filtered.filter((fb) => fb.rating === parseInt(ratingFilter));
+    }
+    return filtered;
   };
 
   const drawerContent = (
@@ -301,40 +368,180 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
                 <CircularProgress sx={{ color: darkMode ? "#1abc9c" : "#6c4f37" }} />
               </Box>
             ) : bookings.length > 0 ? (
-              bookings.map((booking) => {
-                const user = users.find((u) => u.userId === booking.userId) || {};
-                const timeSlot = timeSlots.find((ts) => ts.timeSlotId === booking.timeSlotId) || {};
-                const isExpanded = expandedBookingId === booking.bookingId;
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                {bookings.map((booking) => {
+                  const user = users.find((u) => u.userId === booking.userId) || {};
+                  const timeSlot = timeSlots.find((ts) => ts.timeSlotId === booking.timeSlotId) || {};
+                  const isExpanded = expandedBookingId === booking.bookingId;
+                  return (
+                    <Box sx={{ flex: "1 1 calc(50% - 16px)", minWidth: "300px" }} key={booking.bookingId}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ mb: 1, fontWeight: 600, color: darkMode ? "#1abc9c" : "#2c3e50" }}
+                      >
+                        Booking ID: {booking.bookingId}
+                      </Typography>
+                      <BookingCard
+                        darkMode={darkMode}
+                        onClick={() => handleToggleExpand(booking.bookingId)}
+                        component={motion.div}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <Box>
+                          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                            <img
+                              src={user.avatar || "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-1.jpg"}
+                              alt="User Avatar"
+                              style={{ width: "30px", height: "30px", borderRadius: "50%", marginRight: "8px" }}
+                            />
+                            <Typography>
+                              {(user.firstName && user.lastName) ? `${user.lastName} ${user.firstName}` : "Unknown"} (ID: {booking.userId})
+                            </Typography>
+                          </Box>
+                          <Typography>Appointment Date: {new Date(booking.appointmentDate).toLocaleDateString()}</Typography>
+                          {isExpanded && (
+                            <>
+                              <Typography>Therapist ID: {booking.therapistId}</Typography>
+                              <Typography>Time Slot: {timeSlot.description || "N/A"} (ID: {booking.timeSlotId})</Typography>
+                              <Typography>Date Created: {new Date(booking.dateCreated).toLocaleString()}</Typography>
+                              <Typography>Total Price: {booking.totalPrice} VND</Typography>
+                              <Typography>Note: {booking.note || "N/A"}</Typography>
+                              <Typography>Status: {booking.status ? "Active" : "Inactive"}</Typography>
+                              <Typography>Is Paid: {booking.isPaid ? "Yes" : "No"}</Typography>
+                              <Typography>Use Wallet: {booking.useWallet ? "Yes" : "No"}</Typography>
+                            </>
+                          )}
+                        </Box>
+                      </BookingCard>
+                    </Box>
+                  );
+                })}
+              </Box>
+            ) : (
+              <Typography style={{ color: darkMode ? "#dc3545" : "#dc3545" }}>No bookings available.</Typography>
+            )}
+          </Box>
+        )}
+        {activeSection === "feedbacks" && (
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                mb: 2,
+                fontFamily: "'Poppins', sans-serif",
+                fontWeight: 600,
+              }}
+            >
+              All Feedbacks
+            </Typography>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              <FormControl sx={{ minWidth: 150 }}>
+
+                <Select
+                  value={serviceIdFilter}
+                  onChange={(e) => setServiceIdFilter(e.target.value)}
+                  sx={{
+                    color: darkMode ? "#ecf0f1" : "#2c3e50",
+                    background: darkMode ? "rgba(69, 90, 100, 0.9)" : "rgba(248, 244, 225, 0.9)",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: darkMode ? "#5a758c" : "#ccc",
+                    },
+                  }}
+                >
+                  <MenuItem value="All">All Services</MenuItem>
+                  {services.map((service) => (
+                    <MenuItem key={service.serviceId} value={service.serviceId}>
+                      {service.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl sx={{ minWidth: 150 }}>
+
+                <Select
+                  value={ratingFilter}
+                  onChange={(e) => setRatingFilter(e.target.value)}
+                  sx={{
+                    color: darkMode ? "#ecf0f1" : "#2c3e50",
+                    background: darkMode ? "rgba(69, 90, 100, 0.9)" : "rgba(248, 244, 225, 0.9)",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: darkMode ? "#5a758c" : "#ccc",
+                    },
+                  }}
+                >
+                  <MenuItem value="All">All Ratings</MenuItem>
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <MenuItem key={rating} value={rating}>
+                      {rating} Star{rating > 1 ? "s" : ""}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <CircularProgress sx={{ color: darkMode ? "#1abc9c" : "#6c4f37" }} />
+              </Box>
+            ) : filteredFeedbacks().length > 0 ? (
+              filteredFeedbacks().map((feedback) => {
+                const user = users.find((u) => u.userId === feedback.userId) || {};
+                const service = services.find((s) => s.serviceId === feedback.serviceId) || {};
                 return (
-                  <BookingCard
-                    key={booking.bookingId}
-                    darkMode={darkMode}
-                    onClick={() => handleToggleExpand(booking.bookingId)}
-                    component={motion.div}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <Typography>Booking ID: {booking.bookingId}</Typography>
-                    <Typography>Appointment Date: {new Date(booking.appointmentDate).toLocaleDateString()}</Typography>
-                    {isExpanded && (
-                      <>
-                        <Typography>User: {user.userName || "Unknown"} (ID: {booking.userId})</Typography>
-                        <Typography>Therapist ID: {booking.therapistId}</Typography>
-                        <Typography>Time Slot: {timeSlot.description || "N/A"} (ID: {booking.timeSlotId})</Typography>
-                        <Typography>Date Created: {new Date(booking.dateCreated).toLocaleString()}</Typography>
-                        <Typography>Total Price: {booking.totalPrice} VND</Typography>
-                        <Typography>Note: {booking.note || "N/A"}</Typography>
-                        <Typography>Status: {booking.status ? "Active" : "Inactive"}</Typography>
-                        <Typography>Is Paid: {booking.isPaid ? "Yes" : "No"}</Typography>
-                        <Typography>Use Wallet: {booking.useWallet ? "Yes" : "No"}</Typography>
-                      </>
-                    )}
-                  </BookingCard>
+                  <Box key={feedback.feedbackId}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ mb: 1, fontWeight: 600, color: darkMode ? "#1abc9c" : "#2c3e50", textAlign: "left", marginLeft: "40px" }}
+                    >
+                      Service: {service.name || "Unknown"} (ID: {feedback.serviceId})
+                    </Typography>
+                    <FeedbackCard
+                      darkMode={darkMode}
+                      component={motion.div}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                          <img
+                            src={user.avatar || "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-1.jpg"}
+                            alt="User Avatar"
+                            style={{ width: "30px", height: "30px", borderRadius: "50%", marginRight: "8px" }}
+                          />
+                          <Typography sx={{ mr: 1 }}>
+                            {(user.firstName && user.lastName) ? `${user.lastName} ${user.firstName}` : "Unknown"}
+                          </Typography>
+                          <Typography sx={{ display: "flex", alignItems: "center" }}>
+                            {Array(feedback.rating).fill().map((_, index) => (
+                              <FontAwesomeIcon key={index} icon={faStar} style={{ color: "#f39c12", marginRight: "2px" }} />
+                            ))}
+                          </Typography>
+                        </Box>
+                        <Typography style={{ textAlign: "left", marginLeft: "40px" }}>{feedback.comment}</Typography>
+                      </Box>
+                      <Box sx={{ alignSelf: "center" }}>
+                        <button
+                          onClick={() => deleteFeedback(feedback.feedbackId)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: darkMode ? "#dc3545" : "#dc3545",
+                            fontSize: "1rem",
+                            padding: "0.5rem",
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                      </Box>
+                    </FeedbackCard>
+                  </Box>
                 );
               })
             ) : (
-              <Typography>No bookings available.</Typography>
+              <Typography style={{ color: darkMode ? "#dc3545" : "#dc3545" }}>No feedbacks available.</Typography>
             )}
           </Box>
         )}

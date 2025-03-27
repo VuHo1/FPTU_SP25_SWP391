@@ -113,7 +113,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
     try {
       const [bookingsResponse, usersResponse, timeSlotsResponse] = await Promise.all([
         axiosInstance.get(`/bookings/therapist/${userId}/bookings`),
-        axiosInstance.get("/users"),
+        axiosInstance.get("/UserDetails"),
         axiosInstance.get("/timeslot"),
       ]);
       setBookings(bookingsResponse.data);
@@ -316,7 +316,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
                     <Typography>Appointment Date: {new Date(booking.appointmentDate).toLocaleDateString()}</Typography>
                     {isExpanded && (
                       <>
-                        <Typography>User: {user.userName || "Unknown"} (ID: {booking.userId})</Typography>
+                        <Typography>User: {(user.firstName && user.lastName) ? ` ${user.lastName} ${user.firstName}` : "Unknown"} (ID: {booking.userId})</Typography>
                         <Typography>Therapist ID: {booking.therapistId}</Typography>
                         <Typography>Time Slot: {timeSlot.description || "N/A"} (ID: {booking.timeSlotId})</Typography>
                         <Typography>Date Created: {new Date(booking.dateCreated).toLocaleString()}</Typography>
