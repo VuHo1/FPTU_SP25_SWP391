@@ -3,7 +3,9 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../page/AuthContext";
 import { getAllServices, getServiceCategories, getImageService } from "../api/testApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { faStar, faChevronLeft, faChevronRight, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+
 
 const BlogDetail = ({ darkMode }) => {
   const { id } = useParams();
@@ -12,8 +14,10 @@ const BlogDetail = ({ darkMode }) => {
   const [service, setService] = useState(null);
   const [categories, setCategories] = useState([]);
   const [images, setImages] = useState([]);
+
   const [feedbacks, setFeedbacks] = useState([]);
   const [newFeedback, setNewFeedback] = useState({ rating: 5, comment: "" });
+
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -229,9 +233,9 @@ const BlogDetail = ({ darkMode }) => {
 
   const currentUserId = localStorage.getItem("userId");
 
-  if (loading) return <div className="loading">Đang tải...</div>;
+  if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">{error}</div>;
-  if (!service) return <h2>Dịch vụ không tồn tại</h2>;
+  if (!service) return <h2>Service does not exist</h2>;
 
   const isServiceActive = service.status;
   const mainImage = images.length > 0 ? images[mainImageIndex]?.imageURL : null;
@@ -591,8 +595,9 @@ const BlogDetail = ({ darkMode }) => {
         <div className="blog-content">
           <div className="blog-text">
             <h1>{service.name}</h1>
-            <p>{service.description || "Không có mô tả chi tiết."}</p>
+            <p>{service.description || "No detailed description available."}</p>
             <div className="blog-info">
+
               <p className="price">Giá: {service.price ? `${service.price.toLocaleString("vi-VN")} VND` : "N/A"}</p>
               <p>Trạng thái: {service.status ? "Hoạt động" : "Không hoạt động"}</p>
               <p>
@@ -609,12 +614,13 @@ const BlogDetail = ({ darkMode }) => {
               </div>
             </div>
             <Link to="/service" className="back-button">Quay lại</Link>
+
             <button
               onClick={isServiceActive ? handleBookingClick : null}
               className={isServiceActive ? "booking-button" : "inactive-button"}
               disabled={!isServiceActive}
             >
-              {isServiceActive ? "Đặt Lịch Ngay" : "Không Khả Dụng"}
+              {isServiceActive ? "Book Now" : "Not Available"}
             </button>
           </div>
           <div className="blog-image">

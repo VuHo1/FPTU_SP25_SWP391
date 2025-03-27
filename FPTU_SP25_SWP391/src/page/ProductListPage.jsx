@@ -107,7 +107,7 @@ export default function ProductListPage({ darkMode }) {
         >
           <motion.img
             src="https://maisoninterior.vn/wp-content/uploads/2025/02/mau-van-phong-lam-viec-dep-02.jpg"
-            alt="Văn phòng SkinCare Pro"
+            alt="SkinCare Pro Office"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
@@ -149,7 +149,7 @@ export default function ProductListPage({ darkMode }) {
                 color: darkMode ? "#e5e7eb" : "#1f2937",
               }}
             >
-              Chào mừng đến với{" "}
+              Welcome to{" "}
               <span style={{ color: "#e67e22", fontWeight: "800" }}>
                 SkinCare Pro
               </span>
@@ -161,12 +161,7 @@ export default function ProductListPage({ darkMode }) {
               viewport={{ once: false }}
               style={paragraphStyles}
             >
-              Chúng tôi tự hào là đơn vị tiên phong trong lĩnh vực chăm sóc và
-              tư vấn da chuyên sâu, mang đến những giải pháp toàn diện, khoa học
-              và cá nhân hóa cho từng loại da. Với đội ngũ chuyên gia giàu kinh
-              nghiệm và sự kết hợp giữa công nghệ hiện đại cùng các phương pháp
-              chăm sóc tiên tiến, chúng tôi cam kết giúp khách hàng đạt được làn
-              da khỏe mạnh, rạng rỡ từ bên trong.
+              We pride ourselves on being a pioneer in the field of advanced skincare and consultation, offering comprehensive, scientific, and personalized solutions for every skin type. With a team of experienced experts and a blend of modern technology and cutting-edge skincare methods, we are committed to helping our customers achieve healthy, radiant skin from within.
             </motion.p>
             <motion.p
               initial={{ opacity: 0, x: -30 }}
@@ -175,11 +170,7 @@ export default function ProductListPage({ darkMode }) {
               viewport={{ once: false }}
               style={paragraphStyles}
             >
-              Tại SkinCare Pro, chúng tôi không chỉ tập trung vào vẻ đẹp bên
-              ngoài mà còn chú trọng nuôi dưỡng làn da từ sâu bên trong, giúp
-              bạn tự tin tỏa sáng trong mọi hoàn cảnh. Khám phá các dịch vụ độc
-              quyền và sản phẩm chăm sóc da đẳng cấp được thiết kế riêng cho
-              bạn.
+              At SkinCare Pro, we don’t just focus on outer beauty but also emphasize nurturing your skin from the inside out, helping you shine confidently in every situation. Explore our exclusive services and premium skincare products designed just for you.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -201,17 +192,17 @@ export default function ProductListPage({ darkMode }) {
                   transition: "background-color 0.3s ease",
                 }}
                 onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode
-                  ? "#2ea74d"
-                  : "#d2691e")
+                  (e.currentTarget.style.backgroundColor = darkMode
+                    ? "#2ea74d"
+                    : "#d2691e")
                 }
                 onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = darkMode
-                  ? "#34c759"
-                  : "#e67e22")
+                  (e.currentTarget.style.backgroundColor = darkMode
+                    ? "#34c759"
+                    : "#e67e22")
                 }
               >
-                Khám Phá Dịch Vụ
+                Explore Services
               </Link>
             </motion.div>
           </div>
@@ -246,7 +237,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={headingStyles}
           >
-            Đội Ngũ Chuyên Gia
+            Our Expert Team
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -255,9 +246,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Đội ngũ của chúng tôi không chỉ có hơn 10 năm kinh nghiệm trong
-            ngành làm đẹp và chăm sóc da, mà còn là những người tiên phong trong
-            việc nghiên cứu và ứng dụng các công nghệ chăm sóc da mới nhất.
+            Our team not only brings over 10 years of experience in the beauty and skincare industry but also leads the way in researching and applying the latest skincare technologies.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -266,9 +255,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Mỗi chuyên gia tại SkinCare Pro đều được đào tạo bài bản tại các học
-            viện danh tiếng trong và ngoài nước, đảm bảo mang đến cho bạn những
-            trải nghiệm chuyên nghiệp và hiệu quả nhất.
+            Every expert at SkinCare Pro is thoroughly trained at prestigious institutes both domestically and internationally, ensuring you receive the most professional and effective experience.
           </motion.p>
           <div
             style={{
@@ -283,22 +270,22 @@ export default function ProductListPage({ darkMode }) {
           >
             {[
               {
-                name: "Dr. Nguyễn Minh",
-                role: "Chuyên gia da liễu",
+                name: "Dr. Minh Nguyen",
+                role: "Dermatologist",
                 img: "https://bizweb.dktcdn.net/100/175/849/files/z4277782048544-ed8d504b298a553f544c17838ff9f090.jpg?v=1681895249035",
-                bio: "Chuyên gia với hơn 15 năm kinh nghiệm trong điều trị các vấn đề da liễu.",
+                bio: "An expert with over 15 years of experience in treating dermatological issues.",
               },
               {
-                name: "Dr. Lê Hoàng",
-                role: "Chuyên gia trị liệu",
+                name: "Dr. Hoang Le",
+                role: "Therapy Specialist",
                 img: "https://bizweb.dktcdn.net/100/175/849/files/bacsidsc-7090k.jpg?v=1647837404831",
-                bio: "Chuyên về liệu pháp tái tạo da không xâm lấn.",
+                bio: "Specializes in non-invasive skin regeneration therapies.",
               },
               {
-                name: "ThS. Trần Mai",
-                role: "Chuyên gia nghiên cứu",
+                name: "MSc. Mai Tran",
+                role: "Research Specialist",
                 img: "https://hthaostudio.com/wp-content/uploads/2022/08/Anh-profile-bac-si-min.jpg",
-                bio: "Đóng góp vào việc phát triển sản phẩm chăm sóc da tự nhiên.",
+                bio: "Contributes to the development of natural skincare products.",
               },
             ].map((expert, index) => (
               <motion.div
@@ -398,7 +385,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={headingStyles}
           >
-            Sứ Mệnh & Mục Tiêu
+            Mission & Goals
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -407,10 +394,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Sứ mệnh của chúng tôi là mang lại làn da khỏe đẹp và sự tự tin cho
-            mọi người thông qua các liệu trình cá nhân hóa và tư vấn chuyên sâu.
-            Chúng tôi hướng đến một cộng đồng yêu thương bản thân và hiểu biết
-            về chăm sóc da.
+            Our mission is to bring healthy, beautiful skin and confidence to everyone through personalized treatments and in-depth consultations. We aim to foster a community that loves and understands skincare.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -419,9 +403,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Với tầm nhìn trở thành thương hiệu chăm sóc da hàng đầu khu vực,
-            SkinCare Pro không ngừng đổi mới để đáp ứng nhu cầu ngày càng cao
-            của khách hàng.
+            With a vision to become the leading skincare brand in the region, SkinCare Pro continuously innovates to meet the growing demands of our customers.
           </motion.p>
           <ul
             style={{
@@ -435,16 +417,16 @@ export default function ProductListPage({ darkMode }) {
           >
             {[
               {
-                text: "Đưa công nghệ phân tích da tiên tiến đến khách hàng",
-                detail: "Ứng dụng AI để phân tích và đề xuất giải pháp tối ưu.",
+                text: "Bring advanced skin analysis technology to customers",
+                detail: "Using AI to analyze and recommend optimal solutions.",
               },
               {
-                text: "Tư vấn cá nhân hóa phù hợp với từng loại da",
-                detail: "Mỗi khách hàng đều nhận được lộ trình riêng biệt.",
+                text: "Provide personalized consultations for every skin type",
+                detail: "Each customer receives a tailored treatment plan.",
               },
               {
-                text: "Mang đến giải pháp bền vững, hiệu quả dài lâu",
-                detail: "Hỗ trợ lâu dài với sản phẩm thân thiện môi trường.",
+                text: "Offer sustainable, long-lasting solutions",
+                detail: "Long-term support with eco-friendly products.",
               },
             ].map((goal, index) => (
               <motion.li
@@ -514,7 +496,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={headingStyles}
           >
-            Lịch Sử Hình Thành & Phát Triển
+            History & Development
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -523,10 +505,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            SkinCare Pro ra đời vào năm 2010 từ niềm đam mê mang lại làn da khỏe
-            đẹp cho mọi người. Từ một trung tâm nhỏ tại TP.HCM, chúng tôi đã mở
-            rộng thành hệ thống hơn 20 chi nhánh trên toàn quốc, phục vụ hàng
-            ngàn khách hàng mỗi năm.
+            SkinCare Pro was founded in 2010 with a passion for bringing healthy, beautiful skin to everyone. Starting as a small center in Ho Chi Minh City, we have expanded into a network of over 20 branches nationwide, serving thousands of customers each year.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -535,9 +514,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Hành trình của chúng tôi gắn liền với những bước tiến công nghệ và
-            sự tin tưởng từ khách hàng, từ việc áp dụng các liệu pháp truyền
-            thống đến tích hợp trí tuệ nhân tạo trong chăm sóc da hiện đại.
+            Our journey is tied to technological advancements and the trust of our customers, evolving from traditional therapies to integrating artificial intelligence into modern skincare.
           </motion.p>
           <div
             style={{
@@ -553,19 +530,19 @@ export default function ProductListPage({ darkMode }) {
             {[
               {
                 year: "2010",
-                milestone: "Thành lập trung tâm đầu tiên tại TP.HCM.",
+                milestone: "Established the first center in Ho Chi Minh City.",
               },
               {
                 year: "2015",
-                milestone: "Mở rộng ra 10 chi nhánh tại các thành phố lớn.",
+                milestone: "Expanded to 10 branches in major cities.",
               },
               {
                 year: "2020",
-                milestone: "Ra mắt ứng dụng chăm sóc da bằng AI.",
+                milestone: "Launched an AI-powered skincare app.",
               },
               {
                 year: "2023",
-                milestone: "Đạt mốc 50,000 khách hàng hài lòng.",
+                milestone: "Reached a milestone of 50,000 satisfied customers.",
               },
             ].map((event, index) => (
               <motion.div
@@ -639,7 +616,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={headingStyles}
           >
-            Cam Kết Chất Lượng
+            Quality Commitment
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -648,9 +625,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Chúng tôi cam kết mang đến dịch vụ tư vấn da cá nhân hóa với tiêu
-            chuẩn cao nhất, đảm bảo an toàn, hiệu quả và sự hài lòng của khách
-            hàng trong từng trải nghiệm.
+            We are committed to providing personalized skincare consultations with the highest standards, ensuring safety, effectiveness, and customer satisfaction in every experience.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -659,9 +634,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            SkinCare Pro luôn đặt sức khỏe làn da của bạn lên hàng đầu, sử dụng
-            các sản phẩm được kiểm nghiệm nghiêm ngặt và đội ngũ chuyên gia tận
-            tâm phục vụ 24/7.
+            SkinCare Pro always prioritizes your skin’s health, using rigorously tested products and a dedicated team of experts available 24/7.
           </motion.p>
           <div
             style={{
@@ -676,16 +649,16 @@ export default function ProductListPage({ darkMode }) {
           >
             {[
               {
-                title: "An Toàn",
-                desc: "Sử dụng sản phẩm không chứa hóa chất độc hại, được chứng nhận quốc tế.",
+                title: "Safety",
+                desc: "Using products free of harmful chemicals, internationally certified.",
               },
               {
-                title: "Hiệu Quả",
-                desc: "Cam kết mang lại kết quả rõ rệt trong thời gian ngắn nhất.",
+                title: "Effectiveness",
+                desc: "Committed to delivering noticeable results in the shortest time.",
               },
               {
-                title: "Tận Tâm",
-                desc: "Hỗ trợ khách hàng mọi lúc, mọi nơi với sự nhiệt tình và chuyên nghiệp.",
+                title: "Dedication",
+                desc: "Supporting customers anytime, anywhere with enthusiasm and professionalism.",
               },
             ].map((item, index) => (
               <motion.div
@@ -759,7 +732,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={headingStyles}
           >
-            Câu Hỏi Thường Gặp
+            Frequently Asked Questions
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -768,9 +741,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Dưới đây là những thắc mắc phổ biến từ khách hàng của chúng tôi,
-            cùng với câu trả lời chi tiết để bạn hiểu rõ hơn về dịch vụ SkinCare
-            Pro.
+            Below are common questions from our customers, along with detailed answers to help you better understand SkinCare Pro’s services.
           </motion.p>
           <div
             style={{
@@ -782,16 +753,16 @@ export default function ProductListPage({ darkMode }) {
           >
             {[
               {
-                q: "Tôi cần đặt lịch hẹn trước bao lâu?",
-                a: "Bạn có thể đặt lịch trước ít nhất 24 giờ để chúng tôi sắp xếp chuyên gia phù hợp. Trong trường hợp khẩn cấp, vui lòng liên hệ hotline để được hỗ trợ ngay.",
+                q: "How far in advance do I need to book an appointment?",
+                a: "You can book at least 24 hours in advance to ensure we arrange the right expert for you. For urgent cases, please contact our hotline for immediate assistance.",
               },
               {
-                q: "Dịch vụ có dành cho da nhạy cảm không?",
-                a: "Chắc chắn rồi! Chúng tôi có các liệu trình đặc biệt dành riêng cho da nhạy cảm, sử dụng sản phẩm dịu nhẹ và không gây kích ứng.",
+                q: "Are the services suitable for sensitive skin?",
+                a: "Absolutely! We offer specialized treatments for sensitive skin, using gentle, non-irritating products.",
               },
               {
-                q: "Tôi có thể thanh toán bằng cách nào?",
-                a: "Chúng tôi chấp nhận thanh toán bằng tiền mặt, thẻ ngân hàng, và các nền tảng thanh toán trực tuyến như MoMo, ZaloPay.",
+                q: "What payment methods are accepted?",
+                a: "We accept cash, bank cards, and online payment platforms like MoMo and ZaloPay.",
               },
             ].map((faq, index) => (
               <motion.div
@@ -822,8 +793,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Nếu bạn có thêm câu hỏi, đừng ngần ngại liên hệ với chúng tôi qua
-            email hoặc hotline!
+            If you have more questions, feel free to contact us via email or hotline!
           </motion.p>
         </div>
       </motion.section>
@@ -856,7 +826,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={headingStyles}
           >
-            Chính Sách Công Ty
+            Company Policy
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -865,9 +835,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Chúng tôi cam kết minh bạch trong mọi hoạt động, từ quy trình dịch
-            vụ đến chính sách bảo hành và hỗ trợ khách hàng. Tìm hiểu thêm về
-            các điều khoản và quyền lợi của bạn tại SkinCare Pro.
+            We are committed to transparency in all our operations, from service processes to warranty and customer support policies. Learn more about your rights and benefits at SkinCare Pro.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -876,9 +844,7 @@ export default function ProductListPage({ darkMode }) {
             viewport={{ once: false }}
             style={paragraphStyles}
           >
-            Chính sách của chúng tôi bao gồm đổi trả sản phẩm trong 7 ngày, hỗ
-            trợ kỹ thuật miễn phí trong 30 ngày sau liệu trình, và bảo vệ thông
-            tin cá nhân theo tiêu chuẩn GDPR.
+            Our policies include product returns within 7 days, free technical support for 30 days post-treatment, and personal data protection in line with GDPR standards.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -900,17 +866,17 @@ export default function ProductListPage({ darkMode }) {
                 transition: "background-color 0.3s ease, transform 0.2s ease",
               }}
               onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = darkMode
-                ? "#2ea74d"
-                : "#d2691e")
+                (e.currentTarget.style.backgroundColor = darkMode
+                  ? "#2ea74d"
+                  : "#d2691e")
               }
               onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = darkMode
-                ? "#34c759"
-                : "#e67e22")
+                (e.currentTarget.style.backgroundColor = darkMode
+                  ? "#34c759"
+                  : "#e67e22")
               }
             >
-              Xem Chính Sách Công Ty
+              View Company Policy
             </Link>
           </motion.div>
           <div
@@ -926,9 +892,9 @@ export default function ProductListPage({ darkMode }) {
             }}
           >
             {[
-              "Chính sách bảo hành dịch vụ",
-              "Quy định đổi trả sản phẩm",
-              "Cam kết bảo mật thông tin",
+              "Service warranty policy",
+              "Product return regulations",
+              "Privacy commitment",
             ].map((policy, index) => (
               <motion.div
                 key={index}

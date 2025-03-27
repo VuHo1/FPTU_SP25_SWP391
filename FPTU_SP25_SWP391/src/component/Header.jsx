@@ -1,4 +1,3 @@
-// Header.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,12 +7,11 @@ import {
   faCalendarCheck,
   faEnvelope,
   faShoppingBag,
-  faShoppingCart,
   faSignInAlt,
   faMoon,
   faSun,
   faUser,
-  faPenToSquare
+  faHistory // Added icon for Transaction History
 } from "@fortawesome/free-solid-svg-icons";
 import "./Header.css";
 import { useAuth } from "../page/AuthContext";
@@ -39,9 +37,6 @@ const Header = ({ darkMode, toggleDarkMode }) => {
           <FontAwesomeIcon icon={faInfoCircle} /> About
         </Link>
         <Link to="/booking_page" className="link">
-          <Link to="/userquiz" className="link">
-            <FontAwesomeIcon icon={faPenToSquare} /> Quiz
-          </Link>
           <FontAwesomeIcon icon={faCalendarCheck} /> Booking
         </Link>
         <Link to="/contact" className="link">
@@ -64,7 +59,7 @@ const Header = ({ darkMode, toggleDarkMode }) => {
             <button className="user-icon">
               <FontAwesomeIcon icon={faUser} />
             </button>
-            <div className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`}>
+            <div className={`dropdown-menu ${isDropdownOpen ? "open" : ""}`}>
               <Link
                 to="/profile"
                 className="dropdown-item"
@@ -79,10 +74,14 @@ const Header = ({ darkMode, toggleDarkMode }) => {
               >
                 Edit Profile
               </Link>
-              <button
-                className="dropdown-item logout-btn"
-                onClick={handleLogout}
+              <Link
+                to="/history-transaction-user"
+                className="dropdown-item"
+                onClick={() => setIsDropdownOpen(false)}
               >
+                Transaction History
+              </Link>
+              <button className="dropdown-item logout-btn" onClick={handleLogout}>
                 Logout
               </button>
             </div>
