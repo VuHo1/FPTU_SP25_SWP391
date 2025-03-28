@@ -16,7 +16,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { getServiceCategories, getAllServices, getImageService } from "../api/testApi";
 
-const ServicesPage = () => {
+const ServicesPage = ({ darkMode }) => { // Add darkMode prop
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterPriceRange, setFilterPriceRange] = useState("all");
@@ -44,14 +44,13 @@ const ServicesPage = () => {
       const servicesData = servicesResponse.data || [];
       setCategories(categoriesData);
 
-      // Adjust service status based on category status
       const adjustedServices = servicesData.map((service) => {
         const category = categoriesData.find(
           (cat) => cat.serviceCategoryId === service.serviceCategoryId
         );
         return {
           ...service,
-          effectiveStatus: category?.status === false ? false : service.status, // Sync with category status
+          effectiveStatus: category?.status === false ? false : service.status,
         };
       });
 
@@ -62,7 +61,7 @@ const ServicesPage = () => {
             images: (res.data || []).map((img, index) => ({
               imageServiceId: img.imageServiceId,
               imageURL: img.imageURL,
-              isMain: index === 0, // Default first image as main
+              isMain: index === 0,
             })),
           }))
           .catch(() => ({
@@ -151,7 +150,6 @@ const ServicesPage = () => {
 
   const filteredAndSortedServices = () => {
     let result = services.filter((service) => {
-      // Only include services with effectiveStatus === true
       const isActive = service.effectiveStatus === true;
       const matchesSearch =
         service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -160,7 +158,7 @@ const ServicesPage = () => {
       const matchesCategory =
         filterCategory === "all" ||
         service.serviceCategoryId ===
-        categories.find((cat) => cat.name === filterCategory)?.serviceCategoryId;
+          categories.find((cat) => cat.name === filterCategory)?.serviceCategoryId;
       const price = service.price || 0;
       const matchesPriceRange =
         filterPriceRange === "all" ||
@@ -195,7 +193,7 @@ const ServicesPage = () => {
 
   const formatPrice = (price) => {
     if (!price) return "N/A";
-    return `${price.toLocaleString("en-US")} ₫`; // Changed to "en-US" for consistency with English content
+    return `${price.toLocaleString("en-US")} ₫`;
   };
 
   const allServices = filteredAndSortedServices();
@@ -227,8 +225,9 @@ const ServicesPage = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400 RatioRatio;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
+        /* Light Mode Styles */
         .services-page {
           min-height: 100vh;
           padding: 3rem 2rem;
@@ -236,6 +235,7 @@ const ServicesPage = () => {
           font-family: 'Poppins', sans-serif;
           position: relative;
           overflow-x: hidden;
+          transition: background 0.3s ease, color 0.3s ease;
         }
         .services-container {
           max-width: 1400px;
@@ -251,6 +251,7 @@ const ServicesPage = () => {
           background: #ffffff;
           border-radius: 12px;
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          transition: background 0.3s ease, box-shadow 0.3s ease;
         }
         .service-title {
           font-size: 2.5rem;
@@ -277,6 +278,7 @@ const ServicesPage = () => {
           border-radius: 12px;
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
           flex-wrap: wrap;
+          transition: background 0.3s ease, box-shadow 0.3s ease;
         }
         .search-container {
           position: relative;
@@ -300,7 +302,7 @@ const ServicesPage = () => {
           color: #1f2937;
           background: #fff;
           outline: none;
-          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
         }
         .search-input:focus {
           border-color: #3b82f6;
@@ -335,7 +337,7 @@ const ServicesPage = () => {
           border-radius: 12px;
           overflow: hidden;
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
         }
         .service-item:hover {
           transform: translateY(-8px);
@@ -415,6 +417,7 @@ const ServicesPage = () => {
           top: 3rem;
           height: fit-content;
           z-index: 1000;
+          transition: background 0.3s ease, box-shadow 0.3s ease;
         }
         .filter-bar h4 {
           font-size: 1.5rem;
@@ -446,11 +449,11 @@ const ServicesPage = () => {
           color: #1f2937;
           background: #fff;
           cursor: pointer;
-          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
         }
         .filter-bar select:focus {
           border-color: #3b82f6;
-          box-shadow: 6 0 8px rgba(59, 130, 246, 0.2);
+          box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
           outline: none;
         }
         .main-content {
@@ -503,6 +506,111 @@ const ServicesPage = () => {
         .page-number:hover:not(.active) {
           background: #f3f4f6;
         }
+
+        /* Dark Mode Styles */
+        .services-page.dark {
+          background: #1f2937;
+          color: #f9fafb;
+        }
+        .dark .service-header {
+          background: #374151;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        .dark .service-title {
+          color: #f9fafb;
+        }
+        .dark .service-description {
+          color: #d1d5db;
+        }
+        .dark .service-controls {
+          background: #374151;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        .dark .search-icon {
+          color: #d1d5db;
+        }
+        .dark .search-input {
+          background: #4b5563;
+          border-color: #6b7280;
+          color: #f9fafb;
+        }
+        .dark .search-input:focus {
+          border-color: #60a5fa;
+          box-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+        }
+        .dark .QA-btn {
+          background: #60a5fa;
+        }
+        .dark .QA-btn:hover {
+          background: #3b82f6;
+        }
+        .dark .service-item {
+          background: #374151;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .dark .service-item:hover {
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        .dark .service-content h2 {
+          color: #f9fafb;
+        }
+        .dark .service-content .price {
+          color: #60a5fa;
+        }
+        .dark .loading, .dark .error {
+          color: #d1d5db;
+        }
+        .dark .error {
+          color: #f87171;
+        }
+        .dark .filter-bar {
+          background: #374151;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .dark .filter-bar h4 {
+          color: #f9fafb;
+          border-bottom: 1px solid #4b5563;
+        }
+        .dark .filter-section label {
+          color: #f9fafb;
+        }
+        .dark .filter-bar select {
+          background: #4b5563;
+          border-color: #6b7280;
+          color: #f9fafb;
+        }
+        .dark .filter-bar select:focus {
+          border-color: #60a5fa;
+          box-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+        }
+        .dark .pagination-btn {
+          background: #4b5563;
+          color: #f9fafb;
+          border-color: #6b7280;
+        }
+        .dark .pagination-btn:hover:not(:disabled) {
+          background: #60a5fa;
+          color: #ffffff;
+        }
+        .dark .pagination-btn:disabled {
+          background: #374151;
+          color: #6b7280;
+        }
+        .dark .page-number {
+          background: #4b5563;
+          color: #f9fafb;
+          border-color: #6b7280;
+        }
+        .dark .page-number.active {
+          background: #60a5fa;
+          color: #ffffff;
+          border-color: #60a5fa;
+        }
+        .dark .page-number:hover:not(.active) {
+          background: #6b7280;
+        }
+
+        /* Responsive Styles */
         @media (max-width: 1024px) {
           .services-container {
             flex-direction: column;
@@ -548,7 +656,7 @@ const ServicesPage = () => {
         }
       `}</style>
 
-      <div className="services-page">
+      <div className={`services-page ${darkMode ? "dark" : ""}`}>
         <div className="services-container">
           <motion.div
             className="filter-bar"

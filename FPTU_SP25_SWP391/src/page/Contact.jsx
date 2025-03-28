@@ -22,15 +22,15 @@ const Contact = () => {
 
         try {
             await emailjs.send(
-                "service_btehzea",  // Thay bằng Service ID của bạn
-                "template_47k9ey5", // Thay bằng Template ID của bạn
+                "service_btehzea",  // Replace with your Service ID
+                "template_47k9ey5", // Replace with your Template ID
                 formData,
-                "JuVWhcf8DMNpj82Sa"   // Thay bằng Public Key của bạn
+                "JuVWhcf8DMNpj82Sa"   // Replace with your Public Key
             );
-            setStatus({ type: "success", message: "Gửi thành công! Chúng tôi sẽ liên hệ sớm nhất." });
+            setStatus({ type: "success", message: "Sent successfully! We will contact you soon." });
             setFormData({ name: "", email: "", message: "" });
         } catch (error) {
-            setStatus({ type: "error", message: "Lỗi khi gửi email. Vui lòng thử lại!" });
+            setStatus({ type: "error", message: "Error sending email. Please try again!" });
             console.error("EmailJS Error:", error);
         }
         setIsSending(false);
@@ -38,21 +38,44 @@ const Contact = () => {
 
     return (
         <div className="contact-container">
-            <h1 className="contact-title">Liên Hệ Với Chúng Tôi</h1>
-            <p className="contact-description">Nếu bạn có bất kỳ câu hỏi nào, hãy để lại thông tin, chúng tôi sẽ liên hệ sớm nhất có thể.</p>
+            <h1 className="contact-title">Contact Us</h1>
+            <p className="contact-description">If you have any questions, please leave your information, and we will get back to you as soon as possible.</p>
 
             <div className="contact-form">
                 <form onSubmit={handleSubmit}>
-                    <label>Họ và Tên</label>
-                    <input type="text" name="name" placeholder="Nhập họ và tên" value={formData.name} onChange={handleChange} required />
+                    <label>Full Name</label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        placeholder="Enter your full name" 
+                        value={formData.name} 
+                        onChange={handleChange} 
+                        required 
+                    />
 
                     <label>Email</label>
-                    <input type="email" name="email" placeholder="Nhập email" value={formData.email} onChange={handleChange} required />
+                    <input 
+                        type="email" 
+                        name="email" 
+                        placeholder="Enter your email" 
+                        value={formData.email} 
+                        onChange={handleChange} 
+                        required 
+                    />
 
-                    <label>Nội dung</label>
-                    <textarea name="message" placeholder="Nhập nội dung liên hệ..." rows="5" value={formData.message} onChange={handleChange} required></textarea>
+                    <label>Message</label>
+                    <textarea 
+                        name="message" 
+                        placeholder="Enter your message..." 
+                        rows="5" 
+                        value={formData.message} 
+                        onChange={handleChange} 
+                        required
+                    ></textarea>
 
-                    <button type="submit" disabled={isSending}>{isSending ? "Đang gửi..." : "Gửi liên hệ"}</button>
+                    <button type="submit" disabled={isSending}>
+                        {isSending ? "Sending..." : "Send Contact"}
+                    </button>
                 </form>
                 {status && <p className={status.type === "success" ? "success-msg" : "error-msg"}>{status.message}</p>}
             </div>
