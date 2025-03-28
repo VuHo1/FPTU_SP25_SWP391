@@ -807,3 +807,19 @@ export const handlePaymentReturn = async (code, id, cancel, status, orderCode, t
     },
   });
 };
+// Add this to testApi.js
+export const getUserBookings = async (userId, token) => {
+  try {
+    const response = await apiClient.get(`/api/bookings/user/${userId}/bookings`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'text/plain',
+      },
+    });
+    console.log(`User bookings for userId ${userId}:`, response.data);
+    return response;
+  } catch (error) {
+    console.error('Error fetching user bookings:', error.response?.data || error);
+    throw error;
+  }
+};

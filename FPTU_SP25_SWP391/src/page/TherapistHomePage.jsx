@@ -320,12 +320,9 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
                         <Typography>Therapist ID: {booking.therapistId}</Typography>
                         <Typography>Time Slot: {timeSlot.description || "N/A"} (ID: {booking.timeSlotId})</Typography>
                         <Typography>Date Created: {new Date(booking.dateCreated).toLocaleString()}</Typography>
-
-                        <Typography>Total Price: {booking.totalPrice} VND</Typography>
                         <Typography>Note: {booking.note || "N/A"}</Typography>
                         <Typography>Status: {booking.status ? "Active" : "Inactive"}</Typography>
-                        <Typography>Is Paid: {booking.isPaid ? "Yes" : "No"}</Typography>
-                        <Typography>Use Wallet: {booking.useWallet ? "Yes" : "No"}</Typography>
+                  
                       </>
                     )}
                   </BookingCard>
