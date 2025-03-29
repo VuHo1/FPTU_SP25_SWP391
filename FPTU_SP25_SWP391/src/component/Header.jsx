@@ -11,7 +11,6 @@ import {
   faMoon,
   faSun,
   faUser,
-  faHistory // Added icon for Transaction History
 } from "@fortawesome/free-solid-svg-icons";
 import "./Header.css";
 import { useAuth } from "../page/AuthContext";

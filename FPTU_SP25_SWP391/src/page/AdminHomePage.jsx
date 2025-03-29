@@ -20,7 +20,15 @@ import {
   FormControl,
   Pagination,
   Divider,
-  InputLabel
+  InputLabel,
+  Snackbar,
+  Alert,
+  Dialog,           // Added Dialog
+  DialogActions,    // Added DialogActions
+  DialogContent,    // Added DialogContent
+  DialogContentText,// Added DialogContentText
+  DialogTitle,      // Added DialogTitle
+  Button,           // Added Button
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
@@ -38,7 +46,7 @@ import {
   faSignOutAlt,
   faTrashAlt,
   faCalendar,
-  faHistory // Added icon for Transaction History
+  faHistory,
 } from "@fortawesome/free-solid-svg-icons";
 import CreateUserForm from "./CreateUserForm";
 import ServicesDashboard from "./ServicesDashboard";
@@ -134,6 +142,13 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
   const [roleFilter, setRoleFilter] = useState("");
   const [filterTrigger, setFilterTrigger] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // State for Dialog
+  const [userToDelete, setUserToDelete] = useState(null); // Store user to delete
   const usersPerPage = 10;
 
   const navigate = useNavigate();
@@ -143,18 +158,42 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleOpenDeleteDialog = (userId) => {
+    setUserToDelete(userId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setUserToDelete(null);
+  };
+
+  const handleDeleteUser = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found.");
-      await deleteUser(userId, token);
-      setUsers((prev) => prev.filter((user) => user.userId !== userId));
-      setFilteredUsers((prev) => prev.filter((user) => user.userId !== userId));
-      alert("User deleted successfully!");
+      await deleteUser(userToDelete, token);
+      setUsers((prev) => prev.filter((user) => user.userId !== userToDelete));
+      setFilteredUsers((prev) => prev.filter((user) => user.userId !== userToDelete));
+      setNotification({
+        open: true,
+        message: "User deleted successfully!",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert(`Failed to delete user: ${error.response?.data?.message || error.message}`);
+      setNotification({
+        open: true,
+        message: `Failed to delete user: ${error.response?.data?.message || error.message}`,
+        severity: "error",
+      });
+    } finally {
+      handleCloseDeleteDialog();
     }
+  };
+
+  const handleCloseNotification = () => {
+    setNotification((prev) => ({ ...prev, open: false }));
   };
 
   const handleUserCreated = (newUser) => {
@@ -228,14 +267,13 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     return acc;
   }, {});
 
-  // Updated menuItems with Transaction History
   const menuItems = [
     { text: "Dashboard", icon: <FontAwesomeIcon icon={faTachometerAlt} />, action: () => setTabValue(0) },
     { text: "Users", icon: <FontAwesomeIcon icon={faUsers} />, action: () => setTabValue(1) },
     { text: "Services", icon: <FontAwesomeIcon icon={faBuilding} />, action: () => setTabValue(2) },
     { text: "Time Slots", icon: <FontAwesomeIcon icon={faBuilding} />, action: () => setTabValue(3) },
     { text: "Schedules", icon: <FontAwesomeIcon icon={faCalendar} />, action: () => setTabValue(4) },
-    { text: "Transaction History", icon: <FontAwesomeIcon icon={faHistory} />, action: () => navigate("/history-transaction-admin") }, // New menu item
+    { text: "Transaction History", icon: <FontAwesomeIcon icon={faHistory} />, action: () => navigate("/history-transaction-admin") },
     { text: "User Profile", icon: <FontAwesomeIcon icon={faUser} />, action: () => navigate("/profile-role") },
     { text: "Edit Profile", icon: <FontAwesomeIcon icon={faEdit} />, action: () => navigate("/edit-profilerole") },
     { text: "Toggle Dark Mode", icon: <FontAwesomeIcon icon={faMoon} />, action: toggleDarkMode },
@@ -268,7 +306,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
               key={item.text}
               onClick={item.action}
               darkMode={darkMode}
-              isActive={tabValue === index && index < 5} // Adjusted to only highlight first 5 tabs
+              isActive={tabValue === index && index < 5}
               component={motion.div}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -855,7 +893,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
                         </TableCell>
                         <TableCell>
                           <IconButton
-                            onClick={() => user.userId && handleDeleteUser(user.userId)}
+                            onClick={() => user.userId && handleOpenDeleteDialog(user.userId)}
                             disabled={!user.userId}
                             sx={{ color: darkMode ? "#f44336" : "#721c24" }}
                             component={motion.div}
@@ -894,6 +932,51 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
         {/* Schedules Tab */}
         {tabValue === 4 && <ScheduleManagement darkMode={darkMode} />}
       </MainContent>
+
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          sx={{ width: "100%" }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title" sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
+          {"Confirm Deletion"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description" sx={{ color: darkMode ? "#bdc3c7" : "#7f8c8d" }}>
+            Do you want to delete this user? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
+            No
+          </Button>
+          <Button
+            onClick={handleDeleteUser}
+            sx={{ color: darkMode ? "#f44336" : "#721c24" }}
+            autoFocus
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
