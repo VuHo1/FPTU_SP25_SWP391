@@ -64,6 +64,14 @@ const TimeSlotSchedule = ({ darkMode, onReturn }) => {
     return time;
   };
 
+  const isTimeInRange = (time) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    const minMinutes = 7 * 60; // 7:00 AM = 420 minutes
+    const maxMinutes = 21 * 60; // 9:00 PM = 1260 minutes
+    return totalMinutes >= minMinutes && totalMinutes <= maxMinutes;
+  };
+
   const handleCreateOrUpdateTimeSlot = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -74,6 +82,21 @@ const TimeSlotSchedule = ({ darkMode, onReturn }) => {
 
       if (!normalizedStartTime || !normalizedEndTime) {
         throw new Error("Start Time and End Time are required.");
+      }
+
+      // Check if startTime and endTime are within 7 AM to 9 PM
+      if (!isTimeInRange(normalizedStartTime)) {
+        throw new Error("Start Time must be between 7:00 AM and 9:00 PM.");
+      }
+      if (!isTimeInRange(normalizedEndTime)) {
+        throw new Error("End Time must be between 7:00 AM and 9:00 PM.");
+      }
+
+      // Ensure endTime is after startTime
+      const startMinutes = parseInt(normalizedStartTime.split(":")[0]) * 60 + parseInt(normalizedStartTime.split(":")[1]);
+      const endMinutes = parseInt(normalizedEndTime.split(":")[0]) * 60 + parseInt(normalizedEndTime.split(":")[1]);
+      if (endMinutes <= startMinutes) {
+        throw new Error("End Time must be after Start Time.");
       }
 
       if (editTimeSlotId) {
@@ -188,22 +211,24 @@ const TimeSlotSchedule = ({ darkMode, onReturn }) => {
           {editTimeSlotId ? "Update Time Slot" : "Create New Time Slot"}
         </Typography>
         <TextField
-          label="Start Time"
+          label="Start Time (7:00 AM - 9:00 PM)"
           type="time"
           value={startTime}
           onChange={(e) => setStartTime(e.target.value)}
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ shrink: true }}
+          inputProps={{ min: "07:00", max: "21:00" }} // Restrict input range in UI
         />
         <TextField
-          label="End Time"
+          label="End Time (7:00 AM - 9:00 PM)"
           type="time"
           value={endTime}
           onChange={(e) => setEndTime(e.target.value)}
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ shrink: true }}
+          inputProps={{ min: "07:00", max: "21:00" }} // Restrict input range in UI
         />
         <TextField
           label="Description"
