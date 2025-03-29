@@ -824,10 +824,6 @@ export const getUserBookings = async (userId, token) => {
   }
 };
 
-
-// Add these at the end of your testApi.js file
-
-// Fetch all feedbacks for a specific service
 export const getFeedbacksByServiceId = async (serviceId, token) => {
   try {
     const response = await apiClient.get(`/api/feedbacks/${serviceId}`, {
@@ -910,6 +906,21 @@ export const deleteFeedback = async (feedbackId, token) => {
     return response;
   } catch (error) {
     console.error(`Error deleting feedback ${feedbackId}:`, error.response?.data || error);
+    throw error;
+  }
+};
+export const deleteTherapistSpecialty = async (id, token) => {
+  try {
+    const response = await apiClient.delete(`/api/TherapistSpecialty/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: '*/*',
+      },
+    });
+    console.log(`Deleted therapist specialty with ID: ${id}`);
+    return response;
+  } catch (error) {
+    console.error('Error deleting therapist specialty:', error.response?.data || error);
     throw error;
   }
 };

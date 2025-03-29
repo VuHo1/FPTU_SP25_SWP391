@@ -25,6 +25,7 @@ import {
   getServiceCategories,
   createTherapistSpecialty,
   getAllTherapistSpecialties,
+  deleteTherapistSpecialty, // Newly added import
 } from "../api/testApi";
 
 // Custom styled components for a professional look
@@ -170,6 +171,28 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
     } catch (error) {
       setError(`Failed to create specialty: ${error.message || "Unknown error"}`);
       console.error("Error creating specialty:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSpecialty = async (specialtyId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+
+      await deleteTherapistSpecialty(specialtyId, token);
+
+      // Update local state by removing the deleted specialty
+      setTherapistSpecialties((prev) =>
+        prev.filter((specialty) => specialty.id !== specialtyId)
+      );
+
+      setSuccess("Therapist specialty deleted successfully");
+    } catch (error) {
+      setError(`Failed to delete specialty: ${error.message || "Unknown error"}`);
+      console.error("Error deleting specialty:", error);
     } finally {
       setLoading(false);
     }
@@ -390,12 +413,13 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
                     <TableCell>Therapist ID</TableCell>
                     <TableCell>Service Category ID</TableCell>
                     <TableCell>Category Name</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {therapistSpecialties.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={3} sx={{ textAlign: "center", color: darkMode ? "#718096" : "#a0aec0" }}>
+                      <TableCell colSpan={4} sx={{ textAlign: "center", color: darkMode ? "#718096" : "#a0aec0" }}>
                         No specialties assigned
                       </TableCell>
                     </TableRow>
@@ -409,6 +433,22 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
                         <TableCell>{specialty.serviceCategoryId}</TableCell>
                         <TableCell>
                           {serviceCategories.find((cat) => cat.serviceCategoryId === specialty.serviceCategoryId)?.name || "Unknown"}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            onClick={() => handleDeleteSpecialty(specialty.id)}
+                            disabled={loading}
+                            sx={{
+                              textTransform: "none",
+                              borderRadius: "6px",
+                              padding: "4px 12px",
+                            }}
+                          >
+                            Delete
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))
