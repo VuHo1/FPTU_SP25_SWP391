@@ -20,9 +20,9 @@ import {
   TableRow,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import { 
-  getAllUsers, 
-  getServiceCategories, 
+import {
+  getAllUsers,
+  getServiceCategories,
   createTherapistSpecialty,
   getAllTherapistSpecialties,
 } from "../api/testApi";
@@ -32,8 +32,8 @@ const DashboardPaper = styled(Paper)(({ theme, darkMode }) => ({
   backgroundColor: darkMode ? "#1e2a38" : "#ffffff",
   padding: "24px",
   borderRadius: "12px",
-  boxShadow: darkMode 
-    ? "0 4px 20px rgba(255, 255, 255, 0.05)" 
+  boxShadow: darkMode
+    ? "0 4px 20px rgba(255, 255, 255, 0.05)"
     : "0 4px 20px rgba(0, 0, 0, 0.05)",
   transition: "all 0.3s ease",
 }));
@@ -109,7 +109,7 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
       setError(null);
 
       const usersResponse = await getAllUsers(token);
-      const therapistUsers = usersResponse.data.filter(user => user.role === "Therapist");
+      const therapistUsers = usersResponse.data.filter((user) => user.role === "Therapist");
       const categoriesResponse = await getServiceCategories(token);
       console.log("Raw service categories data:", categoriesResponse.data);
       const specialtiesResponse = await getAllTherapistSpecialties(token);
@@ -127,10 +127,10 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
 
   const handleToggleCategory = (categoryId) => {
     if (!categoryId || isNaN(categoryId)) return;
-    setNewSpecialty(prev => ({
+    setNewSpecialty((prev) => ({
       ...prev,
       serviceCategoryIds: prev.serviceCategoryIds.includes(categoryId)
-        ? prev.serviceCategoryIds.filter(id => id !== categoryId)
+        ? prev.serviceCategoryIds.filter((id) => id !== categoryId)
         : [...prev.serviceCategoryIds, categoryId],
     }));
   };
@@ -141,7 +141,7 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
         setError("Please select a therapist and at least one service category.");
         return;
       }
-      const validCategoryIds = newSpecialty.serviceCategoryIds.filter(id => id && !isNaN(id));
+      const validCategoryIds = newSpecialty.serviceCategoryIds.filter((id) => id && !isNaN(id));
       if (validCategoryIds.length === 0) {
         setError("No valid service categories selected.");
         return;
@@ -150,7 +150,7 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
       setError(null);
       setSuccess(null);
 
-      const requests = validCategoryIds.map(categoryId =>
+      const requests = validCategoryIds.map((categoryId) =>
         createTherapistSpecialty(newSpecialty.therapistId, categoryId, token)
       );
       await Promise.all(requests);
@@ -158,7 +158,7 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
       const specialtiesResponse = await getAllTherapistSpecialties(token);
       setTherapistSpecialties(specialtiesResponse);
 
-      const updatedTherapists = therapists.map(t =>
+      const updatedTherapists = therapists.map((t) =>
         t.userId === Number(newSpecialty.therapistId)
           ? { ...t, serviceCategoryIds: [...(t.serviceCategoryIds || []), ...validCategoryIds] }
           : t
@@ -201,18 +201,18 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
 
       {!loading && !error && (
         <>
-          {/* Combined Therapists and Categories Table */}
+          {/* Therapists Table */}
           <Box sx={{ mt: 4 }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                color: darkMode ? "#cbd5e0" : "#4a5568", 
-                fontWeight: 600, 
+            <Typography
+              variant="h6"
+              sx={{
+                color: darkMode ? "#cbd5e0" : "#4a5568",
+                fontWeight: 600,
                 mb: 2,
                 fontSize: "1.25rem",
               }}
             >
-              Therapists & Service Categories
+              Therapists
             </Typography>
             <StyledTableContainer darkMode={darkMode}>
               <Table>
@@ -221,33 +221,69 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
                     <TableCell>Therapist ID</TableCell>
                     <TableCell>Therapist Name</TableCell>
                     <TableCell>Email</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {therapists.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} sx={{ textAlign: "center", color: darkMode ? "#718096" : "#a0aec0" }}>
+                        No therapists available
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    therapists.map((therapist) => (
+                      <TableRow
+                        key={therapist.userId}
+                        sx={{ "&:hover": { backgroundColor: darkMode ? "#2d3748" : "#edf2f7" } }}
+                      >
+                        <TableCell>{therapist.userId}</TableCell>
+                        <TableCell>{therapist.userName}</TableCell>
+                        <TableCell>{therapist.email}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </StyledTableContainer>
+          </Box>
+
+          {/* Service Categories Table */}
+          <Box sx={{ mt: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: darkMode ? "#cbd5e0" : "#4a5568",
+                fontWeight: 600,
+                mb: 2,
+                fontSize: "1.25rem",
+              }}
+            >
+              Service Categories
+            </Typography>
+            <StyledTableContainer darkMode={darkMode}>
+              <Table>
+                <TableHead>
+                  <TableRow>
                     <TableCell>Category ID</TableCell>
                     <TableCell>Category Name</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {therapists.length === 0 && serviceCategories.length === 0 ? (
+                  {serviceCategories.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} sx={{ textAlign: "center", color: darkMode ? "#718096" : "#a0aec0" }}>
-                        No data available
+                      <TableCell colSpan={2} sx={{ textAlign: "center", color: darkMode ? "#718096" : "#a0aec0" }}>
+                        No service categories available
                       </TableCell>
                     </TableRow>
                   ) : (
-                    therapists.map(therapist => (
-                      <React.Fragment key={therapist.userId}>
-                        {serviceCategories.map(category => (
-                          <TableRow 
-                            key={`${therapist.userId}-${category.serviceCategoryId}`} 
-                            sx={{ "&:hover": { backgroundColor: darkMode ? "#2d3748" : "#edf2f7" } }}
-                          >
-                            <TableCell>{therapist.userId}</TableCell>
-                            <TableCell>{therapist.userName}</TableCell>
-                            <TableCell>{therapist.email}</TableCell>
-                            <TableCell>{category.serviceCategoryId}</TableCell>
-                            <TableCell>{category.name}</TableCell>
-                          </TableRow>
-                        ))}
-                      </React.Fragment>
+                    serviceCategories.map((category) => (
+                      <TableRow
+                        key={category.serviceCategoryId}
+                        sx={{ "&:hover": { backgroundColor: darkMode ? "#2d3748" : "#edf2f7" } }}
+                      >
+                        <TableCell>{category.serviceCategoryId}</TableCell>
+                        <TableCell>{category.name}</TableCell>
+                      </TableRow>
                     ))
                   )}
                 </TableBody>
@@ -257,11 +293,11 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
 
           {/* Create Specialty Form */}
           <Box sx={{ mt: 4 }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                color: darkMode ? "#cbd5e0" : "#4a5568", 
-                fontWeight: 600, 
+            <Typography
+              variant="h6"
+              sx={{
+                color: darkMode ? "#cbd5e0" : "#4a5568",
+                fontWeight: 600,
                 mb: 2,
                 fontSize: "1.25rem",
               }}
@@ -284,8 +320,10 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
                       borderRadius: "6px",
                     }}
                   >
-                    <MenuItem value=""><em>None</em></MenuItem>
-                    {therapists.map(therapist => (
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {therapists.map((therapist) => (
                       <MenuItem key={therapist.userId} value={therapist.userId}>
                         {therapist.userName}
                       </MenuItem>
@@ -297,7 +335,7 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
                     Service Categories
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                    {serviceCategories.map(category => (
+                    {serviceCategories.map((category) => (
                       <FormControlLabel
                         key={category.serviceCategoryId}
                         control={
@@ -311,8 +349,8 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
                           />
                         }
                         label={category.name}
-                        sx={{ 
-                          color: darkMode ? "#d1d5db" : "#2d3748", 
+                        sx={{
+                          color: darkMode ? "#d1d5db" : "#2d3748",
                           marginRight: 3,
                           "&:hover": { color: darkMode ? "#e2e8f0" : "#1a202c" },
                         }}
@@ -334,11 +372,11 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
 
           {/* Therapist Specialties Table */}
           <Box sx={{ mt: 4 }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                color: darkMode ? "#cbd5e0" : "#4a5568", 
-                fontWeight: 600, 
+            <Typography
+              variant="h6"
+              sx={{
+                color: darkMode ? "#cbd5e0" : "#4a5568",
+                fontWeight: 600,
                 mb: 2,
                 fontSize: "1.25rem",
               }}
@@ -363,14 +401,14 @@ const ScheduleSelectionStaff = ({ darkMode }) => {
                     </TableRow>
                   ) : (
                     therapistSpecialties.map((specialty, index) => (
-                      <TableRow 
-                        key={index} 
+                      <TableRow
+                        key={index}
                         sx={{ "&:hover": { backgroundColor: darkMode ? "#2d3748" : "#edf2f7" } }}
                       >
                         <TableCell>{specialty.therapistId}</TableCell>
                         <TableCell>{specialty.serviceCategoryId}</TableCell>
                         <TableCell>
-                          {serviceCategories.find(cat => cat.serviceCategoryId === specialty.serviceCategoryId)?.name || "Unknown"}
+                          {serviceCategories.find((cat) => cat.serviceCategoryId === specialty.serviceCategoryId)?.name || "Unknown"}
                         </TableCell>
                       </TableRow>
                     ))

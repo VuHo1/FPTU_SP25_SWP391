@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../page/AuthContext";
-import { getAllServices, getServiceCategories, getImageService } from "../api/testApi";
+import {
+  getAllServices,
+  getServiceCategories,
+  getImageService,
+  getFeedbacksByServiceId,
+  getAllUserDetails,
+  postFeedback,
+  updateFeedback,
+  deleteFeedback,
+} from "../api/testApi"; // Import API functions from testApi.js
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import { faStar, faChevronLeft, faChevronRight, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
-
+import {
+  faStar,
+  faChevronLeft,
+  faChevronRight,
+  faEdit,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 
 const BlogDetail = ({ darkMode }) => {
   const { id } = useParams();
@@ -14,51 +27,32 @@ const BlogDetail = ({ darkMode }) => {
   const [service, setService] = useState(null);
   const [categories, setCategories] = useState([]);
   const [images, setImages] = useState([]);
-
   const [feedbacks, setFeedbacks] = useState([]);
   const [newFeedback, setNewFeedback] = useState({ rating: 5, comment: "" });
-
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userDetails, setUserDetails] = useState({});
   const [ratingFilter, setRatingFilter] = useState("All");
-  const [editingFeedbackId, setEditingFeedbackId] = useState(null); // State để theo dõi feedback đang sửa
-  const [editFeedback, setEditFeedback] = useState({ rating: 5, comment: "" }); // State cho form chỉnh sửa
+  const [editingFeedbackId, setEditingFeedbackId] = useState(null);
+  const [editFeedback, setEditFeedback] = useState({ rating: 5, comment: "" });
 
+  // Fetch feedbacks using testApi function
   const fetchFeedbacks = async (serviceId, token) => {
     try {
-      const response = await fetch(
-        `https://kinaa1410-001-site1.qtempurl.com/api/feedbacks/${serviceId}`,
-        {
-          headers: {
-            accept: "*/*",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        }
-      );
-      if (!response.ok) throw new Error("Failed to fetch feedbacks");
-      const data = await response.json();
-      setFeedbacks(Array.isArray(data) ? data : []);
+      const response = await getFeedbacksByServiceId(serviceId, token);
+      setFeedbacks(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.warn(`No feedbacks found for service ${serviceId}: ${err.message}`);
       setFeedbacks([]);
     }
   };
 
+  // Fetch user details using testApi function
   const fetchUserDetails = async (token) => {
     try {
-      const response = await fetch(
-        "https://kinaa1410-001-site1.qtempurl.com/api/UserDetails",
-        {
-          headers: {
-            accept: "*/*",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        }
-      );
-      if (!response.ok) throw new Error("Failed to fetch user details");
-      const userData = await response.json();
+      const response = await getAllUserDetails(token);
+      const userData = response.data;
       const userMap = userData.reduce((acc, user) => {
         acc[user.userId] = {
           userName: `${user.lastName} ${user.firstName}`,
@@ -73,6 +67,7 @@ const BlogDetail = ({ darkMode }) => {
     }
   };
 
+  // Submit feedback using testApi function
   const submitFeedback = async () => {
     if (!isLoggedIn) {
       navigate("/sign_in", { state: { from: `/service/${id}` } });
@@ -88,77 +83,46 @@ const BlogDetail = ({ darkMode }) => {
     }
 
     try {
-      const response = await fetch(
-        "https://kinaa1410-001-site1.qtempurl.com/api/feedbacks",
-        {
-          method: "POST",
-          headers: {
-            accept: "*/*",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            serviceId: parseInt(id, 10),
-            userId: parseInt(userId, 10),
-            rating: newFeedback.rating,
-            comment: newFeedback.comment,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Failed to submit feedback");
-      const data = await response.json();
-      setFeedbacks([...feedbacks, data]);
+      const feedbackData = {
+        serviceId: parseInt(id, 10),
+        userId: parseInt(userId, 10),
+        rating: newFeedback.rating,
+        comment: newFeedback.comment,
+      };
+      const response = await postFeedback(feedbackData, token);
+      setFeedbacks([...feedbacks, response.data]);
       setNewFeedback({ rating: 5, comment: "" });
     } catch (err) {
       setError(`Failed to submit feedback: ${err.message}`);
     }
   };
 
-  const updateFeedback = async (feedbackId) => {
+  // Update feedback using testApi function
+  const updateFeedbackHandler = async (feedbackId) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(
-        `https://kinaa1410-001-site1.qtempurl.com/api/feedbacks/${feedbackId}`,
-        {
-          method: "PUT",
-          headers: {
-            accept: "*/*",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            rating: editFeedback.rating,
-            comment: editFeedback.comment,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Failed to update feedback");
+      const feedbackData = {
+        rating: editFeedback.rating,
+        comment: editFeedback.comment,
+      };
+      await updateFeedback(feedbackId, feedbackData, token);
       const updatedFeedbacks = feedbacks.map((fb) =>
         fb.feedbackId === feedbackId
           ? { ...fb, rating: editFeedback.rating, comment: editFeedback.comment }
           : fb
       );
       setFeedbacks(updatedFeedbacks);
-      setEditingFeedbackId(null); // Thoát chế độ sửa
+      setEditingFeedbackId(null);
     } catch (err) {
       setError(`Failed to update feedback: ${err.message}`);
     }
   };
 
-  const deleteFeedback = async (feedbackId) => {
+  // Delete feedback using testApi function
+  const deleteFeedbackHandler = async (feedbackId) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(
-        `https://kinaa1410-001-site1.qtempurl.com/api/feedbacks/${feedbackId}`,
-        {
-          method: "DELETE",
-          headers: {
-            accept: "*/*",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok) throw new Error("Failed to delete feedback");
+      await deleteFeedback(feedbackId, token);
       setFeedbacks(feedbacks.filter((fb) => fb.feedbackId !== feedbackId));
     } catch (err) {
       setError(`Failed to delete feedback: ${err.message}`);
@@ -171,6 +135,7 @@ const BlogDetail = ({ darkMode }) => {
     return (total / feedbacks.length).toFixed(1);
   };
 
+  // Main useEffect to fetch service, categories, images, feedbacks, and user details
   useEffect(() => {
     const fetchServiceAndCategories = async () => {
       setLoading(true);
@@ -182,6 +147,7 @@ const BlogDetail = ({ darkMode }) => {
           getAllServices(token || null),
           getServiceCategories(token || null),
         ]);
+
         const foundService = servicesResponse.data.find(
           (s) => s.serviceId === parseInt(id, 10)
         );
@@ -224,7 +190,9 @@ const BlogDetail = ({ darkMode }) => {
   const handleNextImage = () =>
     setMainImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
   const handleBookingClick = () =>
-    isLoggedIn ? navigate("/booking_page") : navigate("/sign_in", { state: { from: `/service/${id}` } });
+    isLoggedIn
+      ? navigate("/booking_page")
+      : navigate("/sign_in", { state: { from: `/service/${id}` } });
 
   const filteredFeedbacks = () => {
     if (ratingFilter === "All") return feedbacks;
@@ -597,8 +565,9 @@ const BlogDetail = ({ darkMode }) => {
             <h1>{service.name}</h1>
             <p>{service.description || "No detailed description available."}</p>
             <div className="blog-info">
-
-              <p className="price">Giá: {service.price ? `${service.price.toLocaleString("vi-VN")} VND` : "N/A"}</p>
+              <p className="price">
+                Giá: {service.price ? `${service.price.toLocaleString("vi-VN")} VND` : "N/A"}
+              </p>
               <p>Trạng thái: {service.status ? "Hoạt động" : "Không hoạt động"}</p>
               <p>
                 Danh mục:{" "}
@@ -607,14 +576,17 @@ const BlogDetail = ({ darkMode }) => {
               <div className="rating">
                 Đánh giá: {averageRating} / 5{" "}
                 <span>
-                  {Array(Math.round(averageRating)).fill().map((_, i) => (
-                    <FontAwesomeIcon key={i} icon={faStar} />
-                  ))}
+                  {Array(Math.round(averageRating))
+                    .fill()
+                    .map((_, i) => (
+                      <FontAwesomeIcon key={i} icon={faStar} />
+                    ))}
                 </span>
               </div>
             </div>
-            <Link to="/service" className="back-button">Quay lại</Link>
-
+            <Link to="/service" className="back-button">
+              Quay lại
+            </Link>
             <button
               onClick={isServiceActive ? handleBookingClick : null}
               className={isServiceActive ? "booking-button" : "inactive-button"}
@@ -667,9 +639,8 @@ const BlogDetail = ({ darkMode }) => {
             )}
           </div>
         </div>
-        {/* Phần Feedback */}
+        {/* Feedback Section */}
         <div className="feedback-section">
-          {/* Bên trái: Form tạo feedback */}
           <div className="feedback-form">
             <h3>Để lại đánh giá của bạn</h3>
             <div className="star-rating">
@@ -691,16 +662,16 @@ const BlogDetail = ({ darkMode }) => {
               Gửi đánh giá
             </button>
           </div>
-
-          {/* Bên phải: Danh sách feedback và trung bình sao */}
           <div className="feedback-list">
             <h3>Đánh giá dịch vụ</h3>
             <div className="average-rating">
               Trung bình: {calculateAverageRating()} / 5{" "}
               <span className="feedback-rating">
-                {Array(Math.round(calculateAverageRating())).fill().map((_, i) => (
-                  <FontAwesomeIcon key={i} icon={faStar} />
-                ))}
+                {Array(Math.round(calculateAverageRating()))
+                  .fill()
+                  .map((_, i) => (
+                    <FontAwesomeIcon key={i} icon={faStar} />
+                  ))}
               </span>
             </div>
             <div className="rating-filter">
@@ -716,77 +687,87 @@ const BlogDetail = ({ darkMode }) => {
             </div>
             <div className="feedback-list-container">
               {filteredFeedbacks().length > 0 ? (
-                filteredFeedbacks().slice().reverse().map((fb) => (
-                  <div key={fb.feedbackId} className="feedback-item">
-                    <div className="feedback-user">
-                      <img
-                        src={userDetails[fb.userId]?.avatar || "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-1.jpg"}
-                        alt="User Avatar"
-                        className="feedback-avatar"
-                      />
-                      <span>{userDetails[fb.userId]?.userName || "Unknown User"}</span>
-                    </div>
-                    {editingFeedbackId === fb.feedbackId ? (
-                      <>
-                        <div className="star-rating">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <FontAwesomeIcon
-                              key={star}
-                              icon={faStar}
-                              className={`star ${star <= editFeedback.rating ? "filled" : ""}`}
-                              onClick={() => setEditFeedback({ ...editFeedback, rating: star })}
-                            />
-                          ))}
-                        </div>
-                        <textarea
-                          value={editFeedback.comment}
-                          onChange={(e) => setEditFeedback({ ...editFeedback, comment: e.target.value })}
+                filteredFeedbacks()
+                  .slice()
+                  .reverse()
+                  .map((fb) => (
+                    <div key={fb.feedbackId} className="feedback-item">
+                      <div className="feedback-user">
+                        <img
+                          src={
+                            userDetails[fb.userId]?.avatar ||
+                            "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-1.jpg"
+                          }
+                          alt="User Avatar"
+                          className="feedback-avatar"
                         />
-                        <button
-                          onClick={() => updateFeedback(fb.feedbackId)}
-                          className="update-feedback-button"
-                        >
-                          Cập nhật
-                        </button>
-                        <button
-                          onClick={() => setEditingFeedbackId(null)}
-                          className="submit-feedback-button"
-                          style={{ background: darkMode ? "#6c757d" : "#6c757d", marginLeft: "0.5rem" }}
-                        >
-                          Hủy
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="feedback-rating">
-                          {Array(fb.rating).fill().map((_, i) => (
-                            <FontAwesomeIcon key={i} icon={faStar} />
-                          ))}
-                        </div>
-                        <p>{fb.comment}</p>
-                        {currentUserId && fb.userId === parseInt(currentUserId) && (
-                          <div className="action-buttons">
-                            <button
-                              className="edit-button"
-                              onClick={() => {
-                                setEditingFeedbackId(fb.feedbackId);
-                                setEditFeedback({ rating: fb.rating, comment: fb.comment });
-                              }}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
-                            <button
-                              className="delete-button"
-                              onClick={() => deleteFeedback(fb.feedbackId)}
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
+                        <span>{userDetails[fb.userId]?.userName || "Unknown User"}</span>
+                      </div>
+                      {editingFeedbackId === fb.feedbackId ? (
+                        <>
+                          <div className="star-rating">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <FontAwesomeIcon
+                                key={star}
+                                icon={faStar}
+                                className={`star ${star <= editFeedback.rating ? "filled" : ""}`}
+                                onClick={() => setEditFeedback({ ...editFeedback, rating: star })}
+                              />
+                            ))}
                           </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))
+                          <textarea
+                            value={editFeedback.comment}
+                            onChange={(e) =>
+                              setEditFeedback({ ...editFeedback, comment: e.target.value })
+                            }
+                          />
+                          <button
+                            onClick={() => updateFeedbackHandler(fb.feedbackId)}
+                            className="update-feedback-button"
+                          >
+                            Cập nhật
+                          </button>
+                          <button
+                            onClick={() => setEditingFeedbackId(null)}
+                            className="submit-feedback-button"
+                            style={{ background: darkMode ? "#6c757d" : "#6c757d", marginLeft: "0.5rem" }}
+                          >
+                            Hủy
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="feedback-rating">
+                            {Array(fb.rating)
+                              .fill()
+                              .map((_, i) => (
+                                <FontAwesomeIcon key={i} icon={faStar} />
+                              ))}
+                          </div>
+                          <p>{fb.comment}</p>
+                          {currentUserId && fb.userId === parseInt(currentUserId) && (
+                            <div className="action-buttons">
+                              <button
+                                className="edit-button"
+                                onClick={() => {
+                                  setEditingFeedbackId(fb.feedbackId);
+                                  setEditFeedback({ rating: fb.rating, comment: fb.comment });
+                                }}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                              <button
+                                className="delete-button"
+                                onClick={() => deleteFeedbackHandler(fb.feedbackId)}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))
               ) : (
                 <p>Chưa có đánh giá nào {ratingFilter !== "All" ? `với ${ratingFilter} sao` : ""}.</p>
               )}

@@ -305,9 +305,7 @@ const ProfileRole = ({ darkMode, role }) => {
                   <p>
                     <FontAwesomeIcon icon={faEnvelope} /> {username || "Not provided"}
                   </p>
-                  <p>
-                    <FontAwesomeIcon icon={faPhone} /> {userDetails?.phone || "Not provided"}
-                  </p>
+                  
                 </div>
               </div>
 

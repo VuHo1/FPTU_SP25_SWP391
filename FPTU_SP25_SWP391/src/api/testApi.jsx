@@ -823,3 +823,93 @@ export const getUserBookings = async (userId, token) => {
     throw error;
   }
 };
+
+
+// Add these at the end of your testApi.js file
+
+// Fetch all feedbacks for a specific service
+export const getFeedbacksByServiceId = async (serviceId, token) => {
+  try {
+    const response = await apiClient.get(`/api/feedbacks/${serviceId}`, {
+      headers: {
+        accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(`Feedbacks for service ${serviceId}:`, response.data);
+    return response;
+  } catch (error) {
+    console.error(`Error fetching feedbacks for service ${serviceId}:`, error.response?.data || error);
+    throw error;
+  }
+};
+
+// Fetch all user details (bulk fetch)
+export const getAllUserDetails = async (token) => {
+  try {
+    const response = await apiClient.get(`/api/UserDetails`, {
+      headers: {
+        accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("All user details:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error fetching all user details:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Submit a new feedback
+export const postFeedback = async (feedbackData, token) => {
+  try {
+    const response = await apiClient.post(`/api/feedbacks`, feedbackData, {
+      headers: {
+        accept: "*/*",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Feedback submitted:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error submitting feedback:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// Update an existing feedback
+export const updateFeedback = async (feedbackId, feedbackData, token) => {
+  try {
+    const response = await apiClient.put(`/api/feedbacks/${feedbackId}`, feedbackData, {
+      headers: {
+        accept: "*/*",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(`Feedback ${feedbackId} updated:`, response.data);
+    return response;
+  } catch (error) {
+    console.error(`Error updating feedback ${feedbackId}:`, error.response?.data || error);
+    throw error;
+  }
+};
+
+// Delete a feedback
+export const deleteFeedback = async (feedbackId, token) => {
+  try {
+    const response = await apiClient.delete(`/api/feedbacks/${feedbackId}`, {
+      headers: {
+        accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(`Feedback ${feedbackId} deleted`);
+    return response;
+  } catch (error) {
+    console.error(`Error deleting feedback ${feedbackId}:`, error.response?.data || error);
+    throw error;
+  }
+};
