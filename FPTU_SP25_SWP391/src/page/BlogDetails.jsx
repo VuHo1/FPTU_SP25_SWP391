@@ -10,7 +10,7 @@ import {
   postFeedback,
   updateFeedback,
   deleteFeedback,
-} from "../api/testApi"; // Import API functions from testApi.js
+} from "../api/testApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStar,
@@ -37,7 +37,6 @@ const BlogDetail = ({ darkMode }) => {
   const [editingFeedbackId, setEditingFeedbackId] = useState(null);
   const [editFeedback, setEditFeedback] = useState({ rating: 5, comment: "" });
 
-  // Fetch feedbacks using testApi function
   const fetchFeedbacks = async (serviceId, token) => {
     try {
       const response = await getFeedbacksByServiceId(serviceId, token);
@@ -48,7 +47,7 @@ const BlogDetail = ({ darkMode }) => {
     }
   };
 
-  // Fetch user details using testApi function
+
   const fetchUserDetails = async (token) => {
     try {
       const response = await getAllUserDetails(token);
@@ -67,7 +66,6 @@ const BlogDetail = ({ darkMode }) => {
     }
   };
 
-  // Submit feedback using testApi function
   const submitFeedback = async () => {
     if (!isLoggedIn) {
       navigate("/sign_in", { state: { from: `/service/${id}` } });
@@ -97,7 +95,7 @@ const BlogDetail = ({ darkMode }) => {
     }
   };
 
-  // Update feedback using testApi function
+
   const updateFeedbackHandler = async (feedbackId) => {
     const token = localStorage.getItem("token");
     try {
@@ -118,7 +116,6 @@ const BlogDetail = ({ darkMode }) => {
     }
   };
 
-  // Delete feedback using testApi function
   const deleteFeedbackHandler = async (feedbackId) => {
     const token = localStorage.getItem("token");
     try {
@@ -135,7 +132,7 @@ const BlogDetail = ({ darkMode }) => {
     return (total / feedbacks.length).toFixed(1);
   };
 
-  // Main useEffect to fetch service, categories, images, feedbacks, and user details
+
   useEffect(() => {
     const fetchServiceAndCategories = async () => {
       setLoading(true);
@@ -566,15 +563,15 @@ const BlogDetail = ({ darkMode }) => {
             <p>{service.description || "No detailed description available."}</p>
             <div className="blog-info">
               <p className="price">
-                Giá: {service.price ? `${service.price.toLocaleString("vi-VN")} VND` : "N/A"}
+                Price: {service.price ? `${service.price.toLocaleString("vi-VN")} VND` : "N/A"}
               </p>
-              <p>Trạng thái: {service.status ? "Hoạt động" : "Không hoạt động"}</p>
+              <p>Status: {service.status ? "Active " : "UnActive"}</p>
               <p>
-                Danh mục:{" "}
+                Categorie:{" "}
                 {categories.find((cat) => cat.serviceCategoryId === service.serviceCategoryId)?.name || "N/A"}
               </p>
               <div className="rating">
-                Đánh giá: {averageRating} / 5{" "}
+                Rating: {averageRating} / 5{" "}
                 <span>
                   {Array(Math.round(averageRating))
                     .fill()
@@ -585,7 +582,7 @@ const BlogDetail = ({ darkMode }) => {
               </div>
             </div>
             <Link to="/service" className="back-button">
-              Quay lại
+              Back
             </Link>
             <button
               onClick={isServiceActive ? handleBookingClick : null}
@@ -598,7 +595,7 @@ const BlogDetail = ({ darkMode }) => {
           <div className="blog-image">
             <div style={{ position: "relative" }}>
               <img
-                src={mainImage || "https://via.placeholder.com/600x400"}
+                src={mainImage || "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-1.jpg"}
                 alt={service.name}
                 className="main-image"
               />
@@ -639,10 +636,10 @@ const BlogDetail = ({ darkMode }) => {
             )}
           </div>
         </div>
-        {/* Feedback Section */}
+
         <div className="feedback-section">
           <div className="feedback-form">
-            <h3>Để lại đánh giá của bạn</h3>
+            <h3>Your feedback</h3>
             <div className="star-rating">
               {[1, 2, 3, 4, 5].map((star) => (
                 <FontAwesomeIcon
@@ -656,16 +653,16 @@ const BlogDetail = ({ darkMode }) => {
             <textarea
               value={newFeedback.comment}
               onChange={(e) => setNewFeedback({ ...newFeedback, comment: e.target.value })}
-              placeholder="Nhập nhận xét của bạn..."
+              placeholder="Typing your feedback..."
             />
             <button onClick={submitFeedback} className="submit-feedback-button">
-              Gửi đánh giá
+              Send
             </button>
           </div>
           <div className="feedback-list">
-            <h3>Đánh giá dịch vụ</h3>
+            <h3>Feedbacks of Service</h3>
             <div className="average-rating">
-              Trung bình: {calculateAverageRating()} / 5{" "}
+              Average: {calculateAverageRating()} / 5{" "}
               <span className="feedback-rating">
                 {Array(Math.round(calculateAverageRating()))
                   .fill()
@@ -681,7 +678,7 @@ const BlogDetail = ({ darkMode }) => {
                   className={`filter-button ${ratingFilter === rating ? "active" : ""}`}
                   onClick={() => setRatingFilter(rating)}
                 >
-                  {rating === "All" ? "Tất cả" : `${rating} sao`}
+                  {rating === "All" ? "ALL" : `${rating} Star`}
                 </button>
               ))}
             </div>
@@ -725,14 +722,14 @@ const BlogDetail = ({ darkMode }) => {
                             onClick={() => updateFeedbackHandler(fb.feedbackId)}
                             className="update-feedback-button"
                           >
-                            Cập nhật
+                            Update
                           </button>
                           <button
                             onClick={() => setEditingFeedbackId(null)}
                             className="submit-feedback-button"
                             style={{ background: darkMode ? "#6c757d" : "#6c757d", marginLeft: "0.5rem" }}
                           >
-                            Hủy
+                            Cancel
                           </button>
                         </>
                       ) : (
@@ -769,7 +766,7 @@ const BlogDetail = ({ darkMode }) => {
                     </div>
                   ))
               ) : (
-                <p>Chưa có đánh giá nào {ratingFilter !== "All" ? `với ${ratingFilter} sao` : ""}.</p>
+                <p>No feedback yet {ratingFilter !== "All" ? `with ${ratingFilter} star` : ""}.</p>
               )}
             </div>
           </div>

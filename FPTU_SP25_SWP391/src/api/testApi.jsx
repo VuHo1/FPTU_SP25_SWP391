@@ -912,4 +912,19 @@ export const deleteFeedback = async (feedbackId, token) => {
     console.error(`Error deleting feedback ${feedbackId}:`, error.response?.data || error);
     throw error;
   }
+};// Add to testApi.js
+export const getAllFeedbacks = async (token) => {
+  try {
+    const response = await apiClient.get(`/api/feedbacks`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: '*/*',
+      },
+    });
+    console.log('All Feedbacks Response:', response.data);
+    return response;
+  } catch (error) {
+    console.error('Error fetching all feedbacks:', JSON.stringify(error.response?.data, null, 2));
+    throw error;
+  }
 };

@@ -207,7 +207,7 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
       action();
     } else {
       setActiveSection(section);
-      if (section === "qa-customer") navigate("/staff/qa-customer");
+
       if (section === "view-profile") navigate("/profile-role");
       if (section === "edit-profile") navigate("/edit-profilerole");
       if (section === "bookings") fetchBookings();
@@ -215,7 +215,6 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
     }
   };
 
-  // Hàm lọc feedbacks dựa trên serviceId và rating
   const filteredFeedbacks = () => {
     let filtered = feedbacks;
     if (serviceIdFilter !== "All") {
@@ -408,9 +407,19 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
                               <Typography>Date Created: {new Date(booking.dateCreated).toLocaleString()}</Typography>
                               <Typography>Total Price: {booking.totalPrice} VND</Typography>
                               <Typography>Note: {booking.note || "N/A"}</Typography>
-                              <Typography>Status: {booking.status ? "Active" : "Inactive"}</Typography>
+                              <Typography>
+                                Status: {
+                                  {
+                                    0: "Pending",
+                                    1: "Booked",
+                                    2: "Completed",
+                                    3: "Canceled",
+                                    4: "Failed"
+                                  }[booking.status] || "Unknown"
+                                }
+                              </Typography>
                               <Typography>Is Paid: {booking.isPaid ? "Yes" : "No"}</Typography>
-                              <Typography>Use Wallet: {booking.useWallet ? "Yes" : "No"}</Typography>
+
                             </>
                           )}
                         </Box>

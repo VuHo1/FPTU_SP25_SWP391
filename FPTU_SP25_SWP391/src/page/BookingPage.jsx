@@ -4,7 +4,7 @@ import { useAuth } from '../page/AuthContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const BookingPage = () => {
+const BookingPage = ({ darkMode }) => {
     const { isLoggedIn, userId, token, role } = useAuth();
 
     const [formData, setFormData] = useState({
@@ -28,11 +28,12 @@ const BookingPage = () => {
     const [paymentProcessing, setPaymentProcessing] = useState(false);
 
     useEffect(() => {
+        console.log('darkMode value:', darkMode);
+    }, [darkMode]);
+
+    useEffect(() => {
         if (userId) {
-            setFormData((prev) => ({
-                ...prev,
-                userId: userId,
-            }));
+            setFormData((prev) => ({ ...prev, userId: userId }));
         }
     }, [userId]);
 
@@ -65,7 +66,6 @@ const BookingPage = () => {
     const fetchTherapists = async () => {
         try {
             const response = await getTherapistSchedules(token);
-            console.log('Raw therapist data:', response.data);
             setTherapists(response.data);
         } catch (err) {
             console.error('Error fetching therapists:', err);
@@ -73,61 +73,35 @@ const BookingPage = () => {
         }
     };
 
-    // const updateTherapistTimeSlotsBySchedule = (scheduleId) => {
-    //     const selectedSchedule = therapists.find((t) => t.scheduleId.toString() === scheduleId.toString());
-    //     console.log('Selected schedule:', selectedSchedule);
-
-    //     if (selectedSchedule) {
-    //         setSelectedTherapistData(selectedSchedule);
-
-    //         console.log('Raw time slots:', selectedSchedule.timeSlots);
-    //         console.log('Time slots status:', selectedSchedule.timeSlots.map(slot => ({
-    //             id: slot.timeSlotId,
-    //             description: slot.timeSlotDescription,
-    //             status: slot.status
-    //         })));
-
-    //         setTherapistTimeSlots(selectedSchedule.timeSlots || []);
-    //     } else {
-    //         setTherapistTimeSlots([]);
-    //         setSelectedTherapistData(null);
-    //     }
-    // };
     const updateTherapistTimeSlotsBySchedule = (scheduleId) => {
         const selectedSchedule = therapists.find((t) => t.scheduleId.toString() === scheduleId.toString());
-        console.log('Selected schedule:', selectedSchedule);
-
         if (selectedSchedule) {
             setSelectedTherapistData(selectedSchedule);
             setTherapistTimeSlots(selectedSchedule.timeSlots || []);
             setFormData((prev) => ({
                 ...prev,
-                therapistId: selectedSchedule.therapistId.toString(), // Gán therapistId từ schedule
+                therapistId: selectedSchedule.therapistId.toString(),
             }));
         } else {
             setTherapistTimeSlots([]);
             setSelectedTherapistData(null);
-            setFormData((prev) => ({
-                ...prev,
-                therapistId: '',
-            }));
+            setFormData((prev) => ({ ...prev, therapistId: '' }));
         }
     };
+
     const processPayment = async (bookingId) => {
         try {
             setPaymentProcessing(true);
             const paymentResponse = await createPayment(bookingId, token);
-
             if (paymentResponse && paymentResponse.data && paymentResponse.data.paymentLink) {
                 window.location.href = paymentResponse.data.paymentLink;
                 return;
             }
-
             toast.success('Payment processing initiated successfully!');
-            setPaymentProcessing(false);
         } catch (err) {
             console.error('Error processing payment:', err);
             toast.error('Payment processing failed. Please try again or contact support.');
+        } finally {
             setPaymentProcessing(false);
         }
     };
@@ -140,26 +114,17 @@ const BookingPage = () => {
         });
     };
 
-
-
     const handleRandomTherapist = (e) => {
         e.preventDefault();
         if (therapists && therapists.length > 0) {
-            console.log('Available schedules:', therapists);
             const randomIndex = Math.floor(Math.random() * therapists.length);
             const randomSchedule = therapists[randomIndex];
-            console.log('Selected random schedule:', randomSchedule);
-
             setFormData((prev) => ({
                 ...prev,
                 scheduleId: randomSchedule.scheduleId.toString(),
             }));
-
-            toast.success(
-                `Randomly selected: ${randomSchedule.therapistName} (${getDayName(randomSchedule.dayOfWeek)})`
-            );
+            toast.success(`Randomly selected: ${randomSchedule.therapistName} (${getDayName(randomSchedule.dayOfWeek)})`);
         } else {
-            console.error('No therapist schedules available');
             toast.error('No therapist schedules available to choose from');
         }
     };
@@ -171,14 +136,10 @@ const BookingPage = () => {
 
     const getStatusDescription = (status) => {
         switch (status) {
-            case 0:
-                return '';
-            case 1:
-                return '(Booked)';
-            case 2:
-                return '(Unavailable)';
-            default:
-                return '(Unavailable)';
+            case 0: return '';
+            case 1: return '(Booked)';
+            case 2: return '(Unavailable)';
+            default: return '(Unavailable)';
         }
     };
 
@@ -212,23 +173,10 @@ const BookingPage = () => {
                 bookingData.therapistId = parseInt(formData.therapistId, 10);
             }
 
-            console.log('Submitting booking data:', bookingData);
-            console.log('Token:', token);
-
             const res = await postBooking(bookingData, token);
-            console.log('Booking response:', res.data);
             setResponse(res.data);
 
-            toast.success('Booking confirmed! Your appointment has been scheduled successfully.', {
-                position: 'top-right',
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
-
+            toast.success('Booking confirmed! Your appointment has been scheduled successfully.');
             if (res.data && res.data.bookingId && !formData.useWallet) {
                 await processPayment(res.data.bookingId);
             }
@@ -244,48 +192,18 @@ const BookingPage = () => {
                 serviceId: '',
             });
         } catch (err) {
-            console.log('Error details:', err.response?.data, err.response?.status, err.message);
             setError(err.response ? err.response.data : 'Something went wrong');
             setLoading(false);
-            toast.error(
-                err.response ? `Booking failed: ${err.response.data}` : 'Something went wrong. Please try again later.',
-                {
-                    position: 'top-right',
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                }
-            );
+            toast.error(err.response ? `Booking failed: ${err.response.data}` : 'Something went wrong. Please try again later.');
         }
     };
 
     if (!isLoggedIn || !token) {
         return (
-            <div className='flex items-center justify-center min-h-screen bg-gray-50'>
-                <div className='p-8 bg-white shadow-lg rounded-xl'>
-                    <div className='flex flex-col items-center'>
-                        <div className='p-3 bg-red-100 rounded-full'>
-                            <svg
-                                className='w-8 h-8 text-red-500'
-                                fill='none'
-                                stroke='currentColor'
-                                viewBox='0 0 24 24'
-                                xmlns='http://www.w3.org/2000/svg'
-                            >
-                                <path
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                    strokeWidth='2'
-                                    d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
-                                ></path>
-                            </svg>
-                        </div>
-                        <h2 className='mt-3 text-xl font-semibold text-gray-800'>Authentication Required</h2>
-                        <p className='mt-2 text-gray-600'>Please log in to book an appointment.</p>
-                    </div>
+            <div className="booking-page">
+                <div className="auth-required">
+                    <h2>Authentication Required</h2>
+                    <p>Please log in to book an appointment.</p>
                 </div>
             </div>
         );
@@ -294,92 +212,278 @@ const BookingPage = () => {
     const therapistScheduleOptions = therapists.map((schedule) => ({
         scheduleId: schedule.scheduleId,
         therapistId: schedule.therapistId,
-        displayName: `${schedule.therapistName} (${getDayName(schedule.dayOfWeek)}, ${schedule.startWorkingTime.slice(
-            0,
-            5
-        )} - ${schedule.endWorkingTime.slice(0, 5)})`,
+        displayName: `${schedule.therapistName} (${getDayName(schedule.dayOfWeek)}, ${schedule.startWorkingTime.slice(0, 5)} - ${schedule.endWorkingTime.slice(0, 5)})`,
     }));
 
-    console.log('Therapist schedule options:', therapistScheduleOptions);
-
     return (
-        <div className='min-h-screen px-4 py-12 bg-gradient-to-br from-blue-50 to-indigo-50 sm:px-6 lg:px-8'>
-            <div className='max-w-3xl mx-auto overflow-hidden bg-white shadow-xl rounded-2xl'>
-                <div className='px-8 py-6 bg-gradient-to-r from-blue-600 to-indigo-600'>
-                    <h1 className='text-2xl font-bold text-white'>Book Your Appointment</h1>
-                    <p className='mt-1 text-blue-100'>
-                        {role === 'Therapist'
-                            ? 'Schedule your availability for client sessions'
-                            : 'Schedule a session with our professional therapists'}
-                    </p>
-                </div>
+        <>
+            <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-                <form onSubmit={handleSubmit} className='p-8'>
-                    <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                        <div className='space-y-1'>
-                            <label className='text-sm font-medium text-gray-700'>Therapist Schedule (Optional)</label>
+        .booking-page {
+          min-height: 100vh;
+          padding: 3rem 2rem;
+          background: ${darkMode ? "#1c2526" : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)"};
+          font-family: 'Poppins', sans-serif;
+          color: ${darkMode ? "#ecf0f1" : "#2c3e50"};
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: background 0.3s ease, color 0.3s ease;
+        }
+        .booking-container {
+          background: ${darkMode ? "#2c3e50" : "#ffffff"};
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, ${darkMode ? "0.3" : "0.06"});
+          width: 100%;
+          max-width: 800px;
+        }
+        .booking-header {
+          padding: 1rem 2rem;
+          background: ${darkMode ? "#34495e" : "#3b82f6"};
+          border-radius: 12px 12px 0 0;
+          margin: -2rem -2rem 2rem -2rem;
+        }
+        .booking-title {
+          font-size: 2rem;
+          font-weight: 600;
+          color: ${darkMode ? "#1abc9c" : "#ffffff"};
+          margin-bottom: 0.5rem;
+        }
+        .booking-description {
+          font-size: 1.1rem;
+          color: ${darkMode ? "#bdc3c7" : "#e9ecef"};
+        }
+        .booking-form {
+          display: grid;
+          gap: 1.5rem;
+        }
+        .form-group {
+          display: flex;
+          flex-direction: column;
+        }
+        .form-group label {
+          font-size: 1.1rem;
+          font-weight: 500;
+          color: ${darkMode ? "#f9fafb" : "#1f2937"};
+          margin-bottom: 0.5rem;
+        }
+        .form-group select,
+        .form-group textarea {
+          width: 100%;
+          padding: 1rem;
+          border: 1px solid ${darkMode ? "#4b5563" : "#d1d5db"};
+          border-radius: 8px;
+          font-size: 1rem;
+          color: ${darkMode ? "#f9fafb" : "#1f2937"};
+          background: ${darkMode ? "#34495e" : "#fff"};
+          outline: none;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-group select:focus,
+        .form-group textarea:focus {
+          border-color: ${darkMode ? "#1abc9c" : "#3b82f6"};
+          box-shadow: 0 0 8px rgba(${darkMode ? "26, 188, 156" : "59, 130, 246"}, 0.2);
+        }
+        .form-group textarea {
+          resize: vertical;
+          min-height: 100px;
+        }
+        .form-group select:disabled {
+          background: ${darkMode ? "#2d3748" : "#e5e7eb"};
+          color: ${darkMode ? "#9ca3af" : "#6b7280"};
+          cursor: not-allowed;
+        }
+        .random-button {
+          padding: 0.75rem 1.5rem;
+          font-size: 1rem;
+          font-weight: 500;
+          color: ${darkMode ? "#1abc9c" : "#3b82f6"};
+          background: ${darkMode ? "#34495e" : "#ffffff"};
+          border: 1px solid ${darkMode ? "#4b5563" : "#3b82f6"};
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.3s ease, color 0.3s ease;
+          margin-top: 0.5rem;
+        }
+        .random-button:hover {
+          background: ${darkMode ? "#1abc9c" : "#3b82f6"};
+          color: #ffffff;
+        }
+        .therapist-info {
+          padding: 1rem;
+          background: ${darkMode ? "#34495e" : "#e9f5ff"};
+          border-radius: 8px;
+          margin-top: 1rem;
+        }
+        .therapist-info-title {
+          font-size: 1.2rem;
+          font-weight: 500;
+          color: ${darkMode ? "#1abc9c" : "#3b82f6"};
+          margin-bottom: 0.5rem;
+        }
+        .therapist-info-text {
+          font-size: 1rem;
+          color: ${darkMode ? "#bdc3c7" : "#2c3e50"};
+        }
+        .submit-button {
+          width: 100%;
+          padding: 1rem;
+          font-size: 1rem;
+          font-weight: 600;
+          color: #ffffff;
+          background: ${darkMode ? "#1abc9c" : "#3b82f6"};
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.3s ease, transform 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+        .submit-button:hover:not(:disabled) {
+          background: ${darkMode ? "#16a085" : "#2563eb"};
+          transform: translateY(-2px);
+        }
+        .submit-button:disabled {
+          background: ${darkMode ? "#4b5563" : "#e5e7eb"};
+          cursor: not-allowed;
+          transform: none;
+        }
+        .spinner {
+          width: 1.25rem;
+          height: 1.25rem;
+          border: 2px solid #ffffff;
+          border-top: 2px solid transparent;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .warning-text {
+          font-size: 0.9rem;
+          color: ${darkMode ? "#f59e0b" : "#f59e0b"};
+          margin-top: 0.5rem;
+        }
+        .auth-required {
+          background: ${darkMode ? "#2c3e50" : "#ffffff"};
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, ${darkMode ? "0.3" : "0.06"});
+          text-align: center;
+        }
+        .auth-required h2 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: ${darkMode ? "#ff8787" : "#dc3545"};
+          margin-bottom: 1rem;
+        }
+        .auth-required p {
+          font-size: 1.1rem;
+          color: ${darkMode ? "#bdc3c7" : "#6b7280"};
+        }
+
+        /* Scrollbar Styles */
+        .booking-page::-webkit-scrollbar {
+          width: 8px;
+        }
+        .booking-page::-webkit-scrollbar-thumb {
+          background: ${darkMode ? "#6b7280" : "#6b7280"};
+          border-radius: 4px;
+        }
+        .booking-page::-webkit-scrollbar-track {
+          background: ${darkMode ? "#1c2526" : "#f8f9fa"};
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .booking-page {
+            padding: 2rem 1rem;
+          }
+          .booking-container {
+            padding: 1.5rem;
+          }
+          .booking-title {
+            font-size: 1.75rem;
+          }
+          .booking-description {
+            font-size: 1rem;
+          }
+          .booking-form {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+
+            <div className="booking-page">
+                <div className="booking-container">
+                    <div className="booking-header">
+                        <h1 className="booking-title">Book Your Appointment</h1>
+                        <p className="booking-description">
+                            {role === 'Therapist'
+                                ? 'Schedule your availability for client sessions'
+                                : 'Schedule a session with our professional therapists'}
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="booking-form">
+                        <div className="form-group">
+                            <label>Therapist Schedule (Optional)</label>
                             <select
-                                name='scheduleId'
+                                name="scheduleId"
                                 value={formData.scheduleId}
                                 onChange={handleChange}
-                                className='w-full p-3 text-gray-700 transition border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                             >
-                                <option value=''>Select a therapist schedule</option>
+                                <option value="">Select a therapist schedule</option>
                                 {therapistScheduleOptions.map((option) => (
                                     <option key={option.scheduleId} value={option.scheduleId}>
                                         {option.displayName}
                                     </option>
                                 ))}
                             </select>
-                            <button
-                                type='button'
-                                onClick={handleRandomTherapist}
-                                className='px-3 py-1 mt-2 text-sm font-medium text-blue-700 bg-white border border-blue-500 rounded-md hover:bg-blue-50'
-                            >
+                            <button type="button" className="random-button" onClick={handleRandomTherapist}>
                                 Random Schedule
                             </button>
                         </div>
 
-                        <div className='space-y-1'>
-                            <label className='text-sm font-medium text-gray-700'>Time Slot</label>
+                        <div className="form-group">
+                            <label>Time Slot</label>
                             <select
-                                name='timeSlotId'
+                                name="timeSlotId"
                                 value={formData.timeSlotId}
                                 onChange={handleChange}
-                                className='w-full p-3 text-gray-700 transition border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                                 required
                                 disabled={therapistTimeSlots.filter((slot) => slot.status === 0).length === 0}
                             >
-                                <option value=''>Select a time slot</option>
+                                <option value="">Select a time slot</option>
                                 {therapistTimeSlots.map((slot, index) => (
                                     <option
                                         key={`${slot.timeSlotId}-${index}`}
                                         value={slot.status === 0 ? slot.timeSlotId : ''}
                                         disabled={slot.status !== 0}
-                                        className={slot.status !== 0 ? 'text-gray-500' : 'text-black'}
                                     >
                                         {slot.timeSlotDescription} {getStatusDescription(slot.status)}
                                     </option>
                                 ))}
                             </select>
-                            {formData.scheduleId &&
-                                therapistTimeSlots.filter((slot) => slot.status === 0).length === 0 && (
-                                    <p className='mt-1 text-sm text-orange-500'>
-                                        No available time slots for this schedule
-                                    </p>
-                                )}
+                            {formData.scheduleId && therapistTimeSlots.filter((slot) => slot.status === 0).length === 0 && (
+                                <p className="warning-text">No available time slots for this schedule</p>
+                            )}
                         </div>
 
-                        <div className='space-y-1'>
-                            <label className='text-sm font-medium text-gray-700'>Service</label>
+                        <div className="form-group">
+                            <label>Service</label>
                             <select
-                                name='serviceId'
+                                name="serviceId"
                                 value={formData.serviceId}
                                 onChange={handleChange}
-                                className='w-full p-3 text-gray-700 transition border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                                 required
                             >
-                                <option value=''>Select a service</option>
+                                <option value="">Select a service</option>
                                 {services.map((service) => (
                                     <option key={service.serviceId} value={service.serviceId}>
                                         {service.name} (${service.price})
@@ -387,128 +491,44 @@ const BookingPage = () => {
                                 ))}
                             </select>
                         </div>
-                        {/* <div className='flex items-center mt-6 space-x-3'>
-                            <div className='relative inline-block w-10 mr-2 align-middle select-none'>
-                                <input
-                                    type='checkbox'
-                                    name='useWallet'
-                                    id='useWallet'
-                                    checked={formData.useWallet}
-                                    onChange={handleChange}
-                                    className='absolute block w-6 h-6 transition-all duration-200 bg-white border-4 border-gray-300 rounded-full appearance-none cursor-pointer checked:right-0 checked:border-blue-500 focus:outline-none'
-                                />
-                                <label
-                                    htmlFor='useWallet'
-                                    className='block h-6 overflow-hidden bg-gray-300 rounded-full cursor-pointer'
-                                ></label>
+
+                        {selectedTherapistData && (
+                            <div className="therapist-info">
+                                <h3 className="therapist-info-title">Therapist Schedule Info</h3>
+                                <p className="therapist-info-text">
+                                    {selectedTherapistData.therapistName} is available on{' '}
+                                    {getDayName(selectedTherapistData.dayOfWeek)} from{' '}
+                                    {selectedTherapistData.startWorkingTime} to {selectedTherapistData.endWorkingTime}
+                                </p>
                             </div>
-                            <label htmlFor='useWallet' className='text-sm font-medium text-gray-700'>
-                                Use Wallet for Payment
-                            </label>
-                        </div> */}
-                    </div>
+                        )}
 
-                    {selectedTherapistData && (
-                        <div className='p-4 mt-6 rounded-lg bg-blue-50'>
-                            <h3 className='font-medium text-blue-800'>Therapist Schedule Info</h3>
-                            <p className='mt-1 text-sm text-blue-700'>
-                                {selectedTherapistData.therapistName} is available on{' '}
-                                {getDayName(selectedTherapistData.dayOfWeek)}
-                                from {selectedTherapistData.startWorkingTime} to {selectedTherapistData.endWorkingTime}
-                            </p>
+                        <div className="form-group">
+                            <label>{role === 'Therapist' ? 'Session Notes' : 'Notes for the Therapist'}</label>
+                            <textarea
+                                name="note"
+                                value={formData.note}
+                                onChange={handleChange}
+                                placeholder={
+                                    role === 'Therapist'
+                                        ? 'Any information about your availability or session details...'
+                                        : 'Any special requests or information you want to share...'
+                                }
+                            />
                         </div>
-                    )}
 
-                    <div className='mt-6 space-y-1'>
-                        <label className='text-sm font-medium text-gray-700'>
-                            {role === 'Therapist' ? 'Session Notes' : 'Notes for the therapist'}
-                        </label>
-                        <textarea
-                            name='note'
-                            value={formData.note}
-                            onChange={handleChange}
-                            rows='4'
-                            className='w-full p-3 text-gray-700 transition border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                            placeholder={
-                                role === 'Therapist'
-                                    ? 'Any information about your availability or session details...'
-                                    : 'Any special requests or information you want to share...'
-                            }
-                        ></textarea>
-                    </div>
-
-                    <div className='mt-6'>
-                        <div className='p-4 mb-4 border-l-4 border-blue-500 bg-blue-50'>
-                            <div className='flex'>
-                                <div className='flex-shrink-0'>
-                                    <svg
-                                        className='w-5 h-5 text-blue-400'
-                                        xmlns='http://www.w3.org/2000/svg'
-                                        viewBox='0 0 20 20'
-                                        fill='currentColor'
-                                    >
-                                        <path
-                                            fillRule='evenodd'
-                                            d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
-                                            clipRule='evenodd'
-                                        />
-                                    </svg>
-                                </div>
-                                <div className='ml-3'>
-                                    <p className='text-sm text-blue-700'>
-                                        Checking "Use Wallet for Payment" will deduct the amount from your
-                                        wallet balance. Otherwise, you will be redirected to the payment gateway after
-                                        booking.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className='mt-6'>
-                        <button
-                            type='submit'
-                            disabled={loading || paymentProcessing}
-                            className='flex items-center justify-center w-full px-4 py-3 font-medium text-white transition duration-300 rounded-lg shadow-md bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg'
-                        >
-                            {loading || paymentProcessing ? (
-                                <>
-                                    <svg
-                                        className='w-5 h-5 mr-3 -ml-1 text-white animate-spin'
-                                        xmlns='http://www.w3.org/2000/svg'
-                                        fill='none'
-                                        viewBox='0 0 24 24'
-                                    >
-                                        <circle
-                                            className='opacity-25'
-                                            cx='12'
-                                            cy='12'
-                                            r='10'
-                                            stroke='currentColor'
-                                            strokeWidth='4'
-                                        ></circle>
-                                        <path
-                                            className='opacity-75'
-                                            fill='currentColor'
-                                            d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                                        ></path>
-                                    </svg>
-                                    {loading
-                                        ? role === 'Therapist'
-                                            ? 'Scheduling...'
-                                            : 'Booking in progress...'
-                                        : 'Processing payment...'}
-                                </>
-                            ) : role === 'Therapist' ? (
-                                'Schedule Availability'
-                            ) : (
-                                'Book Appointment'
-                            )}
+                        <button type="submit" className="submit-button" disabled={loading || paymentProcessing}>
+                            {(loading || paymentProcessing) && <span className="spinner"></span>}
+                            {loading
+                                ? role === 'Therapist' ? 'Scheduling...' : 'Booking in progress...'
+                                : paymentProcessing
+                                    ? 'Processing payment...'
+                                    : role === 'Therapist' ? 'Schedule Availability' : 'Book Appointment'}
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

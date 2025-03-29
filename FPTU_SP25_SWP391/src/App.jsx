@@ -110,7 +110,7 @@ function App() {
             <Route path="/therapist/choose-schedule" element={<ChooseScheduleTherapist darkMode={true} />} />
             <Route path="/timeslot-schedule" element={<TimeSlotSchedule darkMode={darkMode} />} />
             <Route path="/staff/qa-customer" element={<QaStaff darkMode={darkMode} />} />
-            <Route path="/history-transaction-admin" element={<HistoryTransactionAdmin darkMode={darkMode}/>} />
+            <Route path="/history-transaction-admin" element={<HistoryTransactionAdmin darkMode={darkMode} />} />
 
 
 
@@ -120,7 +120,7 @@ function App() {
                 <Layout darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
                   <Routes>
                     <Route path="/" element={<HomePage darkMode={darkMode} />} />
-                    <Route path="/booking_page" element={<BookingPage />} />
+                    <Route path="/booking_page" element={<BookingPage darkMode={darkMode} />} />
                     <Route
                       path="/service/:id"
                       element={<BlogDetail darkMode={darkMode} />}
@@ -130,7 +130,7 @@ function App() {
                       path="/about"
                       element={<ProductListPage darkMode={darkMode} />}
                     />
-                    <Route path="/service" element={<Blog darkMode={darkMode}/>} />
+                    <Route path="/service" element={<Blog darkMode={darkMode} />} />
                     <Route
                       path="/contact"
                       element={<Contact darkMode={darkMode} />}
@@ -160,9 +160,9 @@ function App() {
 
                     <Route path="/edit-profile" element={<EditProfile darkMode={darkMode} />} />
                     <Route path="/add-profile" element={<AddProfile darkMode={darkMode} />} />
-                    <Route path="/history-transaction-user"  element={<HistoryTransactionUser darkMode={darkMode} />}
-/>
-                    
+                    <Route path="/history-transaction-user" element={<HistoryTransactionUser darkMode={darkMode} />}
+                    />
+
                     <Route path="*" element={<Error darkMode={darkMode} />} />
 
                   </Routes>

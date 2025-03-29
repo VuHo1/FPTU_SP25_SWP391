@@ -21,7 +21,7 @@ import { styled } from "@mui/system";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComments, faList } from "@fortawesome/free-solid-svg-icons";
+import { faComments, faList, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 // Container Styling
 const QaContainer = styled(Box)(({ darkMode }) => ({
@@ -35,7 +35,7 @@ const QaContainer = styled(Box)(({ darkMode }) => ({
     ? "0 8px 24px rgba(0, 0, 0, 0.4)"
     : "0 8px 24px rgba(0, 0, 0, 0.15)",
   border: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
-  maxWidth: "1200px",
+  maxWidth: "950px",
   margin: "0 auto",
 }));
 
@@ -44,6 +44,9 @@ const Panel = styled(Box)(({ darkMode }) => ({
   padding: "15px",
   background: darkMode ? "rgba(69, 90, 100, 0.8)" : "rgba(248, 244, 225, 0.8)",
   borderRadius: "8px",
+  width: "50%",
+  minWidth: "290px",
+
 }));
 
 const QaStaff = ({ darkMode }) => {
@@ -143,7 +146,27 @@ const QaStaff = ({ darkMode }) => {
       [name]: value,
     }));
   };
+  const handleDeleteQuestion = async (qaId) => {
+    if (!window.confirm("Are you sure you want to delete this question?")) {
+      return;
+    }
 
+    try {
+      await axiosInstance.delete(`/Qa/${qaId}`);
+      const [questionsResponse, recommendationsResponse] = await Promise.all([
+        axiosInstance.get("/Qa"),
+        axiosInstance.get("/service-recommendations")
+      ]);
+
+      setQaList(questionsResponse.data);
+      setRecList(recommendationsResponse.data);
+      setQaSuccess("Question and related rules deleted successfully!");
+
+    } catch (err) {
+      setQaError("Failed to delete question");
+      console.error(err);
+    }
+  };
   const handleRecChange = (e) => {
     const { name, value } = e.target;
     setRecFormData((prev) => ({
@@ -259,7 +282,7 @@ const QaStaff = ({ darkMode }) => {
               onChange={handleQaChange}
               required
               disabled={categoriesLoading || categories.length === 0}
-              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}
+              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", textAlign: 'left' }}
             >
               {categoriesLoading ? (
                 <MenuItem value="">
@@ -335,6 +358,7 @@ const QaStaff = ({ darkMode }) => {
                 <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>ID</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Question</TableCell>
                 <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Service Category</TableCell>
+                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -344,6 +368,15 @@ const QaStaff = ({ darkMode }) => {
                   <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>{qa.question}</TableCell>
                   <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
                     {categories.find((cat) => cat.serviceCategoryId === qa.serviceCategoryId)?.name || qa.serviceCategoryId}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => handleDeleteQuestion(qa.qaId)}
+                      color="error"
+                      size="small"
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -379,7 +412,32 @@ const QaStaff = ({ darkMode }) => {
               onChange={handleRecChange}
               required
               disabled={qaList.length === 0}
-              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}
+              sx={{
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                textAlign: 'left',
+                '& .MuiSelect-select': {
+                  whiteSpace: 'normal',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical'
+                }
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    maxHeight: '400px',
+                    width: '350px',
+                    '& .MuiMenuItem-root': {
+                      whiteSpace: 'normal',
+                      minHeight: '48px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }
+                  }
+                }
+              }}
             >
               {qaList.length === 0 ? (
                 <MenuItem value="">No questions</MenuItem>
@@ -402,7 +460,7 @@ const QaStaff = ({ darkMode }) => {
               value={recFormData.answerOption}
               onChange={handleRecChange}
               required
-              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}
+              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", textAlign: 'left' }}
             >
               <MenuItem value="Yes">Yes</MenuItem>
               <MenuItem value="No">No</MenuItem>
@@ -419,7 +477,32 @@ const QaStaff = ({ darkMode }) => {
               onChange={handleRecChange}
               required
               disabled={servicesLoading || services.length === 0}
-              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}
+              sx={{
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                textAlign: 'left',
+                '& .MuiSelect-select': {
+                  whiteSpace: 'normal',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical'
+                }
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    maxHeight: '400px',
+                    width: '350px',
+                    '& .MuiMenuItem-root': {
+                      whiteSpace: 'normal',
+                      minHeight: '48px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }
+                  }
+                }
+              }}
             >
               {servicesLoading ? (
                 <MenuItem value="">
@@ -437,19 +520,24 @@ const QaStaff = ({ darkMode }) => {
             </Select>
           </FormControl>
 
-          <TextField
-            label="Weight"
-            name="weight"
-            value={recFormData.weight}
-            onChange={handleRecChange}
-            type="number"
-            fullWidth
-            required
-            sx={{ mb: 2 }}
-            InputLabelProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
-            InputProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
-          />
-
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
+              Weight
+            </InputLabel>
+            <Select
+              name="weight"
+              value={recFormData.weight}
+              onChange={handleRecChange}
+              required
+              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", textAlign: 'left' }}
+            >
+              {[1, 2, 3, 4, 5].map((value) => (
+                <MenuItem key={value} value={value}>
+                  {value}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Button
             type="submit"
             variant="contained"
