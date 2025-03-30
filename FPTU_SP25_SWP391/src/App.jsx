@@ -19,7 +19,7 @@ import ForgotPassword from "./page/ForgotPassword";
 import BlogDetail from "./page/BlogDetails";
 import "./App.css";
 import Footer from "./component/Footer";
-import SignUp from "./page/signUpUser";
+import SignUp from "./page/SignUpUser";
 import PolicyPage from "./page/PolicyPage";
 import AdminHomePage from "./page/AdminHomePage";
 import TherapistHomePage from "./page/TherapistHomePage";
