@@ -8,13 +8,14 @@ import {
   faStar,
   faFilter,
   faDollarSign,
+  faStarHalfAlt,
   faSortAlphaDown,
   faSortAlphaUp,
   faClock,
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
-import { getServiceCategories, getAllServices, getImageService } from "../api/testApi";
+import { getServiceCategories, getAllServices, getImageService, getAllFeedbacks } from "../api/testApi";
 
 const ServicesPage = ({ darkMode }) => { // Add darkMode prop
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +27,7 @@ const ServicesPage = ({ darkMode }) => { // Add darkMode prop
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [feedbacks, setFeedbacks] = useState([]);
   const servicesPerPage = 9;
 
   const location = useLocation();
@@ -36,13 +38,16 @@ const ServicesPage = ({ darkMode }) => { // Add darkMode prop
     const token = localStorage.getItem("token");
 
     try {
-      const [categoriesResponse, servicesResponse] = await Promise.all([
+      const [categoriesResponse, servicesResponse, feedbacksResponse] = await Promise.all([
         getServiceCategories(token),
         getAllServices(token),
+        getAllFeedbacks(token),
       ]);
       const categoriesData = categoriesResponse.data || [];
       const servicesData = servicesResponse.data || [];
+      const feedbacksData = feedbacksResponse.data || [];
       setCategories(categoriesData);
+      setFeedbacks(feedbacksData);
 
       const adjustedServices = servicesData.map((service) => {
         const category = categoriesData.find(
@@ -89,10 +94,13 @@ const ServicesPage = ({ darkMode }) => { // Add darkMode prop
           const [categoriesResponse, servicesResponse] = await Promise.all([
             getServiceCategories(null),
             getAllServices(null),
+            getAllFeedbacks(null),
           ]);
           const categoriesData = categoriesResponse.data || [];
           const servicesData = servicesResponse.data || [];
+          const feedbacksData = feedbacksResponse.data || [];
           setCategories(categoriesData);
+          setFeedbacks(feedbacksData);
 
           const adjustedServices = servicesData.map((service) => {
             const category = categoriesData.find(
@@ -147,7 +155,33 @@ const ServicesPage = ({ darkMode }) => { // Add darkMode prop
   useEffect(() => {
     fetchData();
   }, [location.pathname]);
+  const calculateAverageRating = (serviceId) => {
+    const serviceFeedbacks = feedbacks.filter(fb => fb.serviceId === serviceId);
+    if (serviceFeedbacks.length === 0) return 0;
 
+    const totalRating = serviceFeedbacks.reduce((sum, fb) => sum + (fb.rating || 0), 0);
+    return Number((totalRating / serviceFeedbacks.length).toFixed(1));
+  };
+
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
+
+    return (
+      <>
+        {[...Array(fullStars)].map((_, i) => (
+          <FontAwesomeIcon key={`full-${i}`} icon={faStar} className="full-star" />
+        ))}
+        {halfStar === 1 && (
+          <FontAwesomeIcon key="half" icon={faStarHalfAlt} className="half-star" />
+        )}
+        {[...Array(emptyStars)].map((_, i) => (
+          <FontAwesomeIcon key={`empty-${i}`} icon={faStar} className="empty-star" />
+        ))}
+      </>
+    );
+  };
   const filteredAndSortedServices = () => {
     let result = services.filter((service) => {
       const isActive = service.effectiveStatus === true;
@@ -158,7 +192,7 @@ const ServicesPage = ({ darkMode }) => { // Add darkMode prop
       const matchesCategory =
         filterCategory === "all" ||
         service.serviceCategoryId ===
-          categories.find((cat) => cat.name === filterCategory)?.serviceCategoryId;
+        categories.find((cat) => cat.name === filterCategory)?.serviceCategoryId;
       const price = service.price || 0;
       const matchesPriceRange =
         filterPriceRange === "all" ||
@@ -654,6 +688,37 @@ const ServicesPage = ({ darkMode }) => { // Add darkMode prop
             gap: 0.5rem;
           }
         }
+          .rating {
+          display: flex;
+          align-items: center;
+          gap: 0.2rem;
+          font-size: 1.1rem;
+        }
+        .full-star {
+          color: #f59e0b;
+        }
+        .half-star {
+          color: #f59e0b;
+          
+        }
+        .empty-star {
+          color: #d1d5db;
+        }
+        .rating-number {
+          margin-left: 0.5rem;
+          font-size: 1rem;
+          color: #6b7280;
+        }
+        .dark .full-star,
+        .dark .half-star {
+          color: #fbbf24;
+        }
+        .dark .empty-star {
+          color: #6b7280;
+        }
+        .dark .rating-number {
+          color: #d1d5db;
+        }
       `}</style>
 
       <div className={`services-page ${darkMode ? "dark" : ""}`}>
@@ -763,31 +828,33 @@ const ServicesPage = ({ darkMode }) => { // Add darkMode prop
                   {currentServices.length === 0 ? (
                     <div className="error">No matching services found.</div>
                   ) : (
-                    currentServices.map((service) => (
-                      <motion.div key={service.serviceId} variants={itemVariants}>
-                        <Link to={`/service/${service.serviceId}`} className="service-item">
-                          <div className="service-image-wrapper">
-                            <img
-                              src={service.imageUrl || "https://via.placeholder.com/300x200"}
-                              alt={service.name}
-                              className="service-image"
-                            />
-                            <div className="service-overlay">
-                              <span>View Details</span>
+                    currentServices.map((service) => {
+                      const averageRating = calculateAverageRating(service.serviceId);
+                      return (
+                        <motion.div key={service.serviceId} variants={itemVariants}>
+                          <Link to={`/service/${service.serviceId}`} className="service-item">
+                            <div className="service-image-wrapper">
+                              <img
+                                src={service.imageUrl || "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-1.jpg"}
+                                alt={service.name}
+                                className="service-image"
+                              />
+                              <div className="service-overlay">
+                                <span>View Details</span>
+                              </div>
                             </div>
-                          </div>
-                          <div className="service-content">
-                            <h2>{service.name}</h2>
-                            <p className="price">{formatPrice(service.price)}</p>
-                            <div className="rating">
-                              {[...Array(5)].map((_, i) => (
-                                <FontAwesomeIcon key={i} icon={faStar} />
-                              ))}
+                            <div className="service-content">
+                              <h2>{service.name}</h2>
+                              <p className="price">{formatPrice(service.price)}</p>
+                              <div className="rating">
+                                {renderStars(averageRating)}
+                                <span className="rating-number">({averageRating})</span>
+                              </div>
                             </div>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    ))
+                          </Link>
+                        </motion.div>
+                      );
+                    })
                   )}
                 </motion.div>
 

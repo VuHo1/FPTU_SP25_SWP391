@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStar,
   faChevronLeft,
+  faStarHalfAlt,
   faChevronRight,
   faEdit,
   faTrash,
@@ -205,7 +206,25 @@ const BlogDetail = ({ darkMode }) => {
   const isServiceActive = service.status;
   const mainImage = images.length > 0 ? images[mainImageIndex]?.imageURL : null;
   const averageRating = calculateAverageRating();
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
 
+    return (
+      <>
+        {[...Array(fullStars)].map((_, i) => (
+          <FontAwesomeIcon key={`full-${i}`} icon={faStar} className="full-star" />
+        ))}
+        {halfStar === 1 && (
+          <FontAwesomeIcon key="half" icon={faStarHalfAlt} className="half-star" />
+        )}
+        {[...Array(emptyStars)].map((_, i) => (
+          <FontAwesomeIcon key={`empty-${i}`} icon={faStar} className="empty-star" />
+        ))}
+      </>
+    );
+  };
   return (
     <>
       <style>{`
@@ -554,6 +573,35 @@ const BlogDetail = ({ darkMode }) => {
             flex-wrap: wrap;
           }
         }
+          .rating, .feedback-rating {
+          display: flex;
+          align-items: center;
+          gap: 0.2rem;
+          font-size: 1.1rem;
+        }
+        .full-star {
+          color: #f39c12; 
+        }
+        .half-star {
+          color: #f39c12; 
+        }
+        .empty-star {
+          color: ${darkMode ? "#6b7280" : "#ced4da"}; /* Màu sao rỗng, thay đổi theo darkMode */
+        }
+        
+        .star-rating {
+          display: flex;
+          gap: 5px;
+          margin-bottom: 0.5rem;
+        }
+        .star-rating .star {
+          cursor: pointer;
+          font-size: 1.2rem;
+          color: ${darkMode ? "#34495e" : "#ced4da"};
+        }
+        .star-rating .star.filled {
+          color: #f39c12;
+        }
       `}</style>
 
       <div className={`blog-detail ${darkMode ? "dark" : ""}`}>
@@ -570,16 +618,12 @@ const BlogDetail = ({ darkMode }) => {
                 Categorie:{" "}
                 {categories.find((cat) => cat.serviceCategoryId === service.serviceCategoryId)?.name || "N/A"}
               </p>
-              <div className="rating">
-                Rating: {averageRating} / 5{" "}
+              <p>
+                Average Rating: {averageRating} / 5{" "}
                 <span>
-                  {Array(Math.round(averageRating))
-                    .fill()
-                    .map((_, i) => (
-                      <FontAwesomeIcon key={i} icon={faStar} />
-                    ))}
+                  {renderStars(averageRating)}
                 </span>
-              </div>
+              </p>
             </div>
             <Link to="/service" className="back-button">
               Back
@@ -662,13 +706,9 @@ const BlogDetail = ({ darkMode }) => {
           <div className="feedback-list">
             <h3>Feedbacks of Service</h3>
             <div className="average-rating">
-              Average: {calculateAverageRating()} / 5{" "}
+              Average Rating: {averageRating} / 5{" "}
               <span className="feedback-rating">
-                {Array(Math.round(calculateAverageRating()))
-                  .fill()
-                  .map((_, i) => (
-                    <FontAwesomeIcon key={i} icon={faStar} />
-                  ))}
+                {renderStars(averageRating)}
               </span>
             </div>
             <div className="rating-filter">
@@ -766,7 +806,7 @@ const BlogDetail = ({ darkMode }) => {
                     </div>
                   ))
               ) : (
-                <p>No feedback yet {ratingFilter !== "All" ? `with ${ratingFilter} star` : ""}.</p>
+                <p>No feedback yet </p>
               )}
             </div>
           </div>
