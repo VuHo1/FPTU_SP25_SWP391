@@ -153,7 +153,7 @@ export default function SignIn({ darkMode }) {
         >
           <Link to={`/`}>
             <img
-              src="/src/assets/images/logo/logo.png"
+              src="https://png.pngtree.com/png-vector/20220708/ourmid/pngtree-skin-care-logo-png-image_5774040.png"
               alt="Logo"
               style={{
                 width: "115px",
