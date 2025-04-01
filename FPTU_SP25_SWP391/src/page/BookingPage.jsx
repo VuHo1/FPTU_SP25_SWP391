@@ -26,7 +26,53 @@ const BookingPage = ({ darkMode }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [paymentProcessing, setPaymentProcessing] = useState(false);
+    useEffect(() => {
+        const checkPaymentStatus = async () => {
+            const bookingId = localStorage.getItem('pendingBookingId');
+            if (bookingId) {
+                try {
+                    // Giả sử BE cung cấp API để kiểm tra trạng thái booking
+                    const response = await getBookingById(bookingId, token); // API lấy chi tiết booking
+                    const { paymentStatus, paymentCode, paymentId, cancel, orderCode } = response.data;
 
+                    // Gọi handlePaymentReturn với dữ liệu từ booking
+                    await handlePaymentReturn(paymentCode, paymentId, cancel, paymentStatus, orderCode, token);
+
+                    if (paymentStatus === 'PAID') {
+                        toast.success('Payment successful! Your order has been confirmed.', {
+                            position: 'top-right',
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                        });
+                    } else if (paymentStatus === 'CANCELLED' || cancel) {
+                        toast.error('Payment has been canceled. You can try again later.', {
+                            position: 'top-right',
+                            autoClose: 5000,
+                        });
+                    } else {
+                        toast.info(`Payment status: ${paymentStatus || 'Unknown'}`, {
+                            position: 'top-right',
+                            autoClose: 5000,
+                        });
+                    }
+
+                    // Xóa bookingId sau khi xử lý
+                    localStorage.removeItem('pendingBookingId');
+                } catch (error) {
+                    console.error('Error checking payment status:', error);
+                    toast.error('An error occurred while verifying payment. Please contact support.', {
+                        position: 'top-right',
+                        autoClose: 5000,
+                    });
+                }
+            }
+        };
+
+        checkPaymentStatus();
+    }, [token]);
     useEffect(() => {
         console.log('darkMode value:', darkMode);
     }, [darkMode]);
@@ -94,10 +140,14 @@ const BookingPage = ({ darkMode }) => {
             setPaymentProcessing(true);
             const paymentResponse = await createPayment(bookingId, token);
             if (paymentResponse && paymentResponse.data && paymentResponse.data.paymentLink) {
+                // Lưu bookingId vào localStorage để sử dụng sau khi quay lại
+                localStorage.setItem('pendingBookingId', bookingId);
+                console.log('Payment Link:', paymentResponse.data.paymentLink);
+                // Redirect tới payment link
                 window.location.href = paymentResponse.data.paymentLink;
-                return;
+            } else {
+                toast.error('Invalid payment link received.');
             }
-            toast.success('Payment processing initiated successfully!');
         } catch (err) {
             console.error('Error processing payment:', err);
             toast.error('Payment processing failed. Please try again or contact support.');

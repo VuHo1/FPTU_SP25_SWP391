@@ -27,6 +27,7 @@ const HomePage = ({ darkMode }) => {
       if (code && id && (cancel || status) && orderCode) {
         try {
           const response = await handlePaymentReturn(code, id, cancel, status, orderCode, token);
+          console.log('Handle Payment Return Response:', response);
           if (status === 'CANCELLED' || cancel === 'true') {
             toast.error('Payment has been canceled. You can try again later.', {
               position: 'top-right',

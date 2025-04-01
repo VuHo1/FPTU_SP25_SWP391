@@ -794,18 +794,20 @@ export const createPayment = async (bookingId, token) => {
 };
 // Xử lý kết quả thanh toán
 export const handlePaymentReturn = async (code, id, cancel, status, orderCode, token) => {
-  return apiClient.post('/payment-return', null, {
-    params: {
-      code,
-      id,
-      cancel,
-      status,
-      orderCode,
-    },
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  try {
+    const response = await apiClient.get('/api/Payment/payment-return', {
+      params: { code, id, cancel, status, orderCode },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: '*/*',
+      },
+    });
+    console.log('Payment return response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Payment return error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 // Add this to testApi.js
 export const getUserBookings = async (userId, token) => {
