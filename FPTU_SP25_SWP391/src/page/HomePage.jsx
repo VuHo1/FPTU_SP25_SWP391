@@ -71,7 +71,6 @@ const HomePage = ({ darkMode }) => {
     checkPaymentReturn();
   }, [location, token]);
 
-  // Function to shuffle an array (Fisher-Yates shuffle)
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -81,7 +80,7 @@ const HomePage = ({ darkMode }) => {
     return shuffled;
   };
 
-  // Fetch services and their images when the component mounts
+
   useEffect(() => {
     const fetchServices = async () => {
       setLoadingServices(true);
@@ -120,7 +119,7 @@ const HomePage = ({ darkMode }) => {
     fetchServices();
   }, []);
 
-  // Welcome message effect
+
   useEffect(() => {
     if (isLoggedIn && username) {
       setShowWelcome(true);
