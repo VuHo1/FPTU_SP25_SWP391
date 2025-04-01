@@ -504,7 +504,7 @@ const BookingPage = ({ darkMode }) => {
                                 <option value="">Select a service</option>
                                 {services.map((service) => (
                                     <option key={service.serviceId} value={service.serviceId}>
-                                        {service.name} (${service.price})
+                                        {service.name} ({service.price}VND)
                                     </option>
                                 ))}
                             </select>
