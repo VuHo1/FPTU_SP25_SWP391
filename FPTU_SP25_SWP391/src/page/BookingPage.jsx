@@ -31,11 +31,11 @@ const BookingPage = ({ darkMode }) => {
             const bookingId = localStorage.getItem('pendingBookingId');
             if (bookingId) {
                 try {
-                    // Giả sử BE cung cấp API để kiểm tra trạng thái booking
-                    const response = await getBookingById(bookingId, token); // API lấy chi tiết booking
+
+                    const response = await getBookingById(bookingId, token);
                     const { paymentStatus, paymentCode, paymentId, cancel, orderCode } = response.data;
 
-                    // Gọi handlePaymentReturn với dữ liệu từ booking
+
                     await handlePaymentReturn(paymentCode, paymentId, cancel, paymentStatus, orderCode, token);
 
                     if (paymentStatus === 'PAID') {
@@ -59,7 +59,7 @@ const BookingPage = ({ darkMode }) => {
                         });
                     }
 
-                    // Xóa bookingId sau khi xử lý
+
                     localStorage.removeItem('pendingBookingId');
                 } catch (error) {
                     console.error('Error checking payment status:', error);
@@ -140,10 +140,10 @@ const BookingPage = ({ darkMode }) => {
             setPaymentProcessing(true);
             const paymentResponse = await createPayment(bookingId, token);
             if (paymentResponse && paymentResponse.data && paymentResponse.data.paymentLink) {
-                // Lưu bookingId vào localStorage để sử dụng sau khi quay lại
+
                 localStorage.setItem('pendingBookingId', bookingId);
                 console.log('Payment Link:', paymentResponse.data.paymentLink);
-                // Redirect tới payment link
+
                 window.location.href = paymentResponse.data.paymentLink;
             } else {
                 toast.error('Invalid payment link received.');

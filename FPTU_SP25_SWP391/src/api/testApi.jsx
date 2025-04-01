@@ -70,7 +70,38 @@ export const getServiceCategories = async (token) => {
     throw error;
   }
 };
-
+export const getQuestionsByCategory = async (categoryId, token) => {
+  try {
+    const response = await apiClient.get(`/api/Qa/servicecategory/${categoryId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "*/*",
+      },
+    });
+    console.log("Questions Response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error fetching questions:", error);
+    throw error;
+  }
+};
+export const submitQuiz = async (answerPayload, token) => {
+  try {
+    const response = await apiClient.post(`/api/QaAnswer/submit-and-recommend`, answerPayload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "*/*",
+      },
+    });
+    console.log("Submit Quiz Response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error submitting quiz:", error);
+    throw error;
+  }
+};
 export const getListServicesByUserId = async (userId, token) => {
   try {
     console.log('Calling GET /api/services/user with userId:', userId);

@@ -13,9 +13,8 @@ import {
     CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import axios from "axios";
+import { getServiceCategories, getQuestionsByCategory, submitQuiz } from "../api/testApi"; // Điều chỉnh đường dẫn
 
-// Container chính với layout chia đôi
 const QuizContainer = styled(Box)(({ darkMode }) => ({
     display: "flex",
     minHeight: "75vh",
@@ -24,7 +23,6 @@ const QuizContainer = styled(Box)(({ darkMode }) => ({
     gap: "20px",
 }));
 
-// Bên trái (70%)
 const LeftPanel = styled(Box)(({ darkMode }) => ({
     flex: "0 0 70%",
     padding: "20px",
@@ -39,7 +37,6 @@ const LeftPanel = styled(Box)(({ darkMode }) => ({
     minHeight: "400px",
 }));
 
-// Bên phải (30%)
 const RightPanel = styled(Box)(({ darkMode }) => ({
     flex: "0 0 30%",
     padding: "20px",
@@ -52,7 +49,6 @@ const RightPanel = styled(Box)(({ darkMode }) => ({
     color: darkMode ? "#ecf0f1" : "#2c3e50",
 }));
 
-// Card dịch vụ
 const ServiceCard = styled(Box)(({ darkMode }) => ({
     padding: "15px",
     marginBottom: "15px",
@@ -66,7 +62,6 @@ const ServiceCard = styled(Box)(({ darkMode }) => ({
     },
 }));
 
-// Nút Next/Finish cố định
 const FixedNextButton = styled(Button)(({ darkMode }) => ({
     position: "absolute",
     bottom: "20px",
@@ -77,7 +72,6 @@ const FixedNextButton = styled(Button)(({ darkMode }) => ({
     borderRadius: "8px",
 }));
 
-// Nút Reset cố định
 const FixedResetButton = styled(Button)(({ darkMode }) => ({
     position: "absolute",
     bottom: "20px",
@@ -99,20 +93,12 @@ const UserQuiz = ({ darkMode }) => {
 
     const token = localStorage.getItem("token");
     const userId = 5; // Thay bằng giá trị thực từ hệ thống đăng nhập
-    const axiosInstance = axios.create({
-        baseURL: "https://kinaa1410-001-site1.qtempurl.com/api",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-            "Accept": "*/*",
-        },
-    });
 
     // Lấy danh sách danh mục dịch vụ
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axiosInstance.get("/ServiceCategory");
+                const response = await getServiceCategories(token);
                 setCategories(response.data.filter((cat) => cat.status && cat.exist));
             } catch (err) {
                 console.error("Error fetching categories:", err);
@@ -125,7 +111,7 @@ const UserQuiz = ({ darkMode }) => {
     const fetchQuestions = async (categoryId) => {
         setLoading(true);
         try {
-            const response = await axiosInstance.get(`/Qa/servicecategory/${categoryId}`);
+            const response = await getQuestionsByCategory(categoryId, token);
             setQuestions(response.data);
             setAnswers({});
             setCurrentQuestionIndex(0);
@@ -163,7 +149,7 @@ const UserQuiz = ({ darkMode }) => {
                 qaId: parseInt(qaId),
                 answer,
             }));
-            const response = await axiosInstance.post("/QaAnswer/submit-and-recommend", answerPayload);
+            const response = await submitQuiz(answerPayload, token);
             setResults(response.data);
         } catch (err) {
             console.error("Error submitting quiz:", err);
@@ -214,7 +200,7 @@ const UserQuiz = ({ darkMode }) => {
                         }}
                     >
                         <MenuItem value="">
-                            <em>Choose a category</em>
+                            <em>Choose a category1</em>
                         </MenuItem>
                         {categories.map((cat) => (
                             <MenuItem key={cat.serviceCategoryId} value={cat.serviceCategoryId}>
