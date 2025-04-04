@@ -187,10 +187,14 @@ const BlogDetail = ({ darkMode }) => {
     setMainImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
   const handleNextImage = () =>
     setMainImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-  const handleBookingClick = () =>
-    isLoggedIn
-      ? navigate("/booking_page")
-      : navigate("/sign_in", { state: { from: `/service/${id}` } });
+
+  const handleBookingClick = () => {
+    if (isLoggedIn) {
+      navigate("/booking_page", { state: { selectedServiceId: service.serviceId } });
+    } else {
+      navigate("/sign_in", { state: { from: `/service/${id}` } });
+    }
+  };
 
   const filteredFeedbacks = () => {
     if (ratingFilter === "All") return feedbacks;

@@ -221,7 +221,7 @@ export const postServiceCategory = async (serviceData, token) => {
 
 export const getBookingById = async (id, token) => {
   try {
-    const response = await apiClient.get(`/api/Booking/${id}`, {
+    const response = await apiClient.get(`/api/bookings/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { postBooking, getAllServices, getTherapistSchedules, createPayment } from '../api/testApi';
 import { useAuth } from '../page/AuthContext';
 import { toast } from 'react-toastify';
@@ -6,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const BookingPage = ({ darkMode }) => {
     const { isLoggedIn, userId, token, role } = useAuth();
+    const location = useLocation();
 
     const [formData, setFormData] = useState({
         userId: '',
@@ -26,53 +28,17 @@ const BookingPage = ({ darkMode }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [paymentProcessing, setPaymentProcessing] = useState(false);
+
     useEffect(() => {
-        const checkPaymentStatus = async () => {
-            const bookingId = localStorage.getItem('pendingBookingId');
-            if (bookingId) {
-                try {
+        const selectedServiceId = location.state?.selectedServiceId;
+        if (selectedServiceId) {
+            setFormData((prev) => ({
+                ...prev,
+                serviceId: selectedServiceId.toString(),
+            }));
+        }
+    }, [location.state]);
 
-                    const response = await getBookingById(bookingId, token);
-                    const { paymentStatus, paymentCode, paymentId, cancel, orderCode } = response.data;
-
-
-                    await handlePaymentReturn(paymentCode, paymentId, cancel, paymentStatus, orderCode, token);
-
-                    if (paymentStatus === 'PAID') {
-                        toast.success('Payment successful! Your order has been confirmed.', {
-                            position: 'top-right',
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                        });
-                    } else if (paymentStatus === 'CANCELLED' || cancel) {
-                        toast.error('Payment has been canceled. You can try again later.', {
-                            position: 'top-right',
-                            autoClose: 5000,
-                        });
-                    } else {
-                        toast.info(`Payment status: ${paymentStatus || 'Unknown'}`, {
-                            position: 'top-right',
-                            autoClose: 5000,
-                        });
-                    }
-
-
-                    localStorage.removeItem('pendingBookingId');
-                } catch (error) {
-                    console.error('Error checking payment status:', error);
-                    toast.error('An error occurred while verifying payment. Please contact support.', {
-                        position: 'top-right',
-                        autoClose: 5000,
-                    });
-                }
-            }
-        };
-
-        checkPaymentStatus();
-    }, [token]);
     useEffect(() => {
         console.log('darkMode value:', darkMode);
     }, [darkMode]);
@@ -140,10 +106,8 @@ const BookingPage = ({ darkMode }) => {
             setPaymentProcessing(true);
             const paymentResponse = await createPayment(bookingId, token);
             if (paymentResponse && paymentResponse.data && paymentResponse.data.paymentLink) {
-
                 localStorage.setItem('pendingBookingId', bookingId);
                 console.log('Payment Link:', paymentResponse.data.paymentLink);
-
                 window.location.href = paymentResponse.data.paymentLink;
             } else {
                 toast.error('Invalid payment link received.');
@@ -173,7 +137,7 @@ const BookingPage = ({ darkMode }) => {
                 ...prev,
                 scheduleId: randomSchedule.scheduleId.toString(),
             }));
-            toast.success(`Randomly selected: ${randomSchedule.therapistName} (${getDayName(randomSchedule.dayOfWeek)})`);
+            toast.success(`Randomly selected: ${randomSchedule.therapistName} (${getSpecificDate(randomSchedule.dayOfWeek)})`);
         } else {
             toast.error('No therapist schedules available to choose from');
         }
@@ -182,6 +146,16 @@ const BookingPage = ({ darkMode }) => {
     const getDayName = (dayNumber) => {
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         return days[dayNumber % 7] || `Day ${dayNumber}`;
+    };
+
+    // Hàm mới để tính ngày cụ thể dựa trên dayOfWeek
+    const getSpecificDate = (dayOfWeek) => {
+        const today = new Date();
+        const currentDay = today.getDay(); // 0 (Sunday) đến 6 (Saturday)
+        const diff = (dayOfWeek - currentDay + 7) % 7; // Tính khoảng cách đến ngày trong tuần
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + diff); // Cộng số ngày để đến ngày cần tìm
+        return targetDate.toLocaleDateString('en-GB'); // Định dạng DD/MM/YYYY
     };
 
     const getStatusDescription = (status) => {
@@ -239,7 +213,7 @@ const BookingPage = ({ darkMode }) => {
                 scheduleId: '',
                 useWallet: false,
                 note: '',
-                serviceId: '',
+                serviceId: formData.serviceId,
             });
         } catch (err) {
             setError(err.response ? err.response.data : 'Something went wrong');
@@ -280,7 +254,7 @@ const BookingPage = ({ darkMode }) => {
     const therapistScheduleOptions = therapists.map((schedule) => ({
         scheduleId: schedule.scheduleId,
         therapistId: schedule.therapistId,
-        displayName: `${schedule.therapistName} (${getDayName(schedule.dayOfWeek)}, ${schedule.startWorkingTime.slice(0, 5)} - ${schedule.endWorkingTime.slice(0, 5)})`,
+        displayName: `${schedule.therapistName} (${getDayName(schedule.dayOfWeek)}, ${getSpecificDate(schedule.dayOfWeek)}, ${schedule.startWorkingTime.slice(0, 5)} - ${schedule.endWorkingTime.slice(0, 5)})`,
     }));
 
     return (
@@ -454,8 +428,6 @@ const BookingPage = ({ darkMode }) => {
           font-size: 1.1rem;
           color: ${darkMode ? "#bdc3c7" : "#6b7280"};
         }
-
-        /* Scrollbar Styles */
         .booking-page::-webkit-scrollbar {
           width: 8px;
         }
@@ -466,8 +438,6 @@ const BookingPage = ({ darkMode }) => {
         .booking-page::-webkit-scrollbar-track {
           background: ${darkMode ? "#1c2526" : "#f8f9fa"};
         }
-
-        /* Responsive Design */
         @media (max-width: 768px) {
           .booking-page {
             padding: 2rem 1rem;
@@ -565,8 +535,10 @@ const BookingPage = ({ darkMode }) => {
                                 <h3 className="therapist-info-title">Therapist Schedule Info</h3>
                                 <p className="therapist-info-text">
                                     {selectedTherapistData.therapistName} is available on{' '}
-                                    {getDayName(selectedTherapistData.dayOfWeek)} from{' '}
-                                    {selectedTherapistData.startWorkingTime} to {selectedTherapistData.endWorkingTime}
+                                    {getDayName(selectedTherapistData.dayOfWeek)}{' '}
+                                    ({getSpecificDate(selectedTherapistData.dayOfWeek)}) from{' '}
+                                    {selectedTherapistData.startWorkingTime.slice(0, 5)} to{' '}
+                                    {selectedTherapistData.endWorkingTime.slice(0, 5)}
                                 </p>
                             </div>
                         )}
