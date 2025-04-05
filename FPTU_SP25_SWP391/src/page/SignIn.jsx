@@ -27,15 +27,18 @@ export default function SignIn({ darkMode }) {
   };
 
   const handleSave = async () => {
+    // Check for empty fields
     if (!userName || !password) {
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: "Please fill in all required fields!",
+        title: "Missing Information",
+        text: "Please enter both username and password!",
+        confirmButtonColor: darkMode ? "#1abc9c" : "#6c4f37",
       });
       setIsLoading(false);
       return;
     }
+
     const data = { userName, password };
     setIsLoading(true);
 
@@ -43,14 +46,16 @@ export default function SignIn({ darkMode }) {
       const response = await login(data);
       Swal.fire({
         icon: "success",
-        title: "Login success!",
-        text: response?.data?.message || "Successfully",
+        title: "Login Successful!",
+        text: response?.data?.message || "Welcome back!",
+        confirmButtonColor: darkMode ? "#1abc9c" : "#6c4f37",
       });
 
       const token = response.data.token;
       const userId = response.data.userId;
       const decodedToken = jwtDecode(token);
       const role = decodedToken.role;
+
       console.log("Login response:", response.data);
       console.log("Decoded token:", decodedToken);
       console.log("Extracted values:", { userId, role, token });
@@ -62,6 +67,7 @@ export default function SignIn({ darkMode }) {
         role: role,
       });
 
+      // Navigate based on role
       switch (role) {
         case "Customer":
           navigate("/");
@@ -81,18 +87,34 @@ export default function SignIn({ darkMode }) {
 
       setIsLoading(false);
     } catch (error) {
-      let errorMessage = "An unknown error occurred.";
+      let errorMessage = "An unexpected error occurred.";
+      let errorTitle = "Login Failed";
+
+      // Handle specific error cases
       if (error.response) {
-        errorMessage = error.response.data.message || error.response.data || "Login failed.";
+        const status = error.response.status;
+        if (status === 401) {
+          errorTitle = "Unauthorized";
+          errorMessage = "Incorrect username or password. Please try again.";
+        } else if (status === 400) {
+          errorTitle = "Bad Request";
+          errorMessage = error.response.data.message || "Invalid input data.";
+        } else if (status === 500) {
+          errorTitle = "Server Error";
+          errorMessage = "Something went wrong on our end. Please try again later.";
+        } else {
+          errorMessage = error.response.data.message || "Login failed.";
+        }
       } else if (error.request) {
-        errorMessage = "No response from the server. Please check your network.";
-      } else {
-        errorMessage = error.message || "An unexpected error occurred.";
+        errorTitle = "Network Error";
+        errorMessage = "Unable to connect to the server. Please check your internet connection.";
       }
+
       Swal.fire({
         icon: "error",
-        title: "Please check your input!!!",
+        title: errorTitle,
         text: errorMessage,
+        confirmButtonColor: darkMode ? "#1abc9c" : "#6c4f37",
       });
       setIsLoading(false);
     }
@@ -146,8 +168,8 @@ export default function SignIn({ darkMode }) {
           transition={{ duration: 0.5, delay: 0.2 }}
           style={{
             display: "flex",
-            justifyContent: "center", // Center horizontally
-            alignItems: "center", // Center vertically within the div
+            justifyContent: "center",
+            alignItems: "center",
             marginBottom: "25px",
           }}
         >

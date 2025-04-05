@@ -21,7 +21,7 @@ import {
   faEdit,
   faMoon,
   faSignOutAlt,
-  faBook, // Icon mới cho View Bookings
+  faBook,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
@@ -78,8 +78,8 @@ const BookingCard = styled(Box)(({ darkMode }) => ({
   background: darkMode ? "rgba(69, 90, 100, 0.9)" : "rgba(248, 244, 225, 0.9)",
   borderRadius: "10px",
   color: darkMode ? "#ecf0f1" : "#2c3e50",
-  '& *': {
-    color: 'inherit',
+  "& *": {
+    color: "inherit",
   },
 }));
 
@@ -92,14 +92,14 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
   const [users, setUsers] = useState([]);
   const [expandedBookingId, setExpandedBookingId] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
-  const { logout, userId, token } = useAuth();
+  const { logout, userId, token, username } = useAuth(); // Added username from useAuth
 
   const axiosInstance = axios.create({
     baseURL: "https://kinaa1410-001-site1.qtempurl.com/api",
     headers: {
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-      "Accept": "*/*",
+      Accept: "*/*",
     },
   });
 
@@ -131,7 +131,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
       setActiveSection("home");
       navigate("/skintherapist/home", { replace: true, state: {} });
     }
-  }, [location, navigate]);
+  }, [location, navigate, userId]);
 
   const handleLogout = () => {
     logout();
@@ -166,9 +166,11 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
       if (section === "bookings") fetchBookings();
     }
   };
+
   const handleToggleExpand = (bookingId) => {
     setExpandedBookingId(expandedBookingId === bookingId ? null : bookingId);
   };
+
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", p: 1 }}>
       <Box>
@@ -176,7 +178,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
           variant="h6"
           sx={{
             color: darkMode ? "#ecf0f1" : "#2c3e50",
-            mb: 2,
+            mb: 1,
             fontWeight: 700,
             textAlign: "center",
             fontFamily: "'Poppins', sans-serif",
@@ -192,6 +194,18 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
           transition={{ duration: 0.5 }}
         >
           <FontAwesomeIcon icon={faUser} /> Therapist Control Panel
+        </Typography>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: darkMode ? "#bdc3c7" : "#7f8c8d",
+            mb: 2,
+            textAlign: "center",
+            fontFamily: "'Roboto', sans-serif",
+            fontSize: "0.9rem",
+          }}
+        >
+          Welcome, {username || "Therapist"}
         </Typography>
         <Divider sx={{ backgroundColor: darkMode ? "#5a758c" : "#ccc", my: 1 }} />
         <List sx={{ padding: 0 }}>
@@ -270,7 +284,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
                 fontWeight: 600,
               }}
             >
-              Welcome, Therapist!
+              Welcome, {username || "Therapist"}!
             </Typography>
             <Typography
               sx={{
@@ -303,26 +317,31 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
               </Box>
             ) : bookings.length > 0 ? (
               bookings.map((booking) => {
-                const user = users.find(u => u.userId === booking.userId) || {};
-                const timeSlot = timeSlots.find(ts => ts.timeSlotId === booking.timeSlotId) || {};
+                const user = users.find((u) => u.userId === booking.userId) || {};
+                const timeSlot = timeSlots.find((ts) => ts.timeSlotId === booking.timeSlotId) || {};
                 const isExpanded = expandedBookingId === booking.bookingId;
                 return (
-                  <BookingCard key={booking.bookingId} darkMode={darkMode} onClick={() => handleToggleExpand(booking.bookingId)}
+                  <BookingCard
+                    key={booking.bookingId}
+                    darkMode={darkMode}
+                    onClick={() => handleToggleExpand(booking.bookingId)}
                     component={motion.div}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    sx={{ cursor: "pointer" }}>
+                    sx={{ cursor: "pointer" }}
+                  >
                     <Typography>Booking ID: {booking.bookingId}</Typography>
                     <Typography>Appointment Date: {new Date(booking.appointmentDate).toLocaleDateString()}</Typography>
                     {isExpanded && (
                       <>
-                        <Typography>User: {(user.firstName && user.lastName) ? ` ${user.lastName} ${user.firstName}` : "Unknown"} (ID: {booking.userId})</Typography>
+                        <Typography>
+                          User: {(user.firstName && user.lastName) ? `${user.lastName} ${user.firstName}` : "Unknown"} (ID: {booking.userId})
+                        </Typography>
                         <Typography>Therapist ID: {booking.therapistId}</Typography>
                         <Typography>Time Slot: {timeSlot.description || "N/A"} (ID: {booking.timeSlotId})</Typography>
                         <Typography>Date Created: {new Date(booking.dateCreated).toLocaleString()}</Typography>
                         <Typography>Note: {booking.note || "N/A"}</Typography>
                         <Typography>Status: {booking.status ? "Active" : "Inactive"}</Typography>
-                  
                       </>
                     )}
                   </BookingCard>

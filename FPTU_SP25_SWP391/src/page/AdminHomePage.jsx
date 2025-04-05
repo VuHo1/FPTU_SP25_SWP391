@@ -23,12 +23,12 @@ import {
   InputLabel,
   Snackbar,
   Alert,
-  Dialog,           // Added Dialog
-  DialogActions,    // Added DialogActions
-  DialogContent,    // Added DialogContent
-  DialogContentText,// Added DialogContentText
-  DialogTitle,      // Added DialogTitle
-  Button,           // Added Button
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
@@ -122,7 +122,7 @@ const LogoutListItem = styled(ListItem)(({ darkMode }) => ({
   borderRadius: "8px",
   margin: "4px 12px",
   padding: "8px 16px",
-  background: darkMode ? "#e74c3c" : "#f2dede",
+  background: darkMode ? "#e74c3 sentó" : "#f2dede",
   color: darkMode ? "#ecf0f1" : "#721c24",
   transition: "background 0.3s ease, transform 0.2s ease",
   "&:hover": {
@@ -147,12 +147,12 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
     message: "",
     severity: "success",
   });
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // State for Dialog
-  const [userToDelete, setUserToDelete] = useState(null); // Store user to delete
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const usersPerPage = 10;
 
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, username } = useAuth(); // Added username from useAuth
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -286,7 +286,7 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
           variant="h6"
           sx={{
             color: darkMode ? "#ecf0f1" : "#2c3e50",
-            mb: 2,
+            mb: 1,
             fontWeight: 700,
             textAlign: "center",
             fontFamily: "'Poppins', sans-serif",
@@ -298,6 +298,18 @@ export default function AdminHomePage({ darkMode, toggleDarkMode }) {
           }}
         >
           <FontAwesomeIcon icon={faUser} /> Admin Panel
+        </Typography>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: darkMode ? "#bdc3c7" : "#7f8c8d",
+            mb: 2,
+            textAlign: "center",
+            fontFamily: "'Roboto', sans-serif",
+            fontSize: "0.9rem",
+          }}
+        >
+          Welcome, {username || "Admin"}
         </Typography>
         <List sx={{ padding: 0 }}>
           {menuItems.map((item, index) => (
