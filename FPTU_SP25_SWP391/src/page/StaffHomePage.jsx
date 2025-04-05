@@ -94,7 +94,7 @@ const BookingCard = styled(Box)(({ darkMode }) => ({
   "& *": {
     color: "inherit",
   },
-  textAlign: "left"
+  textAlign: "left",
 }));
 const FeedbackCard = styled(Box)(({ darkMode }) => ({
   padding: "20px",
@@ -105,23 +105,25 @@ const FeedbackCard = styled(Box)(({ darkMode }) => ({
   "& *": {
     color: "inherit",
   },
-  display: "flex", // Dùng flex để căn icon xóa sang phải
+  display: "flex",
   justifyContent: "space-between",
 }));
+
 const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
   const [activeSection, setActiveSection] = useState("home");
   const [bookings, setBookings] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
-  const [services, setServices] = useState([]); // State cho danh sách dịch vụ
-  const [users, setUsers] = useState([]); // State cho danh sách users
+  const [services, setServices] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [serviceIdFilter, setServiceIdFilter] = useState("All"); // Filter cho serviceId
-  const [ratingFilter, setRatingFilter] = useState("All"); // Filter cho rating
+  const [serviceIdFilter, setServiceIdFilter] = useState("All");
+  const [ratingFilter, setRatingFilter] = useState("All");
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, userId, username } = useAuth(); // Added username from useAuth
   const [timeSlots, setTimeSlots] = useState([]);
   const [expandedBookingId, setExpandedBookingId] = useState(null);
   const token = localStorage.getItem("token");
+
   const axiosInstance = axios.create({
     baseURL: "https://kinaa1410-001-site1.qtempurl.com/api",
     headers: {
@@ -207,7 +209,6 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
       action();
     } else {
       setActiveSection(section);
-
       if (section === "view-profile") navigate("/profile-role");
       if (section === "edit-profile") navigate("/edit-profilerole");
       if (section === "bookings") fetchBookings();
@@ -233,7 +234,7 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
           variant="h6"
           sx={{
             color: darkMode ? "#ecf0f1" : "#2c3e50",
-            mb: 2,
+            mb: 1,
             fontWeight: 700,
             textAlign: "center",
             fontFamily: "'Poppins', sans-serif",
@@ -249,6 +250,18 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
           transition={{ duration: 0.5 }}
         >
           <FontAwesomeIcon icon={faUser} /> Staff Control Panel
+        </Typography>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: darkMode ? "#bdc3c7" : "#7f8c8d",
+            mb: 2,
+            textAlign: "center",
+            fontFamily: "'Roboto', sans-serif",
+            fontSize: "0.9rem",
+          }}
+        >
+          Welcome, {username || "Staff Member"}
         </Typography>
         <Divider sx={{ backgroundColor: darkMode ? "#5a758c" : "#ccc", my: 1 }} />
         <List sx={{ padding: 0 }}>
@@ -327,7 +340,7 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
                 fontWeight: 600,
               }}
             >
-              Welcome, Staff Member!
+              Welcome, {username || "Staff Member"}!
             </Typography>
             <Typography
               sx={{
@@ -419,7 +432,6 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
                                 }
                               </Typography>
                               <Typography>Is Paid: {booking.isPaid ? "Yes" : "No"}</Typography>
-
                             </>
                           )}
                         </Box>
@@ -448,7 +460,6 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
             </Typography>
             <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
               <FormControl sx={{ minWidth: 150 }}>
-
                 <Select
                   value={serviceIdFilter}
                   onChange={(e) => setServiceIdFilter(e.target.value)}
@@ -469,7 +480,6 @@ const StaffHomePage = ({ darkMode, toggleDarkMode }) => {
                 </Select>
               </FormControl>
               <FormControl sx={{ minWidth: 150 }}>
-
                 <Select
                   value={ratingFilter}
                   onChange={(e) => setRatingFilter(e.target.value)}

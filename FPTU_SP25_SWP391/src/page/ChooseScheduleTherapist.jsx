@@ -31,114 +31,140 @@ import { useAuth } from "./AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 
-// Enhanced Professional Styling
+// Professional Styling Redesign
 const ScheduleContainer = styled(Box)(({ darkMode }) => ({
   flexGrow: 1,
   padding: "60px 40px",
   minHeight: "100vh",
   background: darkMode
-    ? "linear-gradient(135deg, #1c2526 0%, #34495e 100%)"
-    : "linear-gradient(135deg, #f8f4e1 0%, #e5e5e5 100%)",
+    ? "linear-gradient(145deg, #1e272e 0%, #2f3e50 100%)"
+    : "linear-gradient(145deg, #f9f7f1 0%, #e8ecef 100%)",
   fontFamily: "'Roboto', sans-serif",
   overflowY: "auto",
+  position: "relative",
+}));
+
+const HeaderSection = styled(Box)(({ darkMode }) => ({
+  marginBottom: "40px",
+  textAlign: "center",
+  background: darkMode
+    ? "rgba(46, 62, 80, 0.95)"
+    : "rgba(255, 255, 255, 0.95)",
+  padding: "20px",
+  borderRadius: "12px",
+  boxShadow: darkMode
+    ? "0 6px 20px rgba(0, 0, 0, 0.5)"
+    : "0 6px 20px rgba(0, 0, 0, 0.1)",
+  border: darkMode ? "1px solid #3b4d63" : "1px solid #d3dce6",
 }));
 
 const FormWrapper = styled(Paper)(({ darkMode }) => ({
-  padding: "32px",
-  borderRadius: "16px",
-  background: darkMode ? "rgba(52, 73, 94, 0.98)" : "rgba(255, 255, 255, 0.98)",
+  padding: "40px",
+  borderRadius: "20px",
+  background: darkMode ? "rgba(46, 62, 80, 0.98)" : "rgba(255, 255, 255, 0.98)",
   boxShadow: darkMode
-    ? "0 8px 24px rgba(0, 0, 0, 0.4)"
-    : "0 8px 24px rgba(0, 0, 0, 0.15)",
-  border: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
-  maxWidth: "720px",
-  margin: "0 auto 64px",
+    ? "0 10px 30px rgba(0, 0, 0, 0.5)"
+    : "0 10px 30px rgba(0, 0, 0, 0.08)",
+  border: darkMode ? "1px solid #3b4d63" : "1px solid #d3dce6",
+  maxWidth: "800px",
+  margin: "0 auto 60px",
   transition: "all 0.3s ease-in-out",
 }));
 
 const StyledButton = styled(Button)(({ darkMode }) => ({
-  padding: "12px 24px",
-  borderRadius: "8px",
+  padding: "14px 28px",
+  borderRadius: "10px",
   fontWeight: 600,
-  fontSize: "15px",
+  fontSize: "16px",
   fontFamily: "'Poppins', sans-serif",
   textTransform: "none",
-  background: darkMode ? "#1abc9c" : "#6c4f37",
-  color: "#fff",
+  background: darkMode
+    ? "linear-gradient(90deg, #00c4cc 0%, #007bff 100%)"
+    : "linear-gradient(90deg, #6c4f37 0%, #8a6f4e 100%)",
+  color: "#ffffff",
   "&:hover": {
-    background: darkMode ? "#16a085" : "#503a28",
+    background: darkMode
+      ? "linear-gradient(90deg, #00a3aa 0%, #0056b3 100%)"
+      : "linear-gradient(90deg, #503a28 0%, #6c4f37 100%)",
     boxShadow: darkMode
-      ? "0 4px 12px rgba(26, 188, 156, 0.3)"
-      : "0 4px 12px rgba(108, 79, 55, 0.3)",
+      ? "0 6px 18px rgba(0, 196, 204, 0.4)"
+      : "0 6px 18px rgba(108, 79, 55, 0.3)",
   },
   transition: "all 0.3s ease-in-out",
 }));
 
 const ScheduleTableWrapper = styled(Paper)(({ darkMode }) => ({
-  padding: "32px",
-  borderRadius: "16px",
-  background: darkMode ? "rgba(52, 73, 94, 0.98)" : "rgba(255, 255, 255, 0.98)",
+  padding: "40px",
+  borderRadius: "20px",
+  background: darkMode ? "rgba(46, 62, 80, 0.98)" : "rgba(255, 255, 255, 0.98)",
   boxShadow: darkMode
-    ? "0 8px 24px rgba(0, 0, 0, 0.4)"
-    : "0 8px 24px rgba(0, 0, 0, 0.15)",
-  border: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
-  maxWidth: "1280px",
+    ? "0 10px 30px rgba(0, 0, 0, 0.5)"
+    : "0 10px 30px rgba(0, 0, 0, 0.08)",
+  border: darkMode ? "1px solid #3b4d63" : "1px solid #d3dce6",
+  maxWidth: "1400px",
   margin: "0 auto",
   transition: "all 0.3s ease-in-out",
 }));
 
 const ScheduleGrid = styled(Box)(({ darkMode }) => ({
   display: "grid",
-  gridTemplateColumns: "120px repeat(7, 1fr)",
-  gap: "8px",
-  padding: "16px",
-  borderRadius: "12px",
-  background: darkMode ? "#34495e" : "#f8f4e1",
-  boxShadow: darkMode ? "inset 0 2px 8px rgba(0, 0, 0, 0.4)" : "inset 0 2px 8px rgba(0, 0, 0, 0.05)",
+  gridTemplateColumns: "150px repeat(7, 1fr)",
+  gap: "10px",
+  padding: "20px",
+  borderRadius: "15px",
+  background: darkMode ? "#2f3e50" : "#f1f4f8",
+  boxShadow: darkMode
+    ? "inset 0 4px 12px rgba(0, 0, 0, 0.5)"
+    : "inset 0 4px 12px rgba(0, 0, 0, 0.05)",
 }));
 
 const ScheduleHeader = styled(Typography)(({ darkMode }) => ({
-  fontSize: "14px",
+  fontSize: "15px",
   fontWeight: 700,
   fontFamily: "'Poppins', sans-serif",
-  color: darkMode ? "#ecf0f1" : "#2c3e50",
+  color: darkMode ? "#e6ecef" : "#2c3e50",
   textAlign: "center",
-  padding: "12px",
-  background: darkMode ? "#5a758c" : "#e0e0e0",
-  borderRadius: "8px",
-  boxShadow: darkMode ? "0 2px 4px rgba(0, 0, 0, 0.2)" : "0 2px 4px rgba(0, 0, 0, 0.1)",
+  padding: "14px",
+  background: darkMode
+    ? "linear-gradient(90deg, #3b4d63 0%, #5a758c 100%)"
+    : "linear-gradient(90deg, #dfe6e9 0%, #b2bec3 100%)",
+  borderRadius: "10px",
+  boxShadow: darkMode
+    ? "0 3px 6px rgba(0, 0, 0, 0.3)"
+    : "0 3px 6px rgba(0, 0, 0, 0.1)",
 }));
 
 const ScheduleCell = styled(Box)(({ darkMode, isScheduled }) => ({
-  padding: "12px",
+  padding: "14px",
   textAlign: "center",
-  fontSize: "14px",
+  fontSize: "15px",
   fontFamily: "'Roboto', sans-serif",
   fontWeight: 500,
-  color: isScheduled ? (darkMode ? "#1abc9c" : "#6c4f37") : darkMode ? "#bdc3c7" : "#7f8c8d",
+  color: isScheduled ? (darkMode ? "#00c4cc" : "#6c4f37") : darkMode ? "#a3bffa" : "#636e72",
   background: isScheduled
-    ? (darkMode ? "rgba(26, 188, 156, 0.15)" : "rgba(108, 79, 55, 0.15)")
+    ? (darkMode ? "rgba(0, 196, 204, 0.2)" : "rgba(108, 79, 55, 0.2)")
     : "transparent",
-  borderRadius: "6px",
-  border: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
-  transition: "all 0.2s ease",
+  borderRadius: "8px",
+  border: darkMode ? "1px solid #3b4d63" : "1px solid #d3dce6",
+  transition: "all 0.3s ease",
   "&:hover": {
-    background: darkMode ? "rgba(69, 90, 100, 0.8)" : "rgba(224, 224, 224, 0.5)",
-    borderColor: darkMode ? "#1abc9c" : "#6c4f37",
+    background: darkMode ? "rgba(59, 77, 99, 0.9)" : "rgba(223, 230, 233, 0.7)",
+    borderColor: darkMode ? "#00c4cc" : "#6c4f37",
     cursor: "pointer",
+    transform: "scale(1.03)",
   },
 }));
 
 const TimeCell = styled(Box)(({ darkMode }) => ({
-  padding: "12px",
+  padding: "14px",
   textAlign: "left",
-  fontSize: "14px",
+  fontSize: "15px",
   fontFamily: "'Roboto', sans-serif",
   fontWeight: 600,
-  color: darkMode ? "#ecf0f1" : "#2c3e50",
-  background: darkMode ? "rgba(90, 117, 140, 0.2)" : "rgba(224, 224, 224, 0.3)",
-  borderRadius: "6px",
-  border: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
+  color: darkMode ? "#e6ecef" : "#2c3e50",
+  background: darkMode ? "rgba(59, 77, 99, 0.3)" : "rgba(178, 190, 195, 0.2)",
+  borderRadius: "8px",
+  border: darkMode ? "1px solid #3b4d63" : "1px solid #d3dce6",
 }));
 
 const ChooseScheduleTherapist = ({ darkMode }) => {
@@ -149,7 +175,7 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
   const [timeSlots, setTimeSlots] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-  const { userId, token } = useAuth();
+  const { userId, token, username } = useAuth();
 
   const therapistId = userId || location.state?.therapistId || localStorage.getItem("userId");
   const authToken = token || location.state?.token || localStorage.getItem("token");
@@ -212,7 +238,7 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
       if (schedule.dayOfWeek !== dayNumber) return false;
       const existingStart = schedule.startWorkingTime;
       const existingEnd = schedule.endWorkingTime;
-      return (startTime < existingEnd && endTime > existingStart);
+      return startTime < existingEnd && endTime > existingStart;
     });
 
     if (hasOverlap) {
@@ -234,7 +260,7 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
       setSelectedDay("");
       setStartTime("");
       setEndTime("");
-      fetchSchedules(); // Refresh schedules after adding
+      fetchSchedules();
     } catch (error) {
       alert("Failed to add schedule. Please try again.");
       console.error("Schedule creation error:", error);
@@ -258,7 +284,6 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
     navigate("/skintherapist/home", { state: { resetToHome: true } });
   };
 
-  // Generate schedule grid based on fetched time slots
   const scheduleGrid = timeSlots.map((slot) => {
     const row = { time: `${slot.startTime.slice(0, 5)}-${slot.endTime.slice(0, 5)}`, start: slot.startTime, end: slot.endTime };
     days.forEach((day) => {
@@ -273,7 +298,6 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
     return row;
   });
 
-  // Handle click on schedule cell
   const handleCellClick = (day, slot) => {
     setSelectedDay(day);
     setStartTime(slot.start);
@@ -288,48 +312,70 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      <Typography
-        variant="h4"
-        sx={{
-          color: darkMode ? "#ecf0f1" : "#2c3e50",
-          fontWeight: 700,
-          mb: 6,
-          textAlign: "center",
-          fontFamily: "'Poppins', sans-serif",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "0.5rem",
-        }}
-        component={motion.div}
-        initial={{ y: -20 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <FontAwesomeIcon icon={faCalendar} /> Therapist Schedule Management
-      </Typography>
+      <HeaderSection darkMode={darkMode}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: darkMode ? "#e6ecef" : "#2c3e50",
+            fontWeight: 700,
+            fontFamily: "'Poppins', sans-serif",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.75rem",
+          }}
+          component={motion.div}
+          initial={{ y: -20 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <FontAwesomeIcon icon={faCalendar} /> Therapist Schedule Management
+        </Typography>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: darkMode ? "#a3bffa" : "#636e72",
+            mt: 1,
+            fontFamily: "'Roboto', sans-serif",
+            fontSize: "0.95rem",
+          }}
+        >
+          Welcome, {username || "Therapist"}
+        </Typography>
+      </HeaderSection>
 
       <FormWrapper
         darkMode={darkMode}
-        elevation={4}
+        elevation={6}
         component={motion.div}
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
+        <Typography
+          variant="h6"
+          sx={{
+            color: darkMode ? "#e6ecef" : "#2c3e50",
+            fontWeight: 600,
+            fontFamily: "'Poppins', sans-serif",
+            mb: 4,
+          }}
+        >
+          Create New Schedule
+        </Typography>
         <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 500, fontFamily: "'Roboto', sans-serif" }}>
+          <InputLabel sx={{ color: darkMode ? "#e6ecef" : "#2c3e50", fontWeight: 500, fontFamily: "'Roboto', sans-serif" }}>
             Day of Week
           </InputLabel>
           <Select
             value={selectedDay}
             onChange={handleDayChange}
             sx={{
-              color: darkMode ? "#ecf0f1" : "#2c3e50",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#5a758c" : "#ccc" },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
-              backgroundColor: darkMode ? "#2c3e50" : "#fff",
-              borderRadius: "8px",
+              color: darkMode ? "#e6ecef" : "#2c3e50",
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#3b4d63" : "#d3dce6" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#00c4cc" : "#6c4f37" },
+              backgroundColor: darkMode ? "#2f3e50" : "#fff",
+              borderRadius: "10px",
               fontSize: "15px",
               fontFamily: "'Roboto', sans-serif",
             }}
@@ -344,18 +390,18 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
         </FormControl>
 
         <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 500, fontFamily: "'Roboto', sans-serif" }}>
+          <InputLabel sx={{ color: darkMode ? "#e6ecef" : "#2c3e50", fontWeight: 500, fontFamily: "'Roboto', sans-serif" }}>
             Start Time
           </InputLabel>
           <Select
             value={startTime}
             onChange={handleStartTimeChange}
             sx={{
-              color: darkMode ? "#ecf0f1" : "#2c3e50",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#5a758c" : "#ccc" },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
-              backgroundColor: darkMode ? "#2c3e50" : "#fff",
-              borderRadius: "8px",
+              color: darkMode ? "#e6ecef" : "#2c3e50",
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#3b4d63" : "#d3dce6" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#00c4cc" : "#6c4f37" },
+              backgroundColor: darkMode ? "#2f3e50" : "#fff",
+              borderRadius: "10px",
               fontSize: "15px",
               fontFamily: "'Roboto', sans-serif",
             }}
@@ -370,18 +416,18 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
         </FormControl>
 
         <FormControl fullWidth sx={{ mb: 4 }}>
-          <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 500, fontFamily: "'Roboto', sans-serif" }}>
+          <InputLabel sx={{ color: darkMode ? "#e6ecef" : "#2c3e50", fontWeight: 500, fontFamily: "'Roboto', sans-serif" }}>
             End Time
           </InputLabel>
           <Select
             value={endTime}
             onChange={handleEndTimeChange}
             sx={{
-              color: darkMode ? "#ecf0f1" : "#2c3e50",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#5a758c" : "#ccc" },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#1abc9c" : "#6c4f37" },
-              backgroundColor: darkMode ? "#2c3e50" : "#fff",
-              borderRadius: "8px",
+              color: darkMode ? "#e6ecef" : "#2c3e50",
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#3b4d63" : "#d3dce6" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: darkMode ? "#00c4cc" : "#6c4f37" },
+              backgroundColor: darkMode ? "#2f3e50" : "#fff",
+              borderRadius: "10px",
               fontSize: "15px",
               fontFamily: "'Roboto', sans-serif",
             }}
@@ -401,8 +447,8 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
             onClick={handleSubmit}
             darkMode={darkMode}
             component={motion.div}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             Add Schedule
           </StyledButton>
@@ -412,16 +458,18 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
             darkMode={darkMode}
             sx={{
               background: "transparent",
-              borderColor: darkMode ? "#1abc9c" : "#6c4f37",
-              color: darkMode ? "#1abc9c" : "#6c4f37",
+              borderColor: darkMode ? "#00c4cc" : "#6c4f37",
+              color: darkMode ? "#00c4cc" : "#6c4f37",
               "&:hover": {
-                borderColor: darkMode ? "#16a085" : "#503a28",
-                background: darkMode ? "rgba(26, 188, 156, 0.1)" : "rgba(108, 79, 55, 0.1)",
+                borderColor: darkMode ? "#007bff" : "#503a28",
+                background: darkMode
+                  ? "rgba(0, 196, 204, 0.1)"
+                  : "rgba(108, 79, 55, 0.1)",
               },
             }}
             component={motion.div}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             Back to Dashboard
           </StyledButton>
@@ -430,7 +478,7 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
 
       <ScheduleTableWrapper
         darkMode={darkMode}
-        elevation={4}
+        elevation={6}
         component={motion.div}
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -440,19 +488,23 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
           <Typography
             variant="h5"
             sx={{
-              color: darkMode ? "#ecf0f1" : "#2c3e50",
+              color: darkMode ? "#e6ecef" : "#2c3e50",
               fontWeight: 600,
               fontFamily: "'Poppins', sans-serif",
               display: "flex",
               alignItems: "center",
-              gap: "0.5rem",
+              gap: "0.75rem",
             }}
           >
             <FontAwesomeIcon icon={faCalendar} /> Current Schedules
           </Typography>
           <Typography
             variant="body2"
-            sx={{ color: darkMode ? "#bdc3c7" : "#7f8c8d", fontWeight: 500, fontFamily: "'Roboto', sans-serif" }}
+            sx={{
+              color: darkMode ? "#a3bffa" : "#636e72",
+              fontWeight: 500,
+              fontFamily: "'Roboto', sans-serif",
+            }}
           >
             {schedules.length} Schedules
           </Typography>
@@ -468,9 +520,7 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
 
           {scheduleGrid.map((row, index) => (
             <React.Fragment key={index}>
-              <TimeCell darkMode={darkMode}>
-                {row.time}
-              </TimeCell>
+              <TimeCell darkMode={darkMode}>{row.time}</TimeCell>
               {days.map((day) => (
                 <ScheduleCell
                   key={`${day}-${index}`}
@@ -486,58 +536,113 @@ const ChooseScheduleTherapist = ({ darkMode }) => {
         </ScheduleGrid>
 
         {schedules.length > 0 && (
-          <Box sx={{ mt: 5 }}>
+          <Box sx={{ mt: 6 }}>
             <Typography
               variant="h5"
               sx={{
-                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                color: darkMode ? "#e6ecef" : "#2c3e50",
                 mb: 3,
                 fontWeight: 600,
                 fontFamily: "'Poppins', sans-serif",
                 display: "flex",
                 alignItems: "center",
-                gap: "0.5rem",
+                gap: "0.75rem",
               }}
             >
               <FontAwesomeIcon icon={faCalendar} /> Schedule Details
             </Typography>
-            <TableContainer sx={{ borderRadius: "8px", overflow: "hidden" }}>
+            <TableContainer sx={{ borderRadius: "12px", overflow: "hidden" }}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ backgroundColor: darkMode ? "#5a758c" : "#e0e0e0", color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600, fontSize: "14px", fontFamily: "'Poppins', sans-serif" }}>
+                    <TableCell
+                      sx={{
+                        backgroundColor: darkMode ? "#3b4d63" : "#dfe6e9",
+                        color: darkMode ? "#e6ecef" : "#2c3e50",
+                        fontWeight: 600,
+                        fontSize: "15px",
+                        fontFamily: "'Poppins', sans-serif",
+                      }}
+                    >
                       Day
                     </TableCell>
-                    <TableCell sx={{ backgroundColor: darkMode ? "#5a758c" : "#e0e0e0", color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600, fontSize: "14px", fontFamily: "'Poppins', sans-serif" }}>
+                    <TableCell
+                      sx={{
+                        backgroundColor: darkMode ? "#3b4d63" : "#dfe6e9",
+                        color: darkMode ? "#e6ecef" : "#2c3e50",
+                        fontWeight: 600,
+                        fontSize: "15px",
+                        fontFamily: "'Poppins', sans-serif",
+                      }}
+                    >
                       Start
                     </TableCell>
-                    <TableCell sx={{ backgroundColor: darkMode ? "#5a758c" : "#e0e0e0", color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600, fontSize: "14px", fontFamily: "'Poppins', sans-serif" }}>
+                    <TableCell
+                      sx={{
+                        backgroundColor: darkMode ? "#3b4d63" : "#dfe6e9",
+                        color: darkMode ? "#e6ecef" : "#2c3e50",
+                        fontWeight: 600,
+                        fontSize: "15px",
+                        fontFamily: "'Poppins', sans-serif",
+                      }}
+                    >
                       End
                     </TableCell>
-                    <TableCell sx={{ backgroundColor: darkMode ? "#5a758c" : "#e0e0e0", color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600, fontSize: "14px", fontFamily: "'Poppins', sans-serif" }}>
+                    <TableCell
+                      sx={{
+                        backgroundColor: darkMode ? "#3b4d63" : "#dfe6e9",
+                        color: darkMode ? "#e6ecef" : "#2c3e50",
+                        fontWeight: 600,
+                        fontSize: "15px",
+                        fontFamily: "'Poppins', sans-serif",
+                      }}
+                    >
                       Actions
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {schedules.map((schedule) => (
-                    <TableRow key={schedule.scheduleId} sx={{ "&:hover": { backgroundColor: darkMode ? "#455a64" : "#f8f4e1" } }}>
-                      <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontSize: "14px", fontFamily: "'Roboto', sans-serif" }}>
+                    <TableRow
+                      key={schedule.scheduleId}
+                      sx={{
+                        "&:hover": { backgroundColor: darkMode ? "#2f3e50" : "#f1f4f8" },
+                      }}
+                    >
+                      <TableCell
+                        sx={{
+                          color: darkMode ? "#e6ecef" : "#2c3e50",
+                          fontSize: "15px",
+                          fontFamily: "'Roboto', sans-serif",
+                        }}
+                      >
                         {days[schedule.dayOfWeek]}
                       </TableCell>
-                      <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontSize: "14px", fontFamily: "'Roboto', sans-serif" }}>
+                      <TableCell
+                        sx={{
+                          color: darkMode ? "#e6ecef" : "#2c3e50",
+                          fontSize: "15px",
+                          fontFamily: "'Roboto', sans-serif",
+                        }}
+                      >
                         {(schedule.startWorkingTime || "").slice(0, 5)}
                       </TableCell>
-                      <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontSize: "14px", fontFamily: "'Roboto', sans-serif" }}>
+                      <TableCell
+                        sx={{
+                          color: darkMode ? "#e6ecef" : "#2c3e50",
+                          fontSize: "15px",
+                          fontFamily: "'Roboto', sans-serif",
+                        }}
+                      >
                         {(schedule.endWorkingTime || "").slice(0, 5)}
                       </TableCell>
                       <TableCell>
                         <Tooltip title="Delete Schedule">
                           <IconButton
                             onClick={() => handleDelete(schedule.scheduleId)}
-                            sx={{ color: darkMode ? "#f44336" : "#721c24" }}
+                            sx={{ color: darkMode ? "#ff6b6b" : "#721c24" }}
                             component={motion.div}
-                            whileHover={{ scale: 1.1 }}
+                            whileHover={{ scale: 1.15 }}
                             whileTap={{ scale: 0.9 }}
                           >
                             <DeleteIcon />

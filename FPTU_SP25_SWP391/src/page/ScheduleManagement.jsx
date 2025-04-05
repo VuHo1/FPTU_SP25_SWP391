@@ -21,9 +21,9 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
-import { getTherapistSchedules, updateTherapistSchedule, deleteTherapistSchedule } from "../api/testApi";
+import { getTherapistSchedules, updateTherapistSchedule } from "../api/testApi"; // Removed deleteTherapistSchedule
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendar, faEdit, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCalendar, faEdit } from "@fortawesome/free-solid-svg-icons"; // Removed faTrashAlt
 
 // Styled Container
 const ScheduleContainer = styled(Box)(({ darkMode }) => ({
@@ -82,20 +82,6 @@ const ScheduleManagement = ({ darkMode }) => {
   useEffect(() => {
     fetchSchedules();
   }, []);
-
-  // Handle delete schedule
-  const handleDelete = async (scheduleId) => {
-    if (!window.confirm("Are you sure you want to delete this schedule?")) return;
-    try {
-      const token = localStorage.getItem("token");
-      await deleteTherapistSchedule(scheduleId, token);
-      setSchedules(schedules.filter((schedule) => schedule.scheduleId !== scheduleId));
-      alert("Schedule deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting schedule:", error);
-      alert("Failed to delete schedule. Please try again.");
-    }
-  };
 
   // Handle edit modal open
   const handleEditOpen = (schedule) => {
@@ -319,17 +305,6 @@ const ScheduleManagement = ({ darkMode }) => {
                         whileTap={{ scale: 0.9 }}
                       >
                         <FontAwesomeIcon icon={faEdit} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Schedule">
-                      <IconButton
-                        onClick={() => handleDelete(schedule.scheduleId)}
-                        sx={{ color: darkMode ? "#f44336" : "#721c24" }}
-                        component={motion.div}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <FontAwesomeIcon icon={faTrashAlt} />
                       </IconButton>
                     </Tooltip>
                   </TableCell>

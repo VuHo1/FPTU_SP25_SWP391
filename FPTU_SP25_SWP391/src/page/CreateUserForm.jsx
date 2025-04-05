@@ -11,6 +11,11 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
@@ -41,6 +46,9 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [formErrors, setFormErrors] = useState({ userName: "", email: "" });
 
   // Data Fetching
   const fetchAllUsers = async () => {
@@ -53,6 +61,8 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
       setSearchResult([]); // Reset search results on fetch
     } catch (error) {
       console.error("Failed to fetch users:", error);
+      setErrorMessage(`Failed to fetch users: ${error.message}`);
+      setErrorDialogOpen(true);
     } finally {
       setLoading(false);
     }
@@ -62,13 +72,46 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
     fetchAllUsers();
   }, []);
 
+  // Validation Functions
+  const validateUserName = (userName) => {
+    return userName.trim().length > 1 ? "" : "Username must be more than 1 character.";
+  };
+
+  const validateEmail = (email) => {
+    return email.includes("@") ? "" : "Email must contain an '@' symbol.";
+  };
+
   // Form Handlers
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserForm((prev) => ({ ...prev, [name]: value }));
+
+    // Validate on change and update errors
+    if (name === "userName") {
+      setFormErrors((prev) => ({ ...prev, userName: validateUserName(value) }));
+    } else if (name === "email") {
+      setFormErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+    }
   };
 
   const handleCreateUser = async (role) => {
+    // Validate form before submission
+    const userNameError = validateUserName(userForm.userName);
+    const emailError = validateEmail(userForm.email);
+
+    setFormErrors({ userName: userNameError, email: emailError });
+
+    if (userNameError || emailError || !userForm.password) {
+      setErrorMessage(
+        "Please correct the following errors:\n" +
+          (userNameError ? `- ${userNameError}\n` : "") +
+          (emailError ? `- ${emailError}\n` : "") +
+          (!userForm.password ? "- Password is required." : "")
+      );
+      setErrorDialogOpen(true);
+      return;
+    }
+
     try {
       console.log("Attempting to create user with role:", role);
       console.log("Current Form Data:", userForm);
@@ -86,6 +129,7 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
 
       onUserCreated(newUser);
       setUserForm({ userName: "", email: "", password: "" });
+      setFormErrors({ userName: "", email: "" }); // Reset errors
       setSearchTerm("");
       setSearchResult([]);
       await fetchAllUsers();
@@ -93,8 +137,15 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
       alert(`${role} created successfully!`);
     } catch (error) {
       console.error(`Error creating ${role}:`, error);
-      alert(`Failed to create ${role}: ${error.response?.data?.message || error.message}`);
+      setErrorMessage(`Failed to create ${role}: ${error.response?.data?.message || error.message}`);
+      setErrorDialogOpen(true);
     }
+  };
+
+  // Handle closing the error dialog
+  const handleErrorDialogClose = () => {
+    setErrorDialogOpen(false);
+    setErrorMessage("");
   };
 
   // Search Handlers
@@ -149,6 +200,8 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
             onChange={handleInputChange}
             fullWidth
             variant="outlined"
+            error={!!formErrors.userName}
+            helperText={formErrors.userName}
             sx={{
               "& .MuiOutlinedInput-root": {
                 "& fieldset": { borderColor: darkMode ? "#5a758c" : "#ccc" },
@@ -164,6 +217,9 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
               "& .MuiInputBase-input": {
                 color: darkMode ? "#ecf0f1" : "#2c3e50",
                 fontFamily: "'Roboto', sans-serif",
+              },
+              "& .MuiFormHelperText-root": {
+                color: darkMode ? "#f44336" : "#721c24",
               },
             }}
           />
@@ -176,6 +232,8 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
             onChange={handleInputChange}
             fullWidth
             variant="outlined"
+            error={!!formErrors.email}
+            helperText={formErrors.email}
             sx={{
               "& .MuiOutlinedInput-root": {
                 "& fieldset": { borderColor: darkMode ? "#5a758c" : "#ccc" },
@@ -191,6 +249,9 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
               "& .MuiInputBase-input": {
                 color: darkMode ? "#ecf0f1" : "#2c3e50",
                 fontFamily: "'Roboto', sans-serif",
+              },
+              "& .MuiFormHelperText-root": {
+                color: darkMode ? "#f44336" : "#721c24",
               },
             }}
           />
@@ -431,6 +492,35 @@ export default function CreateUserForm({ darkMode, onUserCreated }) {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Error Dialog */}
+      <Dialog
+        open={errorDialogOpen}
+        onClose={handleErrorDialogClose}
+        aria-labelledby="error-dialog-title"
+        aria-describedby="error-dialog-description"
+      >
+        <DialogTitle id="error-dialog-title" sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
+          Error
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText
+            id="error-dialog-description"
+            sx={{ color: darkMode ? "#bdc3c7" : "#7f8c8d", whiteSpace: "pre-line" }}
+          >
+            {errorMessage}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleErrorDialogClose}
+            sx={{ color: darkMode ? "#1abc9c" : "#6c4f37" }}
+            autoFocus
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardCard>
   );
 }
