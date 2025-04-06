@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { postBooking, getAllServices, getTherapistSchedules, createPayment } from '../api/testApi';
+import { postBooking, getServicesByTherapistId, getTherapistSchedules, createPayment, getAllServices } from '../api/testApi';
 import { useAuth } from '../page/AuthContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
 
 const BookingPage = ({ darkMode }) => {
     const { isLoggedIn, userId, token, role } = useAuth();
@@ -13,22 +16,26 @@ const BookingPage = ({ darkMode }) => {
         userId: '',
         therapistId: '',
         timeSlotId: '',
-        useWallet: false,
         note: '',
         serviceId: '',
-        scheduleId: '',
+        appointmentDate: '',
     });
 
-    const [services, setServices] = useState([]);
+    const [allServices, setAllServices] = useState([]); // Danh sách tất cả dịch vụ
     const [therapists, setTherapists] = useState([]);
+    const [uniqueTherapists, setUniqueTherapists] = useState([]);
+    const [filteredTherapists, setFilteredTherapists] = useState([]); // Therapist có cung cấp dịch vụ đã chọn
+    const [therapistServicesMap, setTherapistServicesMap] = useState({}); // Lưu trữ dịch vụ của từng therapist
     const [therapistTimeSlots, setTherapistTimeSlots] = useState([]);
-    const [selectedTherapistData, setSelectedTherapistData] = useState(null);
+    const [availableDates, setAvailableDates] = useState([]);
+    const [noTherapistMessage, setNoTherapistMessage] = useState('');
 
     const [response, setResponse] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [paymentProcessing, setPaymentProcessing] = useState(false);
 
+    // Set serviceId từ BlogDetail
     useEffect(() => {
         const selectedServiceId = location.state?.selectedServiceId;
         if (selectedServiceId) {
@@ -39,65 +46,165 @@ const BookingPage = ({ darkMode }) => {
         }
     }, [location.state]);
 
-    useEffect(() => {
-        console.log('darkMode value:', darkMode);
-    }, [darkMode]);
-
+    // Set userId
     useEffect(() => {
         if (userId) {
             setFormData((prev) => ({ ...prev, userId: userId }));
         }
     }, [userId]);
 
+    // Fetch tất cả dịch vụ
     useEffect(() => {
         if (token) {
+            const fetchServices = async () => {
+                try {
+                    const response = await getAllServices(token);
+                    setAllServices(response.data || []);
+                } catch (err) {
+                    console.error('Error fetching all services:', err);
+                    toast.error('Failed to load services. Please try again later.');
+                }
+            };
             fetchServices();
+        }
+    }, [token]);
+
+    // Fetch therapists và lưu trữ dịch vụ của từng therapist
+    useEffect(() => {
+        if (token) {
             fetchTherapists();
         }
     }, [token, role]);
 
+    // Lọc therapist dựa trên serviceId
     useEffect(() => {
-        if (formData.scheduleId) {
-            updateTherapistTimeSlotsBySchedule(formData.scheduleId);
+        if (!formData.serviceId || !uniqueTherapists.length) {
+            setFilteredTherapists([]);
+            return;
+        }
+
+        const compatibleTherapists = uniqueTherapists.filter((therapist) => {
+            const services = therapistServicesMap[therapist.therapistId] || [];
+            return services.some((service) => service.serviceId.toString() === formData.serviceId);
+        });
+
+        setFilteredTherapists(compatibleTherapists);
+        if (compatibleTherapists.length === 0) {
+            setNoTherapistMessage('No therapists available for this service.');
+            setFormData((prev) => ({
+                ...prev,
+                therapistId: '',
+                appointmentDate: '',
+                timeSlotId: '',
+            }));
+        } else {
+            setNoTherapistMessage('');
+        }
+    }, [formData.serviceId, uniqueTherapists, therapistServicesMap]);
+
+    // Fetch available dates và time slots khi thay đổi therapist
+    useEffect(() => {
+        if (formData.therapistId && token) {
+            updateAvailableDates(formData.therapistId);
+        } else {
+            setAvailableDates([]);
+            setTherapistTimeSlots([]);
+            setFormData((prev) => ({ ...prev, timeSlotId: '', appointmentDate: '' }));
+        }
+    }, [formData.therapistId, token]);
+
+    useEffect(() => {
+        if (formData.therapistId && formData.appointmentDate) {
+            updateTherapistTimeSlots(formData.therapistId, formData.appointmentDate);
         } else {
             setTherapistTimeSlots([]);
-            setSelectedTherapistData(null);
+            setFormData((prev) => ({ ...prev, timeSlotId: '' }));
         }
-    }, [formData.scheduleId, therapists]);
+    }, [formData.therapistId, formData.appointmentDate, therapists]);
 
-    const fetchServices = async () => {
-        try {
-            const response = await getAllServices(token);
-            setServices(response.data);
-        } catch (err) {
-            console.error('Error fetching services:', err);
-            toast.error('Failed to load services. Please try again later.');
-        }
-    };
-
-    const fetchTherapists = async () => {
+    const fetchTherapists = useCallback(async () => {
         try {
             const response = await getTherapistSchedules(token);
-            setTherapists(response.data);
+            const therapistData = response.data;
+
+            setTherapists(therapistData);
+
+            const unique = therapistData.reduce((acc, current) => {
+                const existing = acc.find((item) => item.therapistId === current.therapistId);
+                if (!existing) {
+                    acc.push({
+                        therapistId: current.therapistId,
+                        therapistName: current.therapistName,
+                    });
+                }
+                return acc;
+            }, []);
+            setUniqueTherapists(unique);
+
+            // Lấy danh sách dịch vụ cho từng therapist
+            const servicesMap = {};
+            for (const therapist of unique) {
+                try {
+                    const servicesResponse = await getServicesByTherapistId(therapist.therapistId, token);
+                    servicesMap[therapist.therapistId] = servicesResponse.data || [];
+                } catch (err) {
+                    console.error(`Error fetching services for therapist ${therapist.therapistId}:`, err);
+                    servicesMap[therapist.therapistId] = [];
+                }
+            }
+            setTherapistServicesMap(servicesMap);
         } catch (err) {
             console.error('Error fetching therapists:', err);
             toast.error('Failed to load therapists. Please try again later.');
         }
-    };
+    }, [token]);
 
-    const updateTherapistTimeSlotsBySchedule = (scheduleId) => {
-        const selectedSchedule = therapists.find((t) => t.scheduleId.toString() === scheduleId.toString());
+    const updateAvailableDates = useCallback((therapistId) => {
+        const selectedTherapistSchedules = therapists.filter((t) => t.therapistId.toString() === therapistId);
+        const availableDaysOfWeek = selectedTherapistSchedules
+            .filter((schedule) => (schedule.timeSlots || []).some((slot) => slot.status === 0))
+            .map((schedule) => schedule.dayOfWeek);
+
+        const dates = [];
+        const today = new Date();
+        for (let i = 0; i < 30; i++) {
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+            const dayOfWeek = date.getDay();
+            if (availableDaysOfWeek.includes(dayOfWeek)) {
+                dates.push(new Date(date));
+            }
+        }
+        setAvailableDates(dates);
+    }, [therapists]);
+
+    const updateTherapistTimeSlots = useCallback((therapistId, appointmentDate) => {
+        const selectedDate = new Date(appointmentDate);
+        const selectedDayOfWeek = selectedDate.getDay();
+
+        const selectedSchedule = therapists.find(
+            (t) => t.therapistId.toString() === therapistId && t.dayOfWeek === selectedDayOfWeek
+        );
+
         if (selectedSchedule) {
-            setSelectedTherapistData(selectedSchedule);
-            setTherapistTimeSlots(selectedSchedule.timeSlots || []);
-            setFormData((prev) => ({
-                ...prev,
-                therapistId: selectedSchedule.therapistId.toString(),
-            }));
+            const timeSlots = selectedSchedule.timeSlots || [];
+            console.log('Time Slots for therapistId:', therapistId, 'on dayOfWeek:', selectedDayOfWeek, timeSlots);
+            timeSlots.forEach((slot, index) => {
+                console.log(`Time Slot ${index + 1}:`, slot.timeSlotDescription, 'Status:', slot.status);
+            });
+            setTherapistTimeSlots(timeSlots);
         } else {
+            console.log('No schedule found for therapistId:', therapistId, 'on dayOfWeek:', selectedDayOfWeek);
             setTherapistTimeSlots([]);
-            setSelectedTherapistData(null);
-            setFormData((prev) => ({ ...prev, therapistId: '' }));
+        }
+    }, [therapists]);
+
+    const getStatusDescription = (status) => {
+        switch (status) {
+            case 0: return '';
+            case 1: return '(Booked)';
+            case 2: return '(Unavailable)';
+            default: return '(Unavailable)';
         }
     };
 
@@ -121,49 +228,36 @@ const BookingPage = ({ darkMode }) => {
     };
 
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? checked : value,
-        });
-    };
-
-    const handleRandomTherapist = (e) => {
-        e.preventDefault();
-        if (therapists && therapists.length > 0) {
-            const randomIndex = Math.floor(Math.random() * therapists.length);
-            const randomSchedule = therapists[randomIndex];
-            setFormData((prev) => ({
-                ...prev,
-                scheduleId: randomSchedule.scheduleId.toString(),
-            }));
-            toast.success(`Randomly selected: ${randomSchedule.therapistName} (${getSpecificDate(randomSchedule.dayOfWeek)})`);
-        } else {
-            toast.error('No therapist schedules available to choose from');
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+            ...(name === 'serviceId' ? { therapistId: '', appointmentDate: '', timeSlotId: '' } : {}), // Reset khi thay đổi service
+            ...(name === 'therapistId' ? { appointmentDate: '', timeSlotId: '' } : {}), // Reset khi thay đổi therapist
+        }));
+        if (name === 'serviceId') {
+            setNoTherapistMessage('');
         }
     };
 
-    const getDayName = (dayNumber) => {
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return days[dayNumber % 7] || `Day ${dayNumber}`;
-    };
+    const handleDateChange = (date) => {
+        if (date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const localDateString = `${year}-${month}-${day}T00:00:00.000Z`;
 
-    // Hàm mới để tính ngày cụ thể dựa trên dayOfWeek
-    const getSpecificDate = (dayOfWeek) => {
-        const today = new Date();
-        const currentDay = today.getDay(); // 0 (Sunday) đến 6 (Saturday)
-        const diff = (dayOfWeek - currentDay + 7) % 7; // Tính khoảng cách đến ngày trong tuần
-        const targetDate = new Date(today);
-        targetDate.setDate(today.getDate() + diff); // Cộng số ngày để đến ngày cần tìm
-        return targetDate.toLocaleDateString('en-GB'); // Định dạng DD/MM/YYYY
-    };
-
-    const getStatusDescription = (status) => {
-        switch (status) {
-            case 0: return '';
-            case 1: return '(Booked)';
-            case 2: return '(Unavailable)';
-            default: return '(Unavailable)';
+            setFormData({
+                ...formData,
+                appointmentDate: localDateString,
+                timeSlotId: '',
+            });
+        } else {
+            setFormData({
+                ...formData,
+                appointmentDate: '',
+                timeSlotId: '',
+            });
         }
     };
 
@@ -172,8 +266,17 @@ const BookingPage = ({ darkMode }) => {
         setLoading(true);
         setError(null);
 
-        if (!formData.userId || !formData.timeSlotId || !formData.serviceId) {
-            toast.error('Please fill in all required fields: Time Slot and Service');
+        if (!formData.userId || !formData.timeSlotId || !formData.serviceId || !formData.appointmentDate || !formData.therapistId) {
+            toast.error('Please fill in all required fields: Service, Therapist, Appointment Date, and Time Slot');
+            setLoading(false);
+            return;
+        }
+
+        const selectedTimeSlot = therapistTimeSlots.find(
+            (slot) => slot.timeSlotId.toString() === formData.timeSlotId
+        );
+        if (selectedTimeSlot && selectedTimeSlot.status !== 0) {
+            toast.error('The selected time slot is not available. Please choose another slot.');
             setLoading(false);
             return;
         }
@@ -187,21 +290,21 @@ const BookingPage = ({ darkMode }) => {
         try {
             const bookingData = {
                 userId: parseInt(formData.userId, 10),
+                therapistId: parseInt(formData.therapistId, 10),
                 timeSlotId: parseInt(formData.timeSlotId, 10),
-                useWallet: formData.useWallet,
                 note: formData.note || '',
                 serviceId: parseInt(formData.serviceId, 10),
+                appointmentDate: formData.appointmentDate,
             };
 
-            if (formData.therapistId) {
-                bookingData.therapistId = parseInt(formData.therapistId, 10);
-            }
+            console.log('Form Data:', formData);
+            console.log('Booking Data gửi đi:', bookingData);
 
             const res = await postBooking(bookingData, token);
             setResponse(res.data);
 
             toast.success('Booking confirmed! Your appointment has been scheduled successfully.');
-            if (res.data && res.data.bookingId && !formData.useWallet) {
+            if (res.data && res.data.bookingId) {
                 await processPayment(res.data.bookingId);
             }
 
@@ -210,10 +313,9 @@ const BookingPage = ({ darkMode }) => {
                 userId: userId || '',
                 therapistId: '',
                 timeSlotId: '',
-                scheduleId: '',
-                useWallet: false,
                 note: '',
-                serviceId: formData.serviceId,
+                serviceId: '',
+                appointmentDate: '',
             });
         } catch (err) {
             setError(err.response ? err.response.data : 'Something went wrong');
@@ -250,12 +352,6 @@ const BookingPage = ({ darkMode }) => {
             </div>
         );
     }
-
-    const therapistScheduleOptions = therapists.map((schedule) => ({
-        scheduleId: schedule.scheduleId,
-        therapistId: schedule.therapistId,
-        displayName: `${schedule.therapistName} (${getDayName(schedule.dayOfWeek)}, ${getSpecificDate(schedule.dayOfWeek)}, ${schedule.startWorkingTime.slice(0, 5)} - ${schedule.endWorkingTime.slice(0, 5)})`,
-    }));
 
     return (
         <>
@@ -324,7 +420,8 @@ const BookingPage = ({ darkMode }) => {
           transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group textarea:focus,
+        .form-group .react-datepicker-wrapper:focus-within {
           border-color: ${darkMode ? "#1abc9c" : "#3b82f6"};
           box-shadow: 0 0 8px rgba(${darkMode ? "26, 188, 156" : "59, 130, 246"}, 0.2);
         }
@@ -337,37 +434,21 @@ const BookingPage = ({ darkMode }) => {
           color: ${darkMode ? "#9ca3af" : "#6b7280"};
           cursor: not-allowed;
         }
-        .random-button {
-          padding: 0.75rem 1.5rem;
-          font-size: 1rem;
-          font-weight: 500;
-          color: ${darkMode ? "#1abc9c" : "#3b82f6"};
-          background: ${darkMode ? "#34495e" : "#ffffff"};
-          border: 1px solid ${darkMode ? "#4b5563" : "#3b82f6"};
-          border-radius: 8px;
-          cursor: pointer;
-          transition: background 0.3s ease, color 0.3s ease;
-          margin-top: 0.5rem;
+        .form-group select option:disabled {
+          color: ${darkMode ? "#9ca3af" : "#6b7280"};
         }
-        .random-button:hover {
-          background: ${darkMode ? "#1abc9c" : "#3b82f6"};
-          color: #ffffff;
+        .react-datepicker-wrapper {
+          width: 100%;
         }
-        .therapist-info {
+        .react-datepicker__input-container input {
+          width: 100%;
           padding: 1rem;
-          background: ${darkMode ? "#34495e" : "#e9f5ff"};
+          border: 1px solid ${darkMode ? "#4b5563" : "#d1d5db"};
           border-radius: 8px;
-          margin-top: 1rem;
-        }
-        .therapist-info-title {
-          font-size: 1.2rem;
-          font-weight: 500;
-          color: ${darkMode ? "#1abc9c" : "#3b82f6"};
-          margin-bottom: 0.5rem;
-        }
-        .therapist-info-text {
           font-size: 1rem;
-          color: ${darkMode ? "#bdc3c7" : "#2c3e50"};
+          color: ${darkMode ? "#f9fafb" : "#1f2937"};
+          background: ${darkMode ? "#34495e" : "#fff"};
+          outline: none;
         }
         .submit-button {
           width: 100%;
@@ -470,22 +551,65 @@ const BookingPage = ({ darkMode }) => {
 
                     <form onSubmit={handleSubmit} className="booking-form">
                         <div className="form-group">
-                            <label>Therapist Schedule (Optional)</label>
+                            <label>Service</label>
                             <select
-                                name="scheduleId"
-                                value={formData.scheduleId}
+                                name="serviceId"
+                                value={formData.serviceId}
                                 onChange={handleChange}
+                                required
+                                disabled={allServices.length === 0}
                             >
-                                <option value="">Select a therapist schedule</option>
-                                {therapistScheduleOptions.map((option) => (
-                                    <option key={option.scheduleId} value={option.scheduleId}>
-                                        {option.displayName}
+                                <option value="">Select a service</option>
+                                {allServices.map((service) => (
+                                    <option key={service.serviceId} value={service.serviceId}>
+                                        {service.name} ({service.price}VND)
                                     </option>
                                 ))}
                             </select>
-                            <button type="button" className="random-button" onClick={handleRandomTherapist}>
-                                Random Schedule
-                            </button>
+                            {allServices.length === 0 && (
+                                <p className="warning-text">No services available</p>
+                            )}
+                        </div>
+
+                        <div className="form-group">
+                            <label>Therapist</label>
+                            <select
+                                name="therapistId"
+                                value={formData.therapistId}
+                                onChange={handleChange}
+                                required
+                                disabled={!formData.serviceId || filteredTherapists.length === 0}
+                            >
+                                <option value="">Select a therapist</option>
+                                {filteredTherapists.map((therapist) => (
+                                    <option key={therapist.therapistId} value={therapist.therapistId}>
+                                        {therapist.therapistName}
+                                    </option>
+                                ))}
+                            </select>
+                            {formData.serviceId && filteredTherapists.length === 0 && (
+                                <p className="warning-text">{noTherapistMessage}</p>
+                            )}
+                            {!formData.serviceId && (
+                                <p className="warning-text">Please select a service first</p>
+                            )}
+                        </div>
+
+                        <div className="form-group">
+                            <label>Appointment Date</label>
+                            <DatePicker
+                                selected={formData.appointmentDate ? new Date(formData.appointmentDate) : null}
+                                onChange={handleDateChange}
+                                dateFormat="yyyy-MM-dd"
+                                placeholderText="Select date"
+                                minDate={new Date()}
+                                includeDates={availableDates}
+                                required
+                                disabled={!formData.therapistId}
+                            />
+                            {!formData.therapistId && (
+                                <p className="warning-text">Please select a therapist first</p>
+                            )}
                         </div>
 
                         <div className="form-group">
@@ -495,53 +619,26 @@ const BookingPage = ({ darkMode }) => {
                                 value={formData.timeSlotId}
                                 onChange={handleChange}
                                 required
-                                disabled={therapistTimeSlots.filter((slot) => slot.status === 0).length === 0}
+                                disabled={therapistTimeSlots.length === 0}
                             >
                                 <option value="">Select a time slot</option>
-                                {therapistTimeSlots.map((slot, index) => (
+                                {therapistTimeSlots.map((slot) => (
                                     <option
-                                        key={`${slot.timeSlotId}-${index}`}
-                                        value={slot.status === 0 ? slot.timeSlotId : ''}
+                                        key={slot.timeSlotId}
+                                        value={slot.timeSlotId}
                                         disabled={slot.status !== 0}
+                                        style={{
+                                            color: slot.status !== 0 ? (darkMode ? '#9ca3af' : '#6b7280') : (darkMode ? '#f9fafb' : '#1f2937'),
+                                        }}
                                     >
                                         {slot.timeSlotDescription} {getStatusDescription(slot.status)}
                                     </option>
                                 ))}
                             </select>
-                            {formData.scheduleId && therapistTimeSlots.filter((slot) => slot.status === 0).length === 0 && (
-                                <p className="warning-text">No available time slots for this schedule</p>
+                            {formData.therapistId && formData.appointmentDate && therapistTimeSlots.length === 0 && (
+                                <p className="warning-text">No available time slots for this date</p>
                             )}
                         </div>
-
-                        <div className="form-group">
-                            <label>Service</label>
-                            <select
-                                name="serviceId"
-                                value={formData.serviceId}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Select a service</option>
-                                {services.map((service) => (
-                                    <option key={service.serviceId} value={service.serviceId}>
-                                        {service.name} ({service.price}VND)
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {selectedTherapistData && (
-                            <div className="therapist-info">
-                                <h3 className="therapist-info-title">Therapist Schedule Info</h3>
-                                <p className="therapist-info-text">
-                                    {selectedTherapistData.therapistName} is available on{' '}
-                                    {getDayName(selectedTherapistData.dayOfWeek)}{' '}
-                                    ({getSpecificDate(selectedTherapistData.dayOfWeek)}) from{' '}
-                                    {selectedTherapistData.startWorkingTime.slice(0, 5)} to{' '}
-                                    {selectedTherapistData.endWorkingTime.slice(0, 5)}
-                                </p>
-                            </div>
-                        )}
 
                         <div className="form-group">
                             <label>{role === 'Therapist' ? 'Session Notes' : 'Notes for the Therapist'}</label>
