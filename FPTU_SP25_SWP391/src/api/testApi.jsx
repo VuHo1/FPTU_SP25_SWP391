@@ -978,3 +978,19 @@ export const deleteTherapistSpecialty = async (id, token) => {
     throw error;
   }
 };
+
+export const getServicesByTherapistId = async (therapistId, token) => {
+  try {
+    const response = await apiClient.get(`/api/TherapistSpecialty/${therapistId}/services`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: '*/*',
+      },
+    });
+    console.log(`Services for therapistId ${therapistId}:`, response.data);
+    return response;
+  } catch (error) {
+    console.error(`Error fetching services for therapistId ${therapistId}:`, error.response?.data || error);
+    throw error;
+  }
+};
