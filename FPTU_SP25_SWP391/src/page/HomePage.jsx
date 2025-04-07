@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../page/AuthContext';
-import { getAllServices, getImageService, handlePaymentReturn, getBookingById } from '../api/testApi';
+import { getAllServices, getImageService, handlePaymentReturn } from '../api/testApi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
