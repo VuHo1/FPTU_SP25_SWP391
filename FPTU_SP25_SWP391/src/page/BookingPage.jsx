@@ -21,11 +21,11 @@ const BookingPage = ({ darkMode }) => {
         appointmentDate: '',
     });
 
-    const [allServices, setAllServices] = useState([]); // Danh sách tất cả dịch vụ
+    const [allServices, setAllServices] = useState([]);
     const [therapists, setTherapists] = useState([]);
     const [uniqueTherapists, setUniqueTherapists] = useState([]);
-    const [filteredTherapists, setFilteredTherapists] = useState([]); // Therapist có cung cấp dịch vụ đã chọn
-    const [therapistServicesMap, setTherapistServicesMap] = useState({}); // Lưu trữ dịch vụ của từng therapist
+    const [filteredTherapists, setFilteredTherapists] = useState([]);
+    const [therapistServicesMap, setTherapistServicesMap] = useState({});
     const [therapistTimeSlots, setTherapistTimeSlots] = useState([]);
     const [availableDates, setAvailableDates] = useState([]);
     const [noTherapistMessage, setNoTherapistMessage] = useState('');
@@ -35,7 +35,7 @@ const BookingPage = ({ darkMode }) => {
     const [error, setError] = useState(null);
     const [paymentProcessing, setPaymentProcessing] = useState(false);
 
-    // Set serviceId từ BlogDetail
+
     useEffect(() => {
         const selectedServiceId = location.state?.selectedServiceId;
         if (selectedServiceId) {
@@ -46,14 +46,13 @@ const BookingPage = ({ darkMode }) => {
         }
     }, [location.state]);
 
-    // Set userId
     useEffect(() => {
         if (userId) {
             setFormData((prev) => ({ ...prev, userId: userId }));
         }
     }, [userId]);
 
-    // Fetch tất cả dịch vụ
+
     useEffect(() => {
         if (token) {
             const fetchServices = async () => {
@@ -69,14 +68,12 @@ const BookingPage = ({ darkMode }) => {
         }
     }, [token]);
 
-    // Fetch therapists và lưu trữ dịch vụ của từng therapist
     useEffect(() => {
         if (token) {
             fetchTherapists();
         }
     }, [token, role]);
 
-    // Lọc therapist dựa trên serviceId
     useEffect(() => {
         if (!formData.serviceId || !uniqueTherapists.length) {
             setFilteredTherapists([]);
@@ -102,7 +99,7 @@ const BookingPage = ({ darkMode }) => {
         }
     }, [formData.serviceId, uniqueTherapists, therapistServicesMap]);
 
-    // Fetch available dates và time slots khi thay đổi therapist
+
     useEffect(() => {
         if (formData.therapistId && token) {
             updateAvailableDates(formData.therapistId);
@@ -141,7 +138,7 @@ const BookingPage = ({ darkMode }) => {
             }, []);
             setUniqueTherapists(unique);
 
-            // Lấy danh sách dịch vụ cho từng therapist
+
             const servicesMap = {};
             for (const therapist of unique) {
                 try {
@@ -232,8 +229,8 @@ const BookingPage = ({ darkMode }) => {
         setFormData((prev) => ({
             ...prev,
             [name]: value,
-            ...(name === 'serviceId' ? { therapistId: '', appointmentDate: '', timeSlotId: '' } : {}), // Reset khi thay đổi service
-            ...(name === 'therapistId' ? { appointmentDate: '', timeSlotId: '' } : {}), // Reset khi thay đổi therapist
+            ...(name === 'serviceId' ? { therapistId: '', appointmentDate: '', timeSlotId: '' } : {}),
+            ...(name === 'therapistId' ? { appointmentDate: '', timeSlotId: '' } : {}),
         }));
         if (name === 'serviceId') {
             setNoTherapistMessage('');

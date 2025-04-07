@@ -16,60 +16,65 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Card,
+  CardContent,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComments, faList, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faComments, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 // Container Styling
 const QaContainer = styled(Box)(({ darkMode }) => ({
-  display: "flex",
-  gap: "20px",
-  padding: "20px",
-  background: darkMode ? "rgba(52, 73, 94, 0.98)" : "rgba(255, 255, 255, 0.98)",
-  borderRadius: "8px",
+  padding: "30px",
+  background: darkMode ? "linear-gradient(135deg, #34495e 0%, #2c3e50 100%)" : "linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%)",
+  borderRadius: "16px",
   color: darkMode ? "#ecf0f1" : "#2c3e50",
   boxShadow: darkMode
-    ? "0 8px 24px rgba(0, 0, 0, 0.4)"
-    : "0 8px 24px rgba(0, 0, 0, 0.15)",
-  border: darkMode ? "1px solid #5a758c" : "1px solid #ccc",
-  maxWidth: "950px",
-  margin: "0 auto",
+    ? "0 12px 36px rgba(0, 0, 0, 0.5)"
+    : "0 12px 36px rgba(0, 0, 0, 0.1)",
+  maxWidth: "1000px",
+  margin: "40px auto",
 }));
 
-const Panel = styled(Box)(({ darkMode }) => ({
-  flex: 1,
-  padding: "15px",
-  background: darkMode ? "rgba(69, 90, 100, 0.8)" : "rgba(248, 244, 225, 0.8)",
-  borderRadius: "8px",
-  width: "50%",
-  minWidth: "290px",
+const StyledCard = styled(Card)(({ darkMode }) => ({
+  background: darkMode ? "rgba(69, 90, 100, 0.9)" : "rgba(255, 255, 255, 0.95)",
+  borderRadius: "12px",
+  boxShadow: darkMode
+    ? "0 6px 18px rgba(0, 0, 0, 0.3)"
+    : "0 6px 18px rgba(0, 0, 0, 0.05)",
+  padding: "20px",
+  marginBottom: "30px",
+}));
 
+const StyledButton = styled(Button)(({ darkMode }) => ({
+  background: darkMode
+    ? "linear-gradient(45deg, #1abc9c 30%, #16a085 90%)"
+    : "linear-gradient(45deg, #6c4f37 30%, #5a4030 90%)",
+  color: "#fff",
+  padding: "10px 20px",
+  borderRadius: "8px",
+  "&:hover": {
+    background: darkMode
+      ? "linear-gradient(45deg, #16a085 30%, #1abc9c 90%)"
+      : "linear-gradient(45deg, #5a4030 30%, #6c4f37 90%)",
+  },
 }));
 
 const QaStaff = ({ darkMode }) => {
   const [qaFormData, setQaFormData] = useState({
     serviceCategoryId: "",
     question: "",
-    type: "Yes/No",
+    type: "string",
     status: true,
+    options: [{ answerText: "", serviceIds: [] }],
   });
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [qaLoading, setQaLoading] = useState(false);
   const [qaError, setQaError] = useState(null);
   const [qaSuccess, setQaSuccess] = useState(null);
   const [qaList, setQaList] = useState([]);
-  const [recFormData, setRecFormData] = useState({
-    qaId: "",
-    answerOption: "",
-    serviceId: "",
-    weight: "",
-  });
-  const [recLoading, setRecLoading] = useState(false);
-  const [recError, setRecError] = useState(null);
-  const [recSuccess, setRecSuccess] = useState(null);
-  const [recList, setRecList] = useState([]);
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
@@ -78,10 +83,11 @@ const QaStaff = ({ darkMode }) => {
   const axiosInstance = axios.create({
     baseURL: "https://kinaa1410-001-site1.qtempurl.com/api",
     headers: {
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
+
   useEffect(() => {
     const fetchCategories = async () => {
       setCategoriesLoading(true);
@@ -102,42 +108,37 @@ const QaStaff = ({ darkMode }) => {
         const response = await axiosInstance.get("/Service");
         setServices(response.data.filter((svc) => svc.status && svc.exist));
       } catch (err) {
-        setRecError("Unable to load service catalog.");
+        setQaError("Unable to load service catalog.");
         console.error(err);
       } finally {
         setServicesLoading(false);
       }
     };
 
-    const fetchQaList = async () => {
-      try {
-        const response = await axiosInstance.get("/Qa");
-        setQaList(response.data);
-      } catch (err) {
-        setQaError("Unable to load question list.");
-        console.error(err);
-      }
-    };
-
-    const fetchRecList = async () => {
-      try {
-        const response = await axiosInstance.get("/service-recommendations");
-        setRecList(response.data);
-      } catch (err) {
-        setRecError("Could not load suggested rules list.");
-        console.error(err);
-      }
-    };
-
     if (token) {
       fetchCategories();
       fetchServices();
-      fetchQaList();
-      fetchRecList();
     } else {
       setQaError("Please login to continue.");
     }
   }, [token]);
+
+  const fetchQaList = async (categoryId) => {
+    if (!categoryId) return;
+    try {
+      const response = await axiosInstance.get(`/Qa/servicecategory/${categoryId}`);
+      setQaList(response.data);
+    } catch (err) {
+      setQaError("Unable to load question list for this category.");
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (token && selectedCategoryId) {
+      fetchQaList(selectedCategoryId);
+    }
+  }, [selectedCategoryId, token]);
 
   const handleQaChange = (e) => {
     const { name, value } = e.target;
@@ -146,35 +147,46 @@ const QaStaff = ({ darkMode }) => {
       [name]: value,
     }));
   };
+
+  const handleOptionChange = (index, field, value) => {
+    setQaFormData((prev) => {
+      const newOptions = [...prev.options];
+      if (field === "serviceIds") {
+        newOptions[index][field] = value.map((id) => parseInt(id));
+      } else {
+        newOptions[index][field] = value;
+      }
+      return { ...prev, options: newOptions };
+    });
+  };
+
+  const addOption = () => {
+    setQaFormData((prev) => ({
+      ...prev,
+      options: [...prev.options, { answerText: "", serviceIds: [] }],
+    }));
+  };
+
+  const removeOption = (index) => {
+    setQaFormData((prev) => ({
+      ...prev,
+      options: prev.options.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleDeleteQuestion = async (qaId) => {
     if (!window.confirm("Are you sure you want to delete this question?")) {
       return;
     }
-
     try {
       await axiosInstance.delete(`/Qa/${qaId}`);
-      const [questionsResponse, recommendationsResponse] = await Promise.all([
-        axiosInstance.get("/Qa"),
-        axiosInstance.get("/service-recommendations")
-      ]);
-
-      setQaList(questionsResponse.data);
-      setRecList(recommendationsResponse.data);
-      setQaSuccess("Question and related rules deleted successfully!");
-
+      setQaList((prev) => prev.filter((qa) => qa.qaId !== qaId));
+      setQaSuccess("Question deleted successfully!");
     } catch (err) {
-      setQaError("Failed to delete question");
+      setQaError("Failed to delete question.");
       console.error(err);
     }
   };
-  const handleRecChange = (e) => {
-    const { name, value } = e.target;
-    setRecFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
 
   const handleQaSubmit = async (e) => {
     e.preventDefault();
@@ -194,55 +206,24 @@ const QaStaff = ({ darkMode }) => {
         question: qaFormData.question,
         type: qaFormData.type,
         status: qaFormData.status,
+        options: qaFormData.options,
       });
       setQaSuccess("Question created successfully!");
       setQaFormData({
         serviceCategoryId: "",
         question: "",
-        type: "Yes/No",
+        type: "string",
         status: true,
+        options: [{ answerText: "", serviceIds: [] }],
       });
-      setQaList((prev) => [...prev, response.data]);
+      if (selectedCategoryId === response.data.serviceCategoryId) {
+        setQaList((prev) => [...prev, response.data]);
+      }
     } catch (err) {
-      setQaError("An error occurred while creating the question. Please try again.");
+      setQaError("An error occurred while creating the question.");
       console.error(err);
     } finally {
       setQaLoading(false);
-    }
-  };
-
-  const handleRecSubmit = async (e) => {
-    e.preventDefault();
-    setRecLoading(true);
-    setRecError(null);
-    setRecSuccess(null);
-
-    if (!token) {
-      setRecError("Please login to create a recommendation rule.");
-      setRecLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axiosInstance.post("/service-recommendations", {
-        qaId: parseInt(recFormData.qaId),
-        answerOption: recFormData.answerOption,
-        serviceId: parseInt(recFormData.serviceId),
-        weight: parseInt(recFormData.weight),
-      });
-      setRecSuccess("The proposed rule has been created successfully!");
-      setRecFormData({
-        qaId: "",
-        answerOption: "",
-        serviceId: "",
-        weight: "",
-      });
-      setRecList((prev) => [...prev, response.data]);
-    } catch (err) {
-      setRecError("An error occurred while creating the recommendation rule. Please try again.");
-      console.error(err);
-    } finally {
-      setRecLoading(false);
     }
   };
 
@@ -250,39 +231,222 @@ const QaStaff = ({ darkMode }) => {
     <QaContainer
       darkMode={darkMode}
       component={motion.div}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
     >
+      <StyledCard darkMode={darkMode}>
+        <CardContent>
+          <Typography
+            variant="h5"
+            sx={{
+              color: darkMode ? "#1abc9c" : "#6c4f37",
+              fontWeight: 700,
+              mb: 3,
+              fontFamily: "'Poppins', sans-serif",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+            }}
+          >
+            <FontAwesomeIcon icon={faComments} /> Create New Question
+          </Typography>
 
-      <Panel darkMode={darkMode}>
-        <Typography
-          variant="h6"
-          sx={{
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            fontWeight: 600,
-            mb: 2,
-            fontFamily: "'Poppins', sans-serif",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}
-        >
-          <FontAwesomeIcon icon={faComments} /> Create Questions for Customers
-        </Typography>
+          <form onSubmit={handleQaSubmit}>
+            <FormControl fullWidth sx={{ mb: 3 }}>
+              <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
+                Service Category
+              </InputLabel>
+              <Select
+                name="serviceCategoryId"
+                value={qaFormData.serviceCategoryId}
+                onChange={handleQaChange}
+                required
+                disabled={categoriesLoading || categories.length === 0}
+                sx={{
+                  color: darkMode ? "#ecf0f1" : "#2c3e50",
+                  background: darkMode ? "rgba(255, 255, 255, 0.1)" : "#fff",
+                  borderRadius: "8px",
+                }}
+              >
+                {categoriesLoading ? (
+                  <MenuItem value="">
+                    <CircularProgress size={20} />
+                  </MenuItem>
+                ) : categories.length === 0 ? (
+                  <MenuItem value="">No categories yet</MenuItem>
+                ) : (
+                  categories.map((category) => (
+                    <MenuItem
+                      key={category.serviceCategoryId}
+                      value={category.serviceCategoryId}
+                    >
+                      {category.name}
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
 
-        <form onSubmit={handleQaSubmit}>
-          <FormControl fullWidth sx={{ mb: 2 }}>
+            <TextField
+              label="Question"
+              name="question"
+              value={qaFormData.question}
+              onChange={handleQaChange}
+              fullWidth
+              required
+              sx={{
+                mb: 3,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  background: darkMode ? "rgba(255, 255, 255, 0.1)" : "#fff",
+                },
+              }}
+              InputLabelProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
+              InputProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
+            />
+
+            {qaFormData.options.map((option, index) => (
+              <Box
+                key={index}
+                sx={{
+                  mb: 3,
+                  p: 2,
+                  border: darkMode ? "1px solid #5a758c" : "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                  background: darkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.02)",
+                }}
+              >
+                <TextField
+                  label={`Answer Option ${index + 1}`}
+                  value={option.answerText}
+                  onChange={(e) =>
+                    handleOptionChange(index, "answerText", e.target.value)
+                  }
+                  fullWidth
+                  required
+                  sx={{
+                    mb: 2,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      background: darkMode ? "rgba(255, 255, 255, 0.1)" : "#fff",
+                    },
+                  }}
+                  InputLabelProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
+                  InputProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
+                />
+                <FormControl fullWidth>
+                  <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
+                    Linked Services
+                  </InputLabel>
+                  <Select
+                    multiple
+                    value={option.serviceIds}
+                    onChange={(e) =>
+                      handleOptionChange(index, "serviceIds", e.target.value)
+                    }
+                    disabled={servicesLoading || services.length === 0}
+                    sx={{
+                      color: darkMode ? "#ecf0f1" : "#2c3e50",
+                      background: darkMode ? "rgba(255, 255, 255, 0.1)" : "#fff",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    {servicesLoading ? (
+                      <MenuItem value="">
+                        <CircularProgress size={20} />
+                      </MenuItem>
+                    ) : services.length === 0 ? (
+                      <MenuItem value="">No services available</MenuItem>
+                    ) : (
+                      services.map((service) => (
+                        <MenuItem key={service.serviceId} value={service.serviceId}>
+                          {service.name}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Select>
+                </FormControl>
+                {index > 0 && (
+                  <Button
+                    onClick={() => removeOption(index)}
+                    color="error"
+                    sx={{ mt: 2, fontSize: "0.85rem" }}
+                  >
+                    Remove Option
+                  </Button>
+                )}
+              </Box>
+            ))}
+
+            <Button
+              onClick={addOption}
+              variant="outlined"
+              sx={{
+                mb: 3,
+                color: darkMode ? "#1abc9c" : "#6c4f37",
+                borderColor: darkMode ? "#1abc9c" : "#6c4f37",
+                borderRadius: "8px",
+                margin: '20px',
+                "&:hover": {
+                  borderColor: darkMode ? "#16a085" : "#5a4030",
+                  background: darkMode ? "rgba(26, 188, 156, 0.1)" : "rgba(108, 79, 55, 0.1)",
+                },
+              }}
+            >
+              Add Another Option
+            </Button>
+
+            <StyledButton
+              type="submit"
+              variant="contained"
+              disabled={qaLoading || categoriesLoading}
+              darkMode={darkMode}
+            >
+              {qaLoading ? <CircularProgress size={24} /> : "Create Question"}
+            </StyledButton>
+
+            {qaSuccess && (
+              <Typography sx={{ color: darkMode ? "#1abc9c" : "#27ae60", mt: 2, fontWeight: 500 }}>
+                {qaSuccess}
+              </Typography>
+            )}
+            {qaError && (
+              <Typography sx={{ color: darkMode ? "#e74c3c" : "#c0392b", mt: 2, fontWeight: 500 }}>
+                {qaError}
+              </Typography>
+            )}
+          </form>
+        </CardContent>
+      </StyledCard>
+
+      <StyledCard darkMode={darkMode}>
+        <CardContent>
+          <Typography
+            variant="h5"
+            sx={{
+              color: darkMode ? "#1abc9c" : "#6c4f37",
+              fontWeight: 700,
+              mb: 3,
+              fontFamily: "'Poppins', sans-serif",
+            }}
+          >
+            List of Questions
+          </Typography>
+
+          <FormControl fullWidth sx={{ mb: 3 }}>
             <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
-              Service Category
+              Select Category to View Questions
             </InputLabel>
             <Select
-              name="serviceCategoryId"
-              value={qaFormData.serviceCategoryId}
-              onChange={handleQaChange}
-              required
+              value={selectedCategoryId}
+              onChange={(e) => setSelectedCategoryId(e.target.value)}
+              sx={{
+                color: darkMode ? "#ecf0f1" : "#2c3e50",
+                background: darkMode ? "rgba(255, 255, 255, 0.1)" : "#fff",
+                borderRadius: "8px",
+              }}
               disabled={categoriesLoading || categories.length === 0}
-              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", textAlign: 'left' }}
             >
               {categoriesLoading ? (
                 <MenuItem value="">
@@ -291,325 +455,97 @@ const QaStaff = ({ darkMode }) => {
               ) : categories.length === 0 ? (
                 <MenuItem value="">No categories yet</MenuItem>
               ) : (
-                categories.map((category) => (
-                  <MenuItem
-                    key={category.serviceCategoryId}
-                    value={category.serviceCategoryId}
-                  >
-                    {category.name}
-                  </MenuItem>
-                ))
-              )}
-            </Select>
-          </FormControl>
-
-          <TextField
-            label="Question"
-            name="question"
-            value={qaFormData.question}
-            onChange={handleQaChange}
-            fullWidth
-            required
-            sx={{ mb: 2 }}
-            InputLabelProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
-            InputProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
-          />
-
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={qaLoading || categoriesLoading}
-            sx={{
-              backgroundColor: darkMode ? "#1abc9c" : "#6c4f37",
-              "&:hover": { backgroundColor: darkMode ? "#16a085" : "#5a4030" },
-            }}
-          >
-            {qaLoading ? <CircularProgress size={24} color="inherit" /> : "Create Question"}
-          </Button>
-
-          {qaSuccess && (
-            <Typography sx={{ color: darkMode ? "#1abc9c" : "#27ae60", mt: 2 }}>
-              {qaSuccess}
-            </Typography>
-          )}
-          {qaError && (
-            <Typography sx={{ color: darkMode ? "#e74c3c" : "#c0392b", mt: 2 }}>
-              {qaError}
-            </Typography>
-          )}
-
-        </form>
-
-        <Typography
-          variant="h6"
-          sx={{
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            mt: 4,
-            mb: 2,
-            fontFamily: "'Poppins', sans-serif",
-          }}
-        >
-          List of Questions
-        </Typography>
-        <TableContainer component={Paper} sx={{ backgroundColor: darkMode ? "#2c3e50" : "#ffffff" }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>ID</TableCell>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Question</TableCell>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Service Category</TableCell>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {qaList.map((qa) => (
-                <TableRow key={qa.qaId}>
-                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>{qa.qaId}</TableCell>
-                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>{qa.question}</TableCell>
-                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
-                    {categories.find((cat) => cat.serviceCategoryId === qa.serviceCategoryId)?.name || qa.serviceCategoryId}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      onClick={() => handleDeleteQuestion(qa.qaId)}
-                      color="error"
-                      size="small"
+                [
+                  <MenuItem key="none" value="">
+                    -- Select a category --
+                  </MenuItem>,
+                  ...categories.map((category) => (
+                    <MenuItem
+                      key={category.serviceCategoryId}
+                      value={category.serviceCategoryId}
                     >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Panel>
-
-      <Panel darkMode={darkMode}>
-        <Typography
-          variant="h6"
-          sx={{
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            fontWeight: 600,
-            mb: 2,
-            fontFamily: "'Poppins', sans-serif",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}
-        >
-          <FontAwesomeIcon icon={faList} /> Set Up Proposal Rules
-        </Typography>
-
-        <form onSubmit={handleRecSubmit}>
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
-              Question
-            </InputLabel>
-            <Select
-              name="qaId"
-              value={recFormData.qaId}
-              onChange={handleRecChange}
-              required
-              disabled={qaList.length === 0}
-              sx={{
-                color: darkMode ? "#ecf0f1" : "#2c3e50",
-                textAlign: 'left',
-                '& .MuiSelect-select': {
-                  whiteSpace: 'normal',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical'
-                }
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    maxHeight: '400px',
-                    width: '350px',
-                    '& .MuiMenuItem-root': {
-                      whiteSpace: 'normal',
-                      minHeight: '48px',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }
-                  }
-                }
-              }}
-            >
-              {qaList.length === 0 ? (
-                <MenuItem value="">No questions</MenuItem>
-              ) : (
-                qaList.map((qa) => (
-                  <MenuItem key={qa.qaId} value={qa.qaId}>
-                    {qa.question} (ID: {qa.qaId})
-                  </MenuItem>
-                ))
+                      {category.name}
+                    </MenuItem>
+                  )),
+                ]
               )}
             </Select>
           </FormControl>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
-              Answer
-            </InputLabel>
-            <Select
-              name="answerOption"
-              value={recFormData.answerOption}
-              onChange={handleRecChange}
-              required
-              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", textAlign: 'left' }}
-            >
-              <MenuItem value="Yes">Yes</MenuItem>
-              <MenuItem value="No">No</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
-              Recommended Services
-            </InputLabel>
-            <Select
-              name="serviceId"
-              value={recFormData.serviceId}
-              onChange={handleRecChange}
-              required
-              disabled={servicesLoading || services.length === 0}
-              sx={{
-                color: darkMode ? "#ecf0f1" : "#2c3e50",
-                textAlign: 'left',
-                '& .MuiSelect-select': {
-                  whiteSpace: 'normal',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical'
-                }
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    maxHeight: '400px',
-                    width: '350px',
-                    '& .MuiMenuItem-root': {
-                      whiteSpace: 'normal',
-                      minHeight: '48px',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }
-                  }
-                }
-              }}
-            >
-              {servicesLoading ? (
-                <MenuItem value="">
-                  <CircularProgress size={20} />
-                </MenuItem>
-              ) : services.length === 0 ? (
-                <MenuItem value="">No services available</MenuItem>
-              ) : (
-                services.map((service) => (
-                  <MenuItem key={service.serviceId} value={service.serviceId}>
-                    {service.name} (ID: {service.serviceId})
-                  </MenuItem>
-                ))
-              )}
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
-              Weight
-            </InputLabel>
-            <Select
-              name="weight"
-              value={recFormData.weight}
-              onChange={handleRecChange}
-              required
-              sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", textAlign: 'left' }}
-            >
-              {[1, 2, 3, 4, 5].map((value) => (
-                <MenuItem key={value} value={value}>
-                  {value}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={recLoading || servicesLoading}
+          <TableContainer
+            component={Paper}
             sx={{
-              backgroundColor: darkMode ? "#1abc9c" : "#6c4f37",
-              "&:hover": { backgroundColor: darkMode ? "#16a085" : "#5a4030" },
+              background: darkMode ? "rgba(44, 62, 80, 0.95)" : "#fff",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
             }}
           >
-            {recLoading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Add Suggested Rules"
-            )}
-          </Button>
-
-          {recSuccess && (
-            <Typography sx={{ color: darkMode ? "#1abc9c" : "#27ae60", mt: 2 }}>
-              {recSuccess}
-            </Typography>
-          )}
-          {recError && (
-            <Typography sx={{ color: darkMode ? "#e74c3c" : "#c0392b", mt: 2 }}>
-              {recError}
-            </Typography>
-          )}
-        </form>
-
-        {/* Danh sách quy tắc đề xuất */}
-        <Typography
-          variant="h6"
-          sx={{
-            color: darkMode ? "#ecf0f1" : "#2c3e50",
-            mt: 4,
-            mb: 2,
-            fontFamily: "'Poppins', sans-serif",
-          }}
-        >
-          List of Proposed Rules
-        </Typography>
-        <TableContainer component={Paper} sx={{
-          backgroundColor: darkMode ? "#2c3e50" : "#ffffff"
-        }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>ID</TableCell>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Question</TableCell>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Answer</TableCell>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Service</TableCell>
-                <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>Weight</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {recList.map((rec) => (
-                <TableRow key={rec.id}>
-                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>{rec.id}</TableCell>
-                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
-                    {qaList.find((qa) => qa.qaId === rec.qaId)?.question || rec.qaId} ({qaList.find((qa) => qa.qaId === rec.qaId)?.id || rec.qaId})
-                  </TableCell>
-                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>{rec.answerOption}</TableCell>
-                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
-                    {services.find((svc) => svc.serviceId === rec.serviceId)?.name || rec.serviceId}
-                  </TableCell>
-                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>{rec.weight}</TableCell>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600 }}>ID</TableCell>
+                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600 }}>Question</TableCell>
+                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600 }}>Category</TableCell>
+                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600 }}>Options</TableCell>
+                  <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", fontWeight: 600 }}>Action</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Panel>
-    </QaContainer >
+              </TableHead>
+              <TableBody>
+                {qaList.length === 0 && selectedCategoryId ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50", textAlign: "center", py: 4 }}
+                    >
+                      No questions found for this category.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  qaList.map((qa) => (
+                    <TableRow
+                      key={qa.qaId}
+                      component={motion.tr}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                      sx={{
+                        "&:hover": {
+                          background: darkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+                        },
+                      }}
+                    >
+                      <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>{qa.qaId}</TableCell>
+                      <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>{qa.question}</TableCell>
+                      <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
+                        {categories.find((cat) => cat.serviceCategoryId === qa.serviceCategoryId)?.name || qa.serviceCategoryId}
+                      </TableCell>
+                      <TableCell sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
+                        {qa.options.map((opt) => (
+                          <div key={opt.qaOptionId}>
+                            <strong>{opt.answerText}</strong>:{" "}
+                            {opt.serviceIds.map((id) => services.find((svc) => svc.serviceId === id)?.name || id).join(", ")}
+                          </div>
+                        ))}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => handleDeleteQuestion(qa.qaId)}
+                          color="error"
+                          size="small"
+                          sx={{ minWidth: "40px" }}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </StyledCard>
+    </QaContainer>
   );
 };
 
