@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../page/AuthContext';
-import { getAllServices, getImageService, handlePaymentReturn } from '../api/testApi';
+import { getAllServices, getImageService, getBookingById } from '../api/testApi'; // Bỏ handlePaymentReturn, thêm getBookingById
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -12,6 +12,7 @@ const HomePage = ({ darkMode }) => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [services, setServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
+  const [bookingDetails, setBookingDetails] = useState(null); // Thêm state để lưu thông tin booking
   const location = useLocation();
 
   // Check for payment return params
@@ -24,39 +25,36 @@ const HomePage = ({ darkMode }) => {
       const status = queryParams.get('status');
       const orderCode = queryParams.get('orderCode');
 
-      if (code && id && (cancel || status) && orderCode) {
-        try {
-          const response = await handlePaymentReturn(code, id, cancel, status, orderCode, token);
-          console.log('Handle Payment Return Response:', response);
-          if (status === 'CANCELLED' || cancel === 'true') {
-            toast.error('Payment has been canceled. You can try again later.', {
-              position: 'top-right',
-              autoClose: 5000,
-            });
-          } else if (status === 'SUCCESS' || status === 'PAID') {
-            toast.success('Payment successful! Your order has been confirmed.', {
-              position: 'top-right',
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            });
-          } else {
-            toast.info(`Payment status: ${status || 'Unknown'}`, {
-              position: 'top-right',
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            });
-          }
-          const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-        } catch (error) {
-          console.error('Error processing payment return:', error);
-          toast.error('An error occurred while processing the payment. Please contact support.', {
+      // Kiểm tra nếu thiếu query params
+      if (!(code && id && (cancel || status) && orderCode)) {
+        console.log('Missing query params:', { code, id, cancel, status, orderCode });
+        if (queryParams.toString()) {
+          toast.error('Invalid payment return data. Please try again or contact support.', {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+        }
+        return;
+      }
+
+      try {
+        // Hiển thị thông báo dựa trên query params
+        if (status === 'CANCELLED' || cancel === 'true') {
+          toast.error('Payment has been canceled. You can try again later.', {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+        } else if (status === 'SUCCESS' || status === 'PAID') {
+          toast.success('Payment successful! Your order has been confirmed.', {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        } else {
+          toast.info(`Payment status: ${status || 'Unknown'}`, {
             position: 'top-right',
             autoClose: 5000,
             hideProgressBar: false,
@@ -65,6 +63,37 @@ const HomePage = ({ darkMode }) => {
             draggable: true,
           });
         }
+
+        // Kiểm tra token trước khi gọi API
+        if (!token) {
+          toast.error('You are not logged in. Please log in to view booking details.', {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+          return;
+        }
+
+        // Lấy thông tin booking để hiển thị
+        if (id) {
+          const bookingResponse = await getBookingById(id, token);
+          console.log('Updated Booking:', bookingResponse.data);
+          setBookingDetails(bookingResponse.data);
+        }
+
+        // Xóa query params khỏi URL
+        const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      } catch (error) {
+        console.error('Error fetching booking details:', error.response?.data || error.message);
+        const errorMessage = error.response?.data?.message || 'Failed to fetch booking details. Please try again later.';
+        toast.error(errorMessage, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     };
 
@@ -79,7 +108,6 @@ const HomePage = ({ darkMode }) => {
     }
     return shuffled;
   };
-
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -118,7 +146,6 @@ const HomePage = ({ darkMode }) => {
     };
     fetchServices();
   }, []);
-
 
   useEffect(() => {
     if (isLoggedIn && username) {
@@ -285,6 +312,15 @@ const HomePage = ({ darkMode }) => {
     textAlign: 'center',
   };
 
+  const bookingDetailsStyles = {
+    margin: '20px auto',
+    padding: '20px',
+    background: darkMode ? '#2c3e50' : '#f8f9fa',
+    borderRadius: '8px',
+    maxWidth: '800px',
+    textAlign: 'left',
+  };
+
   const welcomeVariants = {
     hidden: { opacity: 0, y: -20 },
     visible: { opacity: 1, y: 0 },
@@ -314,6 +350,42 @@ const HomePage = ({ darkMode }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Hiển thị thông tin booking sau khi thanh toán */}
+      {bookingDetails && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={bookingDetailsStyles}
+        >
+          <h2 style={{ fontSize: '24px', fontWeight: '600', color: darkMode ? '#ffffff' : '#1d1d1f' }}>
+            Booking Details
+          </h2>
+          <p style={{ color: darkMode ? '#bdc3c7' : '#555' }}>Booking ID: {bookingDetails.bookingId}</p>
+          <p style={{ color: darkMode ? '#bdc3c7' : '#555' }}>Service: {bookingDetails.serviceName || 'N/A'}</p>
+          <p style={{ color: darkMode ? '#bdc3c7' : '#555' }}>
+            Status: {bookingDetails.status === 0 ? 'Pending' : bookingDetails.status === 1 ? 'Paid' : bookingDetails.status === 4 ? 'Failed' : 'Unknown'}
+          </p>
+          <p style={{ color: darkMode ? '#bdc3c7' : '#555' }}>
+            Appointment Date: {bookingDetails.appointmentDate ? new Date(bookingDetails.appointmentDate).toLocaleDateString() : 'N/A'}
+          </p>
+          <Link
+            to="/history-transaction-user"
+            style={{
+              display: 'inline-block',
+              marginTop: '10px',
+              padding: '8px 16px',
+              backgroundColor: darkMode ? '#34c759' : '#e67e22',
+              color: '#ffffff',
+              borderRadius: '8px',
+              textDecoration: 'none',
+            }}
+          >
+            View All Bookings
+          </Link>
+        </motion.div>
+      )}
 
       {/* Hero Section */}
       <section
