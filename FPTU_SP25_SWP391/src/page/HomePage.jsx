@@ -57,7 +57,7 @@ const HomePage = ({ darkMode }) => {
             position: 'top-right',
             autoClose: 5000,
           });
-        } else if (paymentStatus === 'SUCCESS' || paymentStatus === 'PAID') {
+        } else if (paymentStatus === 'SUCCESS' || cancel === 'false') {
           toast.success(message || 'Payment successful! Your order has been confirmed.', {
             position: 'top-right',
             autoClose: 5000,
