@@ -2,21 +2,21 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../page/AuthContext';
-import { getAllServices, getImageService } from '../api/testApi'; // Bỏ getBookingById
+import { getAllServices, getImageService, handlePaymentReturn } from '../api/testApi'; // Thêm handlePaymentReturn
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage = ({ darkMode }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const { isLoggedIn, username } = useAuth();
+  const { isLoggedIn, username, token } = useAuth(); // Lấy token từ useAuth
   const [showWelcome, setShowWelcome] = useState(false);
   const [services, setServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const location = useLocation();
 
-  // Check for payment return params
+  // Check for payment return params and call API
   useEffect(() => {
-    const checkPaymentReturn = () => {
+    const checkPaymentReturn = async () => {
       const queryParams = new URLSearchParams(location.search);
       const code = queryParams.get('code');
       const id = queryParams.get('id');
@@ -36,23 +36,52 @@ const HomePage = ({ darkMode }) => {
         return;
       }
 
-      // Hiển thị thông báo dựa trên query params
-      if (status === 'CANCELLED' || cancel === 'true') {
-        toast.error('Payment has been canceled. You can try again later.', {
+      // Kiểm tra token trước khi gọi API
+      if (!token) {
+        toast.error('You are not logged in. Please log in to process payment return.', {
           position: 'top-right',
           autoClose: 5000,
         });
-      } else if (status === 'SUCCESS' || status === 'PAID') {
-        toast.success('Payment successful! Your order has been confirmed.', {
-          position: 'top-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      } else {
-        toast.info(`Payment status: ${status || 'Unknown'}`, {
+        return;
+      }
+
+      // Gọi API handlePaymentReturn với query params và token
+      try {
+        const response = await handlePaymentReturn(code, id, cancel, status, orderCode, token);
+        console.log('Payment return response:', response);
+
+        // Xử lý response từ API
+        const { status: paymentStatus, message } = response; // Giả sử API trả về status và message
+        if (paymentStatus === 'CANCELLED' || cancel === 'true') {
+          toast.error(message || 'Payment has been canceled. You can try again later.', {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+        } else if (paymentStatus === 'SUCCESS' || paymentStatus === 'PAID') {
+          toast.success(message || 'Payment successful! Your order has been confirmed.', {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        } else {
+          toast.info(message || `Payment status: ${paymentStatus || 'Unknown'}`, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+      } catch (error) {
+        console.error('Error calling PaymentReturn API:', error.response?.data || error.message);
+        const errorMessage =
+          error.response?.data?.message ||
+          'Failed to process payment return. Please try again or contact support.';
+        toast.error(errorMessage, {
           position: 'top-right',
           autoClose: 5000,
           hideProgressBar: false,
@@ -68,7 +97,7 @@ const HomePage = ({ darkMode }) => {
     };
 
     checkPaymentReturn();
-  }, [location]);
+  }, [location, token]); // Thêm token vào dependency
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
