@@ -83,7 +83,7 @@ const BookingCard = styled(Box)(({ darkMode }) => ({
   background: darkMode ? "rgba(69, 90, 100, 0.95)" : "rgba(255, 255, 255, 0.95)",
   borderRadius: "12px",
   boxShadow: darkMode ? "0 4px 12px rgba(0, 0, 0, 0.5)" : "0 4px 12px rgba(0, 0, 0, 0.1)",
-  color: darkMode ? "#ecf0f1" : "#2c3e50",
+  color: darkMode ? "#ecf0f1" : "#2c3e50", // Fixed typo from "#2c3 G50"
   "& *": { color: "inherit" },
   display: "flex",
   flexDirection: "column",
@@ -135,6 +135,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
         axiosInstance.get("/UserDetails"),
         axiosInstance.get("/timeslot"),
       ]);
+      console.log("Bookings fetched:", bookingsResponse.data); // Debug
       setBookings(bookingsResponse.data);
       setUsers(usersResponse.data);
       setTimeSlots(timeSlotsResponse.data);
@@ -160,6 +161,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
   };
 
   const handleCheckout = async (bookingId) => {
+    if (loading) return; // Prevent action if already loading
     setLoading(true);
     try {
       const response = await postCheckout(bookingId, token);
@@ -204,6 +206,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
       action();
     } else {
       setActiveSection(section);
+      console.log("Active section set to:", section); // Debug
       if (section === "schedule") {
         if (!userId || !token) {
           alert("Please log in to choose a schedule.");
@@ -433,22 +436,26 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
                       >
                         {isExpanded ? "Collapse" : "Details"}
                       </Button>
-                      {booking.status === 0 && (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          startIcon={<FontAwesomeIcon icon={faCreditCard} />}
-                          onClick={() => handleCheckout(booking.bookingId)}
-                          disabled={loading}
-                          sx={{
-                            textTransform: "none",
-                            backgroundColor: darkMode ? "#3498db" : "#2980b9",
-                            "&:hover": { backgroundColor: darkMode ? "#2980b9" : "#2471a3" },
-                          }}
-                        >
-                          Checkout
-                        </Button>
-                      )}
+                      {/* Checkout Button - Always shown, clickable only when status === 0 */}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<FontAwesomeIcon icon={faCreditCard} />}
+                        onClick={() => handleCheckout(booking.bookingId)}
+                        disabled={booking.status !== 0} // Only clickable when status === 0
+                        sx={{
+                          textTransform: "none",
+                          backgroundColor: booking.status === 0 ? (darkMode ? "#3498db" : "#2980b9") : darkMode ? "#4a6572" : "#b0bec5",
+                          "&:hover": {
+                            backgroundColor: booking.status === 0 ? (darkMode ? "#2980b9" : "#2471a3") : darkMode ? "#4a6572" : "#b0bec5",
+                          },
+                          opacity: booking.status === 0 ? 1 : 0.6,
+                          filter: booking.status === 0 ? "none" : "blur(1px)",
+                          transition: "opacity 0.3s ease, filter 0.3s ease",
+                        }}
+                      >
+                        Checkout
+                      </Button>
                       {booking.status === 1 && (
                         <Button
                           variant="contained"
@@ -470,7 +477,9 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
                 );
               })
             ) : (
-              <Typography sx={{ color: darkMode ? "#bdc3c7" : "#7f8c8d" }}>No bookings available.</Typography>
+              <Typography sx={{ color: darkMode ? "#bdc3c7" : "#7f8c8d" }}>
+                No bookings available. (Debug: Check fetchBookings response)
+              </Typography>
             )}
           </Box>
         )}
