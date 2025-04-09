@@ -2,19 +2,19 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../page/AuthContext';
-import { getAllServices, getImageService, handlePaymentReturn } from '../api/testApi'; // Thêm handlePaymentReturn
+import { getAllServices, getImageService, handlePaymentReturn } from '../api/testApi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage = ({ darkMode }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const { isLoggedIn, username, token } = useAuth(); // Lấy token từ useAuth
+  const { isLoggedIn, username, token } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
   const [services, setServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const location = useLocation();
 
-  // Check for payment return params and call API
+
   useEffect(() => {
     const checkPaymentReturn = async () => {
       const queryParams = new URLSearchParams(location.search);
@@ -24,7 +24,7 @@ const HomePage = ({ darkMode }) => {
       const status = queryParams.get('status');
       const orderCode = queryParams.get('orderCode');
 
-      // Kiểm tra nếu thiếu query params
+
       if (!(code && id && (cancel || status) && orderCode)) {
         console.log('Missing query params:', { code, id, cancel, status, orderCode });
         if (queryParams.toString()) {
@@ -36,7 +36,7 @@ const HomePage = ({ darkMode }) => {
         return;
       }
 
-      // Kiểm tra token trước khi gọi API
+
       if (!token) {
         toast.error('You are not logged in. Please log in to process payment return.', {
           position: 'top-right',
@@ -45,13 +45,13 @@ const HomePage = ({ darkMode }) => {
         return;
       }
 
-      // Gọi API handlePaymentReturn với query params và token
+
       try {
         const response = await handlePaymentReturn(code, id, cancel, status, orderCode, token);
         console.log('Payment return response:', response);
 
-        // Xử lý response từ API
-        const { status: paymentStatus, message } = response; // Giả sử API trả về status và message
+
+        const { status: paymentStatus, message } = response;
         if (paymentStatus === 'CANCELLED' || cancel === 'true') {
           toast.error(message || 'Payment has been canceled. You can try again later.', {
             position: 'top-right',
@@ -91,13 +91,13 @@ const HomePage = ({ darkMode }) => {
         });
       }
 
-      // Xóa query params khỏi URL
+
       const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
       window.history.replaceState({}, document.title, cleanUrl);
     };
 
     checkPaymentReturn();
-  }, [location, token]); // Thêm token vào dependency
+  }, [location, token]);
 
   const shuffleArray = (array) => {
     const shuffled = [...array];

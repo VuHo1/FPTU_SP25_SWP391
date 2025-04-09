@@ -25,7 +25,6 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComments, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-// Container Styling
 const QaContainer = styled(Box)(({ darkMode }) => ({
   padding: "30px",
   background: darkMode ? "linear-gradient(135deg, #34495e 0%, #2c3e50 100%)" : "linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%)",
@@ -70,6 +69,7 @@ const QaStaff = ({ darkMode }) => {
     status: true,
     options: [{ answerText: "", serviceIds: [] }],
   });
+  const [qaFormErrors, setQaFormErrors] = useState({});
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [qaLoading, setQaLoading] = useState(false);
   const [qaError, setQaError] = useState(null);
@@ -80,6 +80,7 @@ const QaStaff = ({ darkMode }) => {
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [servicesLoading, setServicesLoading] = useState(false);
   const token = localStorage.getItem("token");
+
   const axiosInstance = axios.create({
     baseURL: "https://kinaa1410-001-site1.qtempurl.com/api",
     headers: {
@@ -188,6 +189,41 @@ const QaStaff = ({ darkMode }) => {
     }
   };
 
+  const validateQaForm = () => {
+    const errors = {};
+
+    if (!qaFormData.serviceCategoryId || isNaN(parseInt(qaFormData.serviceCategoryId))) {
+      errors.serviceCategoryId = "Please select a valid service category.";
+    }
+
+    if (!qaFormData.question.trim()) {
+      errors.question = "Question is required.";
+    } else if (qaFormData.question.length < 5) {
+      errors.question = "Question must be at least 5 characters long.";
+    } else if (!qaFormData.question.endsWith("?")) {
+      errors.question = "Question must end with a question mark (?}";
+    }
+
+    if (qaFormData.options.length === 0) {
+      errors.options = "At least one answer option is required.";
+    } else {
+      qaFormData.options.forEach((option, index) => {
+        if (!option.answerText.trim()) {
+          errors[`option_${index}_answerText`] = `Answer option ${index + 1} is required.`;
+        } else if (option.answerText.length < 5) {
+          errors[`option_${index}_answerText`] = `Answer option ${index + 1} must be at least 5 characters long.`;
+        }
+
+        if (option.serviceIds.length === 0) {
+          errors[`option_${index}_serviceIds`] = `Please select at least one service for option ${index + 1}.`;
+        }
+      });
+    }
+
+    setQaFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleQaSubmit = async (e) => {
     e.preventDefault();
     setQaLoading(true);
@@ -196,6 +232,12 @@ const QaStaff = ({ darkMode }) => {
 
     if (!token) {
       setQaError("Please login to create a question.");
+      setQaLoading(false);
+      return;
+    }
+
+    if (!validateQaForm()) {
+      setQaError("Please fix the errors in the form.");
       setQaLoading(false);
       return;
     }
@@ -261,13 +303,12 @@ const QaStaff = ({ darkMode }) => {
                 name="serviceCategoryId"
                 value={qaFormData.serviceCategoryId}
                 onChange={handleQaChange}
-                required
-                disabled={categoriesLoading || categories.length === 0}
                 sx={{
                   color: darkMode ? "#ecf0f1" : "#2c3e50",
                   background: darkMode ? "rgba(255, 255, 255, 0.1)" : "#fff",
                   borderRadius: "8px",
                 }}
+                disabled={categoriesLoading || categories.length === 0}
               >
                 {categoriesLoading ? (
                   <MenuItem value="">
@@ -286,6 +327,11 @@ const QaStaff = ({ darkMode }) => {
                   ))
                 )}
               </Select>
+              {qaFormErrors.serviceCategoryId && (
+                <Typography sx={{ color: "#e74c3c", mt: 1, fontSize: "0.85rem" }}>
+                  {qaFormErrors.serviceCategoryId}
+                </Typography>
+              )}
             </FormControl>
 
             <TextField
@@ -294,7 +340,6 @@ const QaStaff = ({ darkMode }) => {
               value={qaFormData.question}
               onChange={handleQaChange}
               fullWidth
-              required
               sx={{
                 mb: 3,
                 "& .MuiOutlinedInput-root": {
@@ -304,6 +349,8 @@ const QaStaff = ({ darkMode }) => {
               }}
               InputLabelProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
               InputProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
+              error={!!qaFormErrors.question}
+              helperText={qaFormErrors.question}
             />
 
             {qaFormData.options.map((option, index) => (
@@ -324,7 +371,6 @@ const QaStaff = ({ darkMode }) => {
                     handleOptionChange(index, "answerText", e.target.value)
                   }
                   fullWidth
-                  required
                   sx={{
                     mb: 2,
                     "& .MuiOutlinedInput-root": {
@@ -334,6 +380,8 @@ const QaStaff = ({ darkMode }) => {
                   }}
                   InputLabelProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
                   InputProps={{ style: { color: darkMode ? "#ecf0f1" : "#2c3e50" } }}
+                  error={!!qaFormErrors[`option_${index}_answerText`]}
+                  helperText={qaFormErrors[`option_${index}_answerText`]}
                 />
                 <FormControl fullWidth>
                   <InputLabel sx={{ color: darkMode ? "#ecf0f1" : "#2c3e50" }}>
@@ -366,6 +414,11 @@ const QaStaff = ({ darkMode }) => {
                       ))
                     )}
                   </Select>
+                  {qaFormErrors[`option_${index}_serviceIds`] && (
+                    <Typography sx={{ color: "#e74c3c", mt: 1, fontSize: "0.85rem" }}>
+                      {qaFormErrors[`option_${index}_serviceIds`]}
+                    </Typography>
+                  )}
                 </FormControl>
                 {index > 0 && (
                   <Button
@@ -387,7 +440,7 @@ const QaStaff = ({ darkMode }) => {
                 color: darkMode ? "#1abc9c" : "#6c4f37",
                 borderColor: darkMode ? "#1abc9c" : "#6c4f37",
                 borderRadius: "8px",
-                margin: '20px',
+                margin: "20px",
                 "&:hover": {
                   borderColor: darkMode ? "#16a085" : "#5a4030",
                   background: darkMode ? "rgba(26, 188, 156, 0.1)" : "rgba(108, 79, 55, 0.1)",
