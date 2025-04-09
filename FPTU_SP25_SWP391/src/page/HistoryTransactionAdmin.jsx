@@ -18,12 +18,12 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Pagination, // Import Pagination
+  Pagination,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faEdit, faTrash, faHome } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faTrash, faHome } from "@fortawesome/free-solid-svg-icons"; // Removed faEdit
 
 const MainContent = styled(Box)(({ darkMode }) => ({
   padding: "40px",
@@ -64,13 +64,12 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
   const [paidFilter, setPaidFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
-  const bookingsPerPage = 10; // 10 bookings per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const bookingsPerPage = 10;
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  // Fetch all bookings from the API
   const fetchBookings = async () => {
     try {
       setLoading(true);
@@ -93,18 +92,15 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
     fetchBookings();
   }, []);
 
-  // Handle search by bookingId and paid filter
   const applyFilters = () => {
     let filtered = bookings;
 
-    // Apply bookingId search
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter((booking) =>
         booking.bookingId.toString().includes(searchTerm.trim())
       );
     }
 
-    // Apply paid filter
     if (paidFilter !== "all") {
       const isPaid = paidFilter === "paid";
       filtered = filtered.filter((booking) => booking.isPaid === isPaid);
@@ -119,15 +115,14 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
   };
 
   const handlePaidFilterChange = (e) => {
     setPaidFilter(e.target.value);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1);
   };
 
-  // Pagination logic
   const indexOfLastBooking = currentPage * bookingsPerPage;
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
   const currentBookings = filteredBookings.slice(indexOfFirstBooking, indexOfLastBooking);
@@ -137,13 +132,6 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
     setCurrentPage(value);
   };
 
-  // Placeholder for edit functionality
-  const handleEdit = (bookingId) => {
-    console.log(`Edit booking with ID: ${bookingId}`);
-    // Implement PUT request to /api/bookings/{bookingId} here
-  };
-
-  // Placeholder for delete functionality
   const handleDelete = async (bookingId) => {
     if (window.confirm(`Are you sure you want to delete booking ID ${bookingId}?`)) {
       try {
@@ -155,7 +143,6 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
         });
         setBookings(bookings.filter((booking) => booking.bookingId !== bookingId));
         setFilteredBookings(filteredBookings.filter((booking) => booking.bookingId !== bookingId));
-        // Adjust page if necessary after deletion
         if (currentBookings.length === 1 && currentPage > 1) {
           setCurrentPage(currentPage - 1);
         }
@@ -165,7 +152,6 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
     }
   };
 
-  // Handle return to admin home
   const handleReturnHome = () => {
     navigate("/admin/home");
   };
@@ -192,7 +178,6 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
         </Button>
       </Box>
 
-      {/* Filters */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
         <TextField
           label="Search by Booking ID"
@@ -250,21 +235,18 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
         </FormControl>
       </Box>
 
-      {/* Loading State */}
       {loading && (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <CircularProgress sx={{ color: darkMode ? "#60a5fa" : "#3b82f6" }} />
         </Box>
       )}
 
-      {/* Error State */}
       {error && (
         <Typography variant="body1" color="error" sx={{ mb: 4 }}>
           {error}
         </Typography>
       )}
 
-      {/* Table */}
       {!loading && !error && (
         <>
           <StyledTableContainer component={Paper} darkMode={darkMode}>
@@ -306,12 +288,6 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
                       <TableCell>{new Date(booking.appointmentDate).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <IconButton
-                          onClick={() => handleEdit(booking.bookingId)}
-                          sx={{ color: darkMode ? "#60a5fa" : "#3b82f6" }}
-                        >
-                          <FontAwesomeIcon icon={faEdit} />
-                        </IconButton>
-                        <IconButton
                           onClick={() => handleDelete(booking.bookingId)}
                           sx={{ color: darkMode ? "#f87171" : "#ef4444" }}
                         >
@@ -325,7 +301,6 @@ const HistoryTransactionAdmin = ({ darkMode }) => {
             </Table>
           </StyledTableContainer>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Pagination

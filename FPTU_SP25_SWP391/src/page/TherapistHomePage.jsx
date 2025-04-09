@@ -9,6 +9,8 @@ import {
   Typography,
   Divider,
   CircularProgress,
+  Button,
+  Chip,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { motion } from "framer-motion";
@@ -22,8 +24,11 @@ import {
   faMoon,
   faSignOutAlt,
   faBook,
+  faCheckCircle,
+  faCreditCard,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import { confirmBookingCompleted, postCheckout } from "../api/testApi";
 
 // Sidebar Styling
 const Sidebar = styled(Drawer)(({ darkMode }) => ({
@@ -73,14 +78,28 @@ const StyledListItem = styled(ListItem)(({ darkMode, isActive }) => ({
 
 // Booking Card Styling
 const BookingCard = styled(Box)(({ darkMode }) => ({
-  padding: "15px",
-  marginBottom: "15px",
-  background: darkMode ? "rgba(69, 90, 100, 0.9)" : "rgba(248, 244, 225, 0.9)",
-  borderRadius: "10px",
-  color: darkMode ? "#ecf0f1" : "#2c3e50",
-  "& *": {
-    color: "inherit",
-  },
+  padding: "20px",
+  marginBottom: "20px",
+  background: darkMode ? "rgba(69, 90, 100, 0.95)" : "rgba(255, 255, 255, 0.95)",
+  borderRadius: "12px",
+  boxShadow: darkMode ? "0 4px 12px rgba(0, 0, 0, 0.5)" : "0 4px 12px rgba(0, 0, 0, 0.1)",
+  color: darkMode ? "#ecf0f1" : "#2c3e50", // Fixed typo from "#2c3 G50"
+  "& *": { color: "inherit" },
+  display: "flex",
+  flexDirection: "column",
+  gap: "15px",
+  border: darkMode ? "1px solid #5a758c" : "1px solid #e0e0e0",
+}));
+
+// Status Badge Styling
+const StatusChip = styled(Chip)(({ status }) => ({
+  fontWeight: 600,
+  fontSize: "0.85rem",
+  ...(status === 0 && { backgroundColor: "#f39c12", color: "#fff" }), // Pending: Yellow
+  ...(status === 1 && { backgroundColor: "#3498db", color: "#fff" }), // Booked: Blue
+  ...(status === 2 && { backgroundColor: "#2ecc71", color: "#fff" }), // Completed: Green
+  ...(status === 3 && { backgroundColor: "#e74c3c", color: "#fff" }), // Canceled: Red
+  ...(status === 4 && { backgroundColor: "#95a5a6", color: "#fff" }), // Failed: Gray
 }));
 
 const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
@@ -92,7 +111,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
   const [users, setUsers] = useState([]);
   const [expandedBookingId, setExpandedBookingId] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
-  const { logout, userId, token, username } = useAuth(); // Added username from useAuth
+  const { logout, userId, token, username } = useAuth();
 
   const axiosInstance = axios.create({
     baseURL: "https://kinaa1410-001-site1.qtempurl.com/api",
@@ -116,6 +135,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
         axiosInstance.get("/UserDetails"),
         axiosInstance.get("/timeslot"),
       ]);
+      console.log("Bookings fetched:", bookingsResponse.data); // Debug
       setBookings(bookingsResponse.data);
       setUsers(usersResponse.data);
       setTimeSlots(timeSlotsResponse.data);
@@ -126,12 +146,45 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
     }
   };
 
+  const handleConfirmCompleted = async (bookingId) => {
+    if (!window.confirm("Are you sure you want to mark this booking as completed?")) return;
+    setLoading(true);
+    try {
+      await confirmBookingCompleted(bookingId, userId, token);
+      alert("Booking marked as completed successfully!");
+      await fetchBookings();
+    } catch (error) {
+      alert("Failed to confirm booking completion. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckout = async (bookingId) => {
+    if (loading) return; // Prevent action if already loading
+    setLoading(true);
+    try {
+      const response = await postCheckout(bookingId, token);
+      const checkoutUrl = response.data.checkoutUrl; // Adjust based on your API response structure
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl; // Redirect to payment gateway
+      } else {
+        alert("Checkout URL not provided by the server.");
+      }
+    } catch (error) {
+      alert("Failed to initiate checkout. Please try again.");
+      console.error("Checkout error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (location.state?.resetToHome) {
       setActiveSection("home");
       navigate("/skintherapist/home", { replace: true, state: {} });
     }
-  }, [location, navigate, userId]);
+  }, [location, navigate]);
 
   const handleLogout = () => {
     logout();
@@ -153,6 +206,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
       action();
     } else {
       setActiveSection(section);
+      console.log("Active section set to:", section); // Debug
       if (section === "schedule") {
         if (!userId || !token) {
           alert("Please log in to choose a schedule.");
@@ -169,6 +223,17 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
 
   const handleToggleExpand = (bookingId) => {
     setExpandedBookingId(expandedBookingId === bookingId ? null : bookingId);
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 0: return "Pending";
+      case 1: return "Booked";
+      case 2: return "Completed";
+      case 3: return "Canceled";
+      case 4: return "Failed";
+      default: return "Unknown";
+    }
   };
 
   const drawerContent = (
@@ -304,7 +369,7 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
               variant="h5"
               sx={{
                 color: darkMode ? "#ecf0f1" : "#2c3e50",
-                mb: 2,
+                mb: 3,
                 fontFamily: "'Poppins', sans-serif",
                 fontWeight: 600,
               }}
@@ -324,31 +389,97 @@ const TherapistHomePage = ({ darkMode, toggleDarkMode }) => {
                   <BookingCard
                     key={booking.bookingId}
                     darkMode={darkMode}
-                    onClick={() => handleToggleExpand(booking.bookingId)}
                     component={motion.div}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    sx={{ cursor: "pointer" }}
+                    whileHover={{ scale: 1.01 }}
                   >
-                    <Typography>Booking ID: {booking.bookingId}</Typography>
-                    <Typography>Appointment Date: {new Date(booking.appointmentDate).toLocaleDateString()}</Typography>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        Booking #{booking.bookingId}
+                      </Typography>
+                      <StatusChip label={getStatusLabel(booking.status)} status={booking.status} />
+                    </Box>
+                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                      <Typography>
+                        <strong>Date:</strong> {new Date(booking.appointmentDate).toLocaleDateString()}
+                      </Typography>
+                      <Typography>
+                        <strong>Time:</strong> {timeSlot.description || "N/A"}
+                      </Typography>
+                      <Typography>
+                        <strong>Client:</strong>{" "}
+                        {user.firstName && user.lastName ? `${user.lastName} ${user.firstName}` : "Unknown"}
+                      </Typography>
+                      <Typography>
+                        <strong>Note:</strong> {booking.note || "N/A"}
+                      </Typography>
+                    </Box>
                     {isExpanded && (
-                      <>
+                      <Box sx={{ mt: 2 }}>
                         <Typography>
-                          User: {(user.firstName && user.lastName) ? `${user.lastName} ${user.firstName}` : "Unknown"} (ID: {booking.userId})
+                          <strong>Created:</strong> {new Date(booking.dateCreated).toLocaleString()}
                         </Typography>
-                        <Typography>Therapist ID: {booking.therapistId}</Typography>
-                        <Typography>Time Slot: {timeSlot.description || "N/A"} (ID: {booking.timeSlotId})</Typography>
-                        <Typography>Date Created: {new Date(booking.dateCreated).toLocaleString()}</Typography>
-                        <Typography>Note: {booking.note || "N/A"}</Typography>
-                        <Typography>Status: {booking.status ? "Active" : "Inactive"}</Typography>
-                      </>
+                        <Typography>
+                          <strong>Therapist ID:</strong> {booking.therapistId}
+                        </Typography>
+                      </Box>
                     )}
+                    <Box sx={{ display: "flex", gap: "10px", justifyContent: "flex-end", mt: 2 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleToggleExpand(booking.bookingId)}
+                        sx={{
+                          textTransform: "none",
+                          borderColor: darkMode ? "#ecf0f1" : "#2c3e50",
+                          color: darkMode ? "#ecf0f1" : "#2c3e50",
+                        }}
+                      >
+                        {isExpanded ? "Collapse" : "Details"}
+                      </Button>
+                      {/* Checkout Button - Always shown, clickable only when status === 0 */}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<FontAwesomeIcon icon={faCreditCard} />}
+                        onClick={() => handleCheckout(booking.bookingId)}
+                        disabled={booking.status !== 0} // Only clickable when status === 0
+                        sx={{
+                          textTransform: "none",
+                          backgroundColor: booking.status === 0 ? (darkMode ? "#3498db" : "#2980b9") : darkMode ? "#4a6572" : "#b0bec5",
+                          "&:hover": {
+                            backgroundColor: booking.status === 0 ? (darkMode ? "#2980b9" : "#2471a3") : darkMode ? "#4a6572" : "#b0bec5",
+                          },
+                          opacity: booking.status === 0 ? 1 : 0.6,
+                          filter: booking.status === 0 ? "none" : "blur(1px)",
+                          transition: "opacity 0.3s ease, filter 0.3s ease",
+                        }}
+                      >
+                        Checkout
+                      </Button>
+                      {booking.status === 1 && (
+                        <Button
+                          variant="contained"
+                          color="success"
+                          startIcon={<FontAwesomeIcon icon={faCheckCircle} />}
+                          onClick={() => handleConfirmCompleted(booking.bookingId)}
+                          disabled={loading}
+                          sx={{
+                            textTransform: "none",
+                            backgroundColor: darkMode ? "#2ecc71" : "#27ae60",
+                            "&:hover": { backgroundColor: darkMode ? "#27ae60" : "#219653" },
+                          }}
+                        >
+                          Confirm Completed
+                        </Button>
+                      )}
+                    </Box>
                   </BookingCard>
                 );
               })
             ) : (
-              <Typography>No bookings available.</Typography>
+              <Typography sx={{ color: darkMode ? "#bdc3c7" : "#7f8c8d" }}>
+                No bookings available. (Debug: Check fetchBookings response)
+              </Typography>
             )}
           </Box>
         )}

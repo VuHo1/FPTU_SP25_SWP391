@@ -994,3 +994,31 @@ export const getServicesByTherapistId = async (therapistId, token) => {
     throw error;
   }
 };
+export const confirmBookingCompleted = async (bookingId, therapistId, token) => {
+  try {
+    if (!bookingId || !therapistId || !token) {
+      throw new Error('bookingId, therapistId, and token are required');
+    }
+
+    const response = await apiClient.post(
+      `/api/bookings/${bookingId}/confirm-completed`,
+      {}, // No body required as per the endpoint spec
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: '*/*',
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          therapistId, // Query parameter
+        },
+      }
+    );
+
+    console.log(`Booking ${bookingId} confirmed as completed by therapist ${therapistId}:`, response.data);
+    return response;
+  } catch (error) {
+    console.error('Error confirming booking completion:', error.response?.data || error.message);
+    throw error;
+  }
+};
